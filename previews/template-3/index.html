@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Echo Creator Blog</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="blog-wrapper">
+        <!-- Brand Header -->
+        <header class="header">
+            <h1 id="blog-title" class="blog-logo">Echo Journal</h1>
+            <p class="tagline">Thoughts on design, minimalism, and serverless technology.</p>
+        </header>
+
+        <!-- Main Layout Grid -->
+        <div class="main-layout">
+            <main class="content-area">
+                <article class="post-card">
+                    <span class="post-category">Design</span>
+                    <h2 class="post-title">Designing for the Serverless Web</h2>
+                    <p class="post-excerpt">How static-first hosting on GitHub Pages coupled with Google Apps Script changes the cost paradigm for indie creators.</p>
+                    <div class="post-meta">Published July 10, 2026 &bull; 5 min read</div>
+                </article>
+
+                <article class="post-card">
+                    <span class="post-category">Development</span>
+                    <h2 class="post-title">Building Web IDEs with Rich Animations</h2>
+                    <p class="post-excerpt">Exploring how glassmorphic sidebars and layout transition animations improve user satisfaction in customizer workspaces.</p>
+                    <div class="post-meta">Published June 18, 2026 &bull; 8 min read</div>
+                </article>
+            </main>
+
+            <!-- Sidebar Panel -->
+            <aside class="sidebar-panel">
+                <div class="widget newsletter-widget">
+                    <h3 id="newsletter-title">Subscribe to Weekly Echoes</h3>
+                    <p>Get design guidelines and code blueprints directly to your inbox.</p>
+                    <form onsubmit="event.preventDefault(); alert('Subscribed!');" class="newsletter-form">
+                        <input type="email" placeholder="name@email.com" required class="input-email">
+                        <button type="submit" class="btn-subscribe" id="btn-subscribe">Join Mailing List</button>
+                    </form>
+                </div>
+            </aside>
+        </div>
+
+        <footer class="footer">
+            <p>&copy; 2026 Echo Journal. Designed with Spark Web.</p>
+        </footer>
+    </div>
+</body>
+</html>

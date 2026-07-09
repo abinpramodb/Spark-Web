@@ -1,0 +1,1118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Design Workshop Workspace Customizer - Live Sandbox</title>
+    <link rel="stylesheet" href="../assets/css/variables.css">
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <style>
+        body {
+            background-color: #0f172a; /* Tech dark theme for builder workspace */
+            color: #e2e8f0;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Top workspace header bar */
+        .workspace-header {
+            height: 64px;
+            background: #1e293b;
+            border-bottom: 1px solid #334155;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            z-index: 50;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .back-link {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #94a3b8;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            transition: var(--transition-fast);
+            padding: 8px 12px;
+            border-radius: var(--radius-sm);
+            background: #0f172a;
+            border: 1px solid #334155;
+        }
+
+        .back-link:hover {
+            color: var(--white);
+            background: #1e293b;
+            border-color: #475569;
+        }
+
+        .project-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--white);
+        }
+
+        .device-selector {
+            display: flex;
+            background: #0f172a;
+            padding: 4px;
+            border-radius: var(--radius-full);
+            border: 1px solid #334155;
+        }
+
+        .device-btn {
+            background: transparent;
+            color: #94a3b8;
+            border: none;
+            padding: 8px 16px;
+            border-radius: var(--radius-full);
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition-fast);
+        }
+
+        .device-btn:hover {
+            color: var(--white);
+        }
+
+        .device-btn.active {
+            background: var(--primary-color);
+            color: var(--white);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .btn-header {
+            padding: 8px 16px;
+            border-radius: var(--radius-md);
+            font-size: 13px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: var(--transition-fast);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-download {
+            background: #334155;
+            color: #f1f5f9;
+            border: 1px solid #475569;
+        }
+
+        .btn-download:hover {
+            background: #475569;
+            color: var(--white);
+        }
+
+        .btn-save-cloud {
+            background: var(--success-color);
+            color: var(--white);
+        }
+
+        .btn-save-cloud:hover {
+            background: var(--success-hover);
+        }
+
+        /* Workspace Main Layout */
+        .workspace-body {
+            flex-grow: 1;
+            display: flex;
+            overflow: hidden;
+            height: calc(100vh - 64px);
+        }
+
+        /* Sidebar styling - Dark Glass look */
+        .sidebar {
+            width: 380px;
+            background: #1e293b;
+            border-right: 1px solid #334155;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+
+        .sidebar-section {
+            padding: 24px;
+            border-bottom: 1px solid #334155;
+        }
+
+        .sidebar-section h3 {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #94a3b8;
+            margin-bottom: 16px;
+            font-weight: 700;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .control-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .control-group label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #cbd5e1;
+        }
+
+        .control-group input[type="text"], 
+        .control-group select {
+            background: #0f172a;
+            border: 1px solid #334155;
+            color: #f1f5f9;
+            padding: 10px 14px;
+            border-radius: var(--radius-md);
+            font-size: 14px;
+            outline: none;
+            font-family: var(--font-sans);
+            transition: var(--transition-fast);
+        }
+
+        .control-group input[type="text"]:focus, 
+        .control-group select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+        }
+
+        .color-picker-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .color-picker-wrapper input[type="color"] {
+            -webkit-appearance: none;
+            border: none;
+            width: 42px;
+            height: 42px;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            background: none;
+            flex-shrink: 0;
+        }
+
+        .color-picker-wrapper input[type="color"]::-webkit-color-swatch-wrapper {
+            padding: 0;
+        }
+
+        .color-picker-wrapper input[type="color"]::-webkit-color-swatch {
+            border: 1px solid #334155;
+            border-radius: var(--radius-md);
+        }
+
+        .color-text-input {
+            flex-grow: 1;
+            text-transform: uppercase;
+        }
+
+        /* Canvas view on the right */
+        .canvas-area {
+            flex-grow: 1;
+            background: #0f172a;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 32px;
+            overflow: auto;
+            position: relative;
+            background-image: radial-gradient(#1e293b 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        /* Device container wrappers */
+        .preview-viewport-wrapper {
+            position: relative;
+            background: #ffffff;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            transition: all var(--transition-normal);
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        /* Desktop Mode Viewport sizes */
+        .viewport-desktop {
+            width: 100%;
+            height: 100%;
+            border-radius: 0;
+            border: none;
+        }
+
+        /* Tablet Mode Viewport sizes */
+        .viewport-tablet {
+            width: 768px;
+            height: 90%;
+            border: 12px solid #1e293b;
+            border-radius: 24px;
+        }
+
+        /* Mobile Phone Chassis container */
+        .viewport-mobile {
+            width: 375px;
+            height: 812px;
+            border: 14px solid #1e293b;
+            border-radius: 40px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Mobile specific notches & lines */
+        .phone-notch {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 150px;
+            height: 25px;
+            background: #1e293b;
+            border-bottom-left-radius: 18px;
+            border-bottom-right-radius: 18px;
+            z-index: 10;
+        }
+
+        .phone-home-indicator {
+            display: none;
+            position: absolute;
+            bottom: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 130px;
+            height: 5px;
+            background: #1e293b;
+            border-radius: 10px;
+            z-index: 10;
+        }
+
+        .viewport-mobile .phone-notch,
+        .viewport-mobile .phone-home-indicator {
+            display: block;
+        }
+
+        /* Dynamic Preview Iframe */
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: #ffffff;
+            transition: opacity 0.2s;
+        }
+
+        /* Top address bar in canvas area */
+        .canvas-header {
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            right: 16px;
+            height: 36px;
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid #334155;
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            pointer-events: none;
+            z-index: 20;
+        }
+
+        .canvas-header-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: #94a3b8;
+        }
+
+        .live-badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: #10b981;
+            font-weight: 700;
+        }
+
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            background: #10b981;
+            border-radius: 50%;
+            animation: pulse 1.8s infinite;
+        }
+
+        .canvas-url-bar {
+            background: #0f172a;
+            color: #94a3b8;
+            font-size: 11px;
+            padding: 3px 20px;
+            border-radius: var(--radius-sm);
+            width: 250px;
+            text-align: center;
+            border: 1px solid #1e293b;
+        }
+
+        /* Alerts & notifications */
+        .notification-toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: var(--success-color);
+            color: var(--white);
+            padding: 12px 24px;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-lg);
+            z-index: 1000;
+            display: none;
+            animation: slideInRight var(--transition-normal) forwards;
+            font-weight: 600;
+        }
+
+        /* Loading spinner */
+        .spinner {
+            border: 2px solid rgba(255,255,255,0.1);
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            border-left-color: #fff;
+            animation: spin 1s linear infinite;
+            display: none;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        /* Auth Modal Styling */
+        .auth-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.4);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .auth-modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .auth-modal-card {
+            background: rgba(30, 41, 59, 0.95);
+            border: 1px solid #334155;
+            border-radius: var(--radius-lg);
+            width: 90%;
+            max-width: 420px;
+            padding: 40px;
+            position: relative;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            transform: scale(0.95);
+            transition: transform 0.3s ease;
+            color: #f1f5f9;
+        }
+
+        .auth-modal-overlay.active .auth-modal-card {
+            transform: scale(1);
+        }
+
+        .auth-modal-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #94a3b8;
+            transition: var(--transition-fast);
+        }
+
+        .auth-modal-close:hover {
+            color: var(--white);
+        }
+
+        .auth-modal-card h2 {
+            font-size: 24px;
+            font-weight: 800;
+            margin-bottom: 12px;
+            letter-spacing: -0.02em;
+            color: var(--white);
+        }
+
+        .auth-modal-card p {
+            font-size: 14px;
+            color: #cbd5e1;
+            line-height: 1.6;
+            margin-bottom: 24px;
+        }
+
+        .auth-input {
+            width: 100%;
+            padding: 14px 18px;
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: var(--radius-md);
+            outline: none;
+            font-size: 14px;
+            font-family: var(--font-sans);
+            color: #f1f5f9;
+            transition: var(--transition-fast);
+        }
+
+        .auth-input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+        }
+
+        .auth-btn {
+            width: 100%;
+            background: var(--primary-color);
+            color: var(--white);
+            border: none;
+            padding: 14px;
+            border-radius: var(--radius-md);
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition-fast);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .auth-btn:hover {
+            background: var(--primary-hover);
+        }
+
+        .auth-back-link {
+            display: block;
+            text-align: center;
+            margin-top: 16px;
+            font-size: 13px;
+            color: #94a3b8;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .auth-back-link:hover {
+            color: var(--primary-color);
+        }
+
+        .auth-error {
+            color: var(--danger-color);
+            font-size: 13px;
+            margin-top: 12px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .auth-btn-spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            display: none;
+        }
+
+        .auth-btn.loading .auth-btn-text {
+            display: none;
+        }
+
+        .auth-btn.loading .auth-btn-spinner {
+            display: block;
+        }
+
+        .user-profile-badge {
+            background: rgba(99, 102, 241, 0.15);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            color: #c7d2fe;
+            padding: 8px 14px;
+            border-radius: var(--radius-md);
+            font-size: 13px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Bar -->
+    <header class="workspace-header">
+        <div class="header-left">
+            <a href="../index.html" class="back-link">
+                <span>&larr; Exit to Store</span>
+            </a>
+            <span class="project-title" id="workspace-title">Customizer Workspace</span>
+        </div>
+
+        <div class="device-selector">
+            <button class="device-btn active" id="btn-desktop" data-device="desktop">
+                🖥️ Desktop
+            </button>
+            <button class="device-btn" id="btn-tablet" data-device="tablet">
+                📟 Tablet
+            </button>
+            <button class="device-btn" id="btn-mobile" data-device="mobile">
+                📱 Mobile
+            </button>
+        </div>
+
+        <div class="header-right">
+            <span id="user-nav-profile" style="display:none;" class="user-profile-badge"></span>
+            <button class="btn-header btn-download" id="download-btn">
+                📥 Download HTML
+            </button>
+            <button class="btn-header btn-save-cloud" id="sync-btn">
+                <div class="spinner" id="sync-spinner"></div>
+                ☁️ Save to Cloud
+            </button>
+        </div>
+    </header>
+
+    <!-- Workspace Main Body -->
+    <div class="workspace-body">
+        <!-- Sidebar Controls -->
+        <aside class="sidebar">
+            <!-- Dynamic Sidebar content will be injected by JavaScript based on active template -->
+            <div id="dynamic-controls"></div>
+        </aside>
+
+        <!-- Canvas Area -->
+        <main class="canvas-area">
+            <div class="canvas-header">
+                <div class="canvas-header-left">
+                    <div class="live-badge">
+                        <div class="pulse-dot"></div>
+                        Live Sandbox
+                    </div>
+                </div>
+                <div class="canvas-url-bar" id="mock-url-bar">template-1/index.html</div>
+                <div style="font-size: 11px; color: #64748b;">Isolated Frame</div>
+            </div>
+
+            <!-- Device Chassis and IFrame Wrapper -->
+            <div class="preview-viewport-wrapper viewport-desktop" id="viewport-wrapper">
+                <div class="phone-notch"></div>
+                <iframe id="preview-viewport" src="../previews/template-1/index.html"></iframe>
+                <div class="phone-home-indicator"></div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Notification toast -->
+    <div class="notification-toast" id="toast"></div>
+
+    <script>
+        // Setup state variables
+        let activeTemplate = 'template-1';
+        const WEB_APP_ENDPOINT = 'https://script.google.com/macros/s/PASTE_YOUR_APPS_SCRIPT_ID_HERE/exec'; // Placed here by user
+
+        // Elements
+        const viewportWrapper = document.getElementById('viewport-wrapper');
+        const iframe = document.getElementById('preview-viewport');
+        const workspaceTitle = document.getElementById('workspace-title');
+        const mockUrlBar = document.getElementById('mock-url-bar');
+        const syncBtn = document.getElementById('sync-btn');
+        const syncSpinner = document.getElementById('sync-spinner');
+        const downloadBtn = document.getElementById('download-btn');
+        const toast = document.getElementById('toast');
+
+        // Check query parameter for active template
+        const urlParams = new URLSearchParams(window.location.search);
+        const templateParam = urlParams.get('template');
+        if (templateParam && ['template-1', 'template-2', 'template-3'].includes(templateParam)) {
+            activeTemplate = templateParam;
+        }
+
+        // Set viewport iframe source and URL mock
+        iframe.src = `../previews/${activeTemplate}/index.html`;
+        mockUrlBar.textContent = `sparkweb.com/previews/${activeTemplate}/index.html`;
+
+        // Update top-level title
+        const templateNames = {
+            'template-1': 'Apex SaaS Landing Page',
+            'template-2': 'Zenith Personal Portfolio',
+            'template-3': 'Echo Creator Blog'
+        };
+        workspaceTitle.textContent = `${templateNames[activeTemplate]} Customizer`;
+
+        // Configuration structures for each template
+        const templateConfigs = {
+            'template-1': {
+                name: 'Apex SaaS',
+                sections: [
+                    {
+                        title: 'Hero Section Content',
+                        controls: [
+                            { id: 'text-hero-title', label: 'Hero Headline', type: 'text', selector: '#template-headline', target: 'text', default: 'Build Beautiful Websites Faster' },
+                            { id: 'text-hero-subtitle', label: 'Hero Subtitle', type: 'text', selector: '#template-subheading', target: 'text', default: 'Deploy your next SaaS product in record time using our production-ready, beautiful HTML layout elements.' },
+                            { id: 'text-hero-btn', label: 'Primary CTA Button', type: 'text', selector: '#template-btn', target: 'text', default: 'Get Started Free' }
+                        ]
+                    },
+                    {
+                        title: 'Design Aesthetics',
+                        controls: [
+                            { id: 'color-brand', label: 'Brand Accent Color', type: 'color', cssVar: '--primary-color', default: '#6366f1' },
+                            { id: 'color-bg', label: 'Hero Gradient Color 2', type: 'color', cssVar: '--accent-secondary', default: '#a855f7' },
+                            { id: 'select-radius', label: 'Corner Styling', type: 'select', cssVar: '--radius-md', options: [{name: 'Sharp (0px)', val: '0px'}, {name: 'Normal (8px)', val: '8px'}, {name: 'Premium Round (16px)', val: '16px'}, {name: 'Max Circle (9999px)', val: '9999px'}], default: '8px' }
+                        ]
+                    }
+                ]
+            },
+            'template-2': {
+                name: 'Zenith Portfolio',
+                sections: [
+                    {
+                        title: 'Profile Details',
+                        controls: [
+                            { id: 'text-name', label: 'Developer Name', type: 'text', selector: '#profile-name', target: 'text', default: 'Alexander Zenith' },
+                            { id: 'text-bio', label: 'Short Bio', type: 'text', selector: '#profile-bio', target: 'text', default: 'Interactive Frontend Developer & UI Designer creating clean web experiences.' },
+                            { id: 'text-cta', label: 'Contact Button', type: 'text', selector: '#contact-cta', target: 'text', default: 'Let\'s Collaborate' }
+                        ]
+                    },
+                    {
+                        title: 'Visual Theme',
+                        controls: [
+                            { id: 'color-portfolio-accent', label: 'Highlight Accent', type: 'color', cssVar: '--accent-color', default: '#10b981' },
+                            { id: 'color-portfolio-bg', label: 'Dark Mode Background', type: 'color', cssVar: '--bg-dark', default: '#0b0f19' },
+                            { id: 'select-font', label: 'Typography Font', type: 'select', cssVar: '--portfolio-font', options: [{name: 'Plus Jakarta Sans', val: "'Plus Jakarta Sans', sans-serif"}, {name: 'Courier Code Mono', val: "'Courier New', monospace"}, {name: 'Georgia Editorial', val: 'Georgia, serif'}], default: "'Plus Jakarta Sans', sans-serif" }
+                        ]
+                    }
+                ]
+            },
+            'template-3': {
+                name: 'Echo Blog',
+                sections: [
+                    {
+                        title: 'Journal Brand Details',
+                        controls: [
+                            { id: 'text-blog-title', label: 'Journal Logo Title', type: 'text', selector: '#blog-title', target: 'text', default: 'Echo Journal' },
+                            { id: 'text-newsletter', label: 'Newsletter Heading', type: 'text', selector: '#newsletter-title', target: 'text', default: 'Subscribe to Weekly Echoes' },
+                            { id: 'text-btn-subscribe', label: 'Subscribe Button', type: 'text', selector: '#btn-subscribe', target: 'text', default: 'Join Mailing List' }
+                        ]
+                    },
+                    {
+                        title: 'Typography & Colors',
+                        controls: [
+                            { id: 'color-blog-accent', label: 'Blog Primary Tone', type: 'color', cssVar: '--blog-accent', default: '#0d9488' },
+                            { id: 'color-blog-card', label: 'Card Background Fill', type: 'color', cssVar: '--card-bg', default: '#ffffff' },
+                            { id: 'select-alignment', label: 'Header Text Alignment', type: 'select', cssVar: '--header-align', options: [{name: 'Left-aligned', val: 'left'}, {name: 'Centered text', val: 'center'}, {name: 'Right-aligned', val: 'right'}], default: 'left' }
+                        ]
+                    }
+                ]
+            }
+        };
+
+        // Render controls on load
+        function renderSidebar() {
+            const container = document.getElementById('dynamic-controls');
+            const config = templateConfigs[activeTemplate];
+            let html = '';
+
+            config.sections.forEach(section => {
+                html += `
+                    <div class="sidebar-section">
+                        <h3>${section.title}</h3>
+                `;
+
+                section.controls.forEach(ctrl => {
+                    html += `<div class="control-group">`;
+                    html += `<label for="${ctrl.id}">${ctrl.label}</label>`;
+
+                    if (ctrl.type === 'text') {
+                        html += `<input type="text" id="${ctrl.id}" value="${ctrl.default}" data-control-id="${ctrl.id}">`;
+                    } else if (ctrl.type === 'color') {
+                        html += `
+                            <div class="color-picker-wrapper">
+                                <input type="color" id="${ctrl.id}" value="${ctrl.default}" data-control-id="${ctrl.id}">
+                                <input type="text" class="color-text-input" id="${ctrl.id}-text" value="${ctrl.default}">
+                            </div>
+                        `;
+                    } else if (ctrl.type === 'select') {
+                        html += `<select id="${ctrl.id}" data-control-id="${ctrl.id}">`;
+                        ctrl.options.forEach(opt => {
+                            const selected = opt.val === ctrl.default ? 'selected' : '';
+                            html += `<option value="${opt.val}" ${selected}>${opt.name}</option>`;
+                        });
+                        html += `</select>`;
+                    }
+
+                    html += `</div>`;
+                });
+
+                html += `</div>`;
+            });
+
+            container.innerHTML = html;
+
+            // Add Event Listeners for inputs
+            config.sections.forEach(section => {
+                section.controls.forEach(ctrl => {
+                    const el = document.getElementById(ctrl.id);
+                    if (ctrl.type === 'text') {
+                        el.addEventListener('input', () => updateSandboxValue(ctrl));
+                    } else if (ctrl.type === 'color') {
+                        const txtEl = document.getElementById(`${ctrl.id}-text`);
+                        el.addEventListener('input', () => {
+                            txtEl.value = el.value;
+                            updateSandboxValue(ctrl);
+                        });
+                        txtEl.addEventListener('input', () => {
+                            if(/^#[0-9A-F]{6}$/i.test(txtEl.value)) {
+                                el.value = txtEl.value;
+                                updateSandboxValue(ctrl);
+                            }
+                        });
+                    } else if (ctrl.type === 'select') {
+                        el.addEventListener('change', () => updateSandboxValue(ctrl));
+                    }
+                });
+            });
+        }
+
+        // Apply mutations directly into preview iframe
+        function updateSandboxValue(ctrl) {
+            try {
+                const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                if (!iframeDoc) return;
+
+                const inputEl = document.getElementById(ctrl.id);
+                const value = inputEl.value;
+
+                if (ctrl.selector) {
+                    const targetEl = iframeDoc.querySelector(ctrl.selector);
+                    if (targetEl) {
+                        if (ctrl.target === 'text') {
+                            targetEl.textContent = value;
+                        } else if (ctrl.target === 'html') {
+                            targetEl.innerHTML = value;
+                        }
+                    }
+                } else if (ctrl.cssVar) {
+                    iframeDoc.documentElement.style.setProperty(ctrl.cssVar, value);
+                }
+            } catch (e) {
+                console.error("Iframe script block update warning. Verify origin permissions.", e);
+            }
+        }
+
+        // Apply all variables on iframe render completion
+        function initializePreviewMutation() {
+            const config = templateConfigs[activeTemplate];
+            config.sections.forEach(section => {
+                section.controls.forEach(ctrl => {
+                    updateSandboxValue(ctrl);
+                });
+            });
+        }
+
+        // Sync iframe trigger on load
+        iframe.addEventListener('load', () => {
+            initializePreviewMutation();
+        });
+
+        // Device Switcher logic
+        const devButtons = {
+            desktop: document.getElementById('btn-desktop'),
+            tablet: document.getElementById('btn-tablet'),
+            mobile: document.getElementById('btn-mobile')
+        };
+
+        Object.keys(devButtons).forEach(mode => {
+            devButtons[mode].addEventListener('click', () => {
+                // Remove active classes
+                Object.values(devButtons).forEach(btn => btn.classList.remove('active'));
+                devButtons[mode].classList.add('active');
+
+                // Adjust viewport wrapper classes
+                viewportWrapper.className = 'preview-viewport-wrapper';
+                
+                if (mode === 'desktop') {
+                    viewportWrapper.classList.add('viewport-desktop');
+                } else if (mode === 'tablet') {
+                    viewportWrapper.classList.add('viewport-tablet');
+                } else if (mode === 'mobile') {
+                    viewportWrapper.classList.add('viewport-mobile');
+                }
+            });
+        });
+
+        // Save to Google Cloud webhook trigger
+        syncBtn.addEventListener('click', async () => {
+            // Gating: check if user is logged in
+            if (!userEmail) {
+                showToast("Please Sign In to save builds to Google Drive.");
+                openAuthModal();
+                return;
+            }
+
+            syncSpinner.style.display = 'inline-block';
+            syncBtn.disabled = true;
+
+            // Harvest values
+            const dataToUpload = {
+                action: 'save_build',
+                email: userEmail,
+                templateId: activeTemplate,
+                generatedTime: new Date().toLocaleString(),
+                fields: {}
+            };
+
+            const config = templateConfigs[activeTemplate];
+            config.sections.forEach(section => {
+                section.controls.forEach(ctrl => {
+                    const inputEl = document.getElementById(ctrl.id);
+                    dataToUpload.fields[ctrl.id] = inputEl.value;
+                });
+            });
+
+            try {
+                // Post request to apps script URL
+                await fetch(WEB_APP_ENDPOINT, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(dataToUpload)
+                });
+                
+                showToast('Success! Live settings uploaded to Google Sheets database ledger.');
+            } catch (err) {
+                console.error(err);
+                showToast('Connection saved, check App Script endpoint parameters.');
+            } finally {
+                syncSpinner.style.display = 'none';
+                syncBtn.disabled = false;
+            }
+        });
+
+        // Interactive compiler download html functionality
+        downloadBtn.addEventListener('click', () => {
+            try {
+                const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                if (!iframeDoc) return;
+
+                // Clone template HTML so original remains intact in preview
+                const docClone = iframeDoc.documentElement.cloneNode(true);
+                
+                // Package and serialise
+                const fullHTML = "<!DOCTYPE html>\n" + docClone.outerHTML;
+                const blob = new Blob([fullHTML], { type: 'text/html;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                
+                // Fire download link
+                const anchor = document.createElement('a');
+                anchor.href = url;
+                anchor.download = `${activeTemplate}-customized.html`;
+                document.body.appendChild(anchor);
+                anchor.click();
+                document.body.removeChild(anchor);
+                
+                URL.revokeObjectURL(url);
+                showToast('Success! Custom template downloaded.');
+            } catch (e) {
+                console.error(e);
+                alert("Cannot compile HTML locally in sandbox due to iframe browser lock. Run a web server to resolve local files paths.");
+            }
+        });
+
+        // Trigger helper notice
+        function showToast(msg) {
+            toast.textContent = msg;
+            toast.style.display = 'block';
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 3000);
+        }
+
+        // OTP Authentication Logic
+        const authModal = document.getElementById('auth-modal');
+        const authModalClose = document.getElementById('auth-modal-close');
+        const authStepEmail = document.getElementById('auth-step-email');
+        const authStepOtp = document.getElementById('auth-step-otp');
+        const authEmailForm = document.getElementById('auth-email-form');
+        const authOtpForm = document.getElementById('auth-otp-form');
+        const authEmailInput = document.getElementById('auth-email');
+        const authOtpInput = document.getElementById('auth-otp');
+        const authSentEmailSpan = document.getElementById('auth-sent-email');
+        const authOtpBackLink = document.getElementById('auth-otp-back');
+        const authErrorMsg = document.getElementById('auth-error-msg');
+        const userNavProfile = document.getElementById('user-nav-profile');
+
+        function checkSession() {
+            const savedEmail = localStorage.getItem('tf_user_email');
+            const token = localStorage.getItem('tf_session_token');
+            if (savedEmail && token) {
+                userEmail = savedEmail;
+                userNavProfile.textContent = savedEmail;
+                userNavProfile.style.display = 'inline-block';
+            } else {
+                userEmail = '';
+                userNavProfile.style.display = 'none';
+            }
+        }
+
+        function openAuthModal() {
+            authErrorMsg.textContent = '';
+            authEmailInput.value = '';
+            authOtpInput.value = '';
+            authStepEmail.style.display = 'block';
+            authStepOtp.style.display = 'none';
+            authModal.classList.add('active');
+        }
+
+        function closeAuthModal() {
+            authModal.classList.remove('active');
+        }
+
+        authModalClose.addEventListener('click', closeAuthModal);
+        authModal.addEventListener('click', (e) => {
+            if (e.target === authModal) closeAuthModal();
+        });
+
+        authEmailForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = authEmailInput.value.trim();
+            const submitBtn = document.getElementById('auth-email-submit');
+            
+            submitBtn.classList.add('loading');
+        // Click handler for Custom/Simulated Google Auth
+        customGoogleBtn.addEventListener('click', () => {
+            const width = 480, height = 600;
+            const left = (window.innerWidth - width) / 2 + window.screenX;
+            const top = (window.innerHeight - height) / 2 + window.screenY;
+            
+            const popup = window.open(
+                'mock-google-login.html',
+                'GoogleSignInFallbackPopup',
+                `width=${width},height=${height},left=${left},top=${top},status=no,resizable=yes`
+            );
+            
+            if (window.focus && popup) popup.focus();
+        });
+
+        // Listen for postMessage events from the Google chooser popup
+        window.addEventListener('message', (event) => {
+            if (event.data && event.data.source === 'tf-google-login') {
+                const { email, name, picture } = event.data;
+                
+                localStorage.setItem('tf_user_email', email);
+                localStorage.setItem('tf_user_name', name);
+                localStorage.setItem('tf_user_picture', picture);
+                localStorage.setItem('tf_session_token', 'mock_google_token_' + Date.now());
+                
+                checkSession();
+                closeAuthModal();
+                showToast('Successfully authenticated!');
+            }
+        });
+
+        // Real Google Identity callback
+        window.handleCredentialResponse = function(response) {
+            try {
+                const responsePayload = decodeJwtResponse(response.credential);
+                
+                localStorage.setItem('tf_user_email', responsePayload.email);
+                localStorage.setItem('tf_user_name', responsePayload.name);
+                localStorage.setItem('tf_user_picture', responsePayload.picture);
+                localStorage.setItem('tf_session_token', response.credential);
+                
+                checkSession();
+                closeAuthModal();
+                showToast('Successfully authenticated!');
+            } catch (err) {
+                console.error(err);
+                authErrorMsg.textContent = 'Google sign-in token decoding failed.';
+            }
+        };
+
+        function decodeJwtResponse(token) {
+            var base64Url = token.split('.')[1];
+            var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            var jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join(''));
+            return JSON.parse(jsonPayload);
+        }
+
+        checkSession();
+
+        // Initialize UI Sidebar elements
+        renderSidebar();
+    </script>
+    
+    <!-- Glassmorphic Login Modal inside Workspace -->
+    <div id="auth-modal" class="auth-modal-overlay">
+        <div class="auth-modal-card">
+            <button class="auth-modal-close" id="auth-modal-close">&times;</button>
+            <div id="auth-google-section" style="text-align: center;">
+                <h2>Access Cloud Storage</h2>
+                <p style="margin-bottom: 20px; color: #cbd5e1;">Sign in using your Google Account to unlock saving customizable configurations to your Google Sheets ledger & Drive vault folder.</p>
+                
+                <!-- Google Sign-In API button container (real) -->
+                <div id="g_id_onload"
+                     data-client_id="YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com"
+                     data-callback="handleCredentialResponse"
+                     data-auto_prompt="false">
+                </div>
+                
+                <!-- Real Sign In Button wrapper -->
+                <div class="google-btn-container" id="real-google-btn" style="display: none; justify-content: center; margin: 20px 0;">
+                    <div class="g_id_signin" data-type="standard" data-size="large" data-theme="outline" data-text="signin_with" data-shape="rectangular" data-logo_alignment="left"></div>
+                </div>
+
+                <!-- Custom Google Sign In button (opens fallback popup or real prompt) -->
+                <button class="google-signin-btn" id="custom-google-btn" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 12px; background: white; border: 1px solid #dadce0; color: #3c4043; border-radius: var(--radius-md); padding: 14px; font-size: 15px; font-weight: 600; cursor: pointer; transition: background 0.2s; margin: 24px 0 12px;">
+                    <svg width="18" height="18" viewBox="0 0 18 18">
+                        <path d="M17.64 9.2c0-.63-.06-1.25-.16-1.84H9v3.47h4.84c-.21 1.12-.84 2.07-1.8 2.71v2.24h2.91c1.7-1.56 2.69-3.86 2.69-6.58z" fill="#4285F4"/>
+                        <path d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.91-2.24c-.8.54-1.84.87-3.05.87-2.34 0-4.33-1.58-5.03-3.71H.95v2.3C2.43 15.89 5.5 18 9 18z" fill="#34A853"/>
+                        <path d="M3.97 10.74c-.18-.54-.28-1.12-.28-1.74s.1-1.2.28-1.74V4.96H.95C.35 6.17 0 7.55 0 9s.35 2.83.95 4.04l3.02-2.3z" fill="#FBBC05"/>
+                        <path d="M9 3.58c1.32 0 2.5.45 3.44 1.35L15 2.4C13.46.96 11.42 0 9 0 5.5 0 2.43 2.11.95 5.09l3.02 2.3c.7-2.13 2.69-3.71 5.03-3.71z" fill="#EA4335"/>
+                    </svg>
+                    <span>Sign in with Google</span>
+                </button>
+                <div class="auth-error" id="auth-error-msg"></div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
