@@ -605,6 +605,11 @@
             pointer-events: auto;
         }
 
+        .active-tab-btn {
+            background: var(--primary-color) !important;
+            color: var(--white) !important;
+        }
+
         .auth-modal-card {
             background: rgba(255, 255, 255, 0.95);
             border: 1px solid rgba(255, 255, 255, 0.7);
@@ -804,6 +809,94 @@
 
 
 
+    <!-- Unified checkout payment modal (Payhip & UPI QR Code) -->
+    <div id="payment-modal" class="auth-modal-overlay">
+        <div class="auth-modal-card" style="max-width: 500px; padding: 32px;">
+            <button class="auth-modal-close" onclick="closePaymentModal()">&times;</button>
+            
+            <!-- Modal Header -->
+            <div style="text-align: center; margin-bottom: 24px;">
+                <h2 style="font-size: 22px; color: #0f172a; margin-bottom: 8px;">Unlock Template</h2>
+                <p style="color: #475569; font-size: 14px;">Select your preferred payment method below to get instant or direct access.</p>
+            </div>
+
+            <!-- Summary Block -->
+            <div id="payment-summary" style="background: rgba(15, 23, 42, 0.04); border: 1px solid rgba(15, 23, 42, 0.08); padding: 16px; border-radius: var(--radius-md); margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <div id="pay-template-name" style="font-weight: 700; color: #0f172a;">Nova SaaS Landing Page Pro</div>
+                    <div style="color: #6366f1; font-size: 12px; text-transform: uppercase; font-weight: 700; margin-top: 4px;">Lifetime License</div>
+                </div>
+                <div id="pay-template-price" style="font-size: 20px; font-weight: 800; color: var(--color-secondary);">$14.99</div>
+            </div>
+
+            <!-- Tabs Selection -->
+            <div style="display: flex; gap: 8px; margin-bottom: 24px; border-bottom: 1px solid #e2e8f0; padding-bottom: 12px;">
+                <button id="tab-payhip-btn" onclick="switchPaymentTab('payhip')" style="flex: 1; padding: 10px; border: none; background: #f1f5f9; border-radius: var(--radius-md); font-weight: 600; cursor: pointer; color: #475569; transition: all 0.2s;" class="active-tab-btn">⚡ Payhip (Instant)</button>
+                <button id="tab-upi-btn" onclick="switchPaymentTab('upi')" style="flex: 1; padding: 10px; border: none; background: #f1f5f9; border-radius: var(--radius-md); font-weight: 600; cursor: pointer; color: #475569; transition: all 0.2s;">🇮🇳 UPI QR Code (Free)</button>
+            </div>
+
+            <!-- Payhip Content Tab -->
+            <div id="payhip-tab-content" style="display: block;">
+                <p style="color: #475569; font-size: 14px; margin-bottom: 24px; line-height: 1.5; text-align: center;">
+                    Unlock the template instantly using Card, PayPal, or Google Pay via our secure checkout platform.
+                </p>
+                <a href="#" id="payhip-checkout-btn" class="search-btn" style="width: 100%; height: 48px; border-radius: var(--radius-md); font-weight: 700; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                    Proceed to Payhip Checkout
+                </a>
+            </div>
+
+            <!-- UPI Content Tab -->
+            <div id="upi-tab-content" style="display: none; text-align: center;">
+                <p style="color: #475569; font-size: 13px; margin-bottom: 16px; line-height: 1.4;">
+                    Scan the QR code below or transfer to the UPI ID. Pay exactly <strong><span id="upi-inr-price">₹1,274</span></strong>.
+                </p>
+                
+                <!-- QR Code Container -->
+                <div style="background: white; padding: 12px; border-radius: var(--radius-md); display: inline-block; border: 1px solid #e2e8f0; margin-bottom: 16px;">
+                    <img id="upi-qr-image" src="" alt="UPI QR Code" style="width: 180px; height: 180px; display: block;">
+                </div>
+
+                <!-- UPI Details -->
+                <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 12px; border-radius: var(--radius-md); font-size: 13px; margin-bottom: 20px; text-align: left;">
+                    <div style="margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center;">
+                        <span style="color: #64748b; font-weight: 600;">UPI ID:</span>
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                            <span id="upi-id-text" style="font-family: monospace; font-weight: 700; color: #0f172a;">oxoredz@ybl</span>
+                            <button onclick="copyUPIId()" style="background: #e2e8f0; border: none; padding: 2px 6px; border-radius: 4px; font-size: 10px; cursor: pointer; font-weight: 600;">Copy</button>
+                        </div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="color: #64748b; font-weight: 600;">Payee Name:</span>
+                        <span style="font-weight: 600; color: #0f172a;">SparkWeb Developer</span>
+                    </div>
+                </div>
+
+                <!-- UTR Submission Form -->
+                <form id="upi-form" onsubmit="submitUPIRequest(event)">
+                    <div class="form-group" style="margin-bottom: 16px; text-align: left;">
+                        <label style="display: block; font-size: 12px; font-weight: 600; text-transform: uppercase; color: #475569; margin-bottom: 8px;">Transaction UTR / Ref No.</label>
+                        <input type="text" id="upi-utr" class="search-input" style="width: 100%;" placeholder="e.g. 416723984512" required>
+                    </div>
+                    <button type="submit" class="search-btn" id="upi-submit-btn" style="width: 100%; height: 48px; border-radius: var(--radius-md); font-weight: 700; display: flex; align-items: center; justify-content: center;">
+                        <span id="upi-btn-text">Submit Verification Request</span>
+                        <div class="auth-btn-spinner" id="upi-btn-spinner" style="margin-left: 10px; display: none;"></div>
+                    </button>
+                </form>
+            </div>
+
+            <!-- Success screen -->
+            <div id="upi-success-view" style="display: none; text-align: center; padding: 20px 0;">
+                <div style="width: 64px; height: 64px; border-radius: 50%; background: rgba(16,185,129,0.1); color: #10b981; font-size: 32px; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;">✓</div>
+                <h3 style="font-size: 20px; color: #0f172a; margin-bottom: 8px;">Request Submitted!</h3>
+                <p style="color: #475569; font-size: 14px; margin-bottom: 24px; line-height: 1.5;">
+                    Your UPI payment request has been sent to the administrator. Access will be unlocked as soon as your transfer is verified (typically within 5 minutes).
+                </p>
+                <button onclick="closePaymentModal()" class="search-btn" style="width: 100%; height: 48px;">Close Window</button>
+            </div>
+
+        </div>
+    </div>
+
     <main>
         <section class="hero-section">
             <div class="badge">
@@ -905,9 +998,7 @@
                 if (isPriceFree || isPurchased) {
                     actionButton = `<a href="templates/live-editor.html?template=${tpl.demoPath}" class="btn btn-primary">Customize & Test Live</a>`;
                 } else {
-                    const payhipUrl = tpl.payhipUrl || 'https://payhip.com/b/mock-pro';
-                    const finalPayhipUrl = payhipUrl + (payhipUrl.includes('?') ? '&' : '?') + 'email=' + encodeURIComponent(userEmail || '');
-                    actionButton = `<a href="${finalPayhipUrl}" class="payhip-buy-button btn btn-primary" onclick="return handlePayhipCheckout(event, '${finalPayhipUrl}')" style="background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); text-decoration: none; display: flex; align-items: center; justify-content: center;">Unlock & Customize</a>`;
+                    actionButton = `<button onclick="openPaymentCheckout('${tpl.id}', '${tpl.name}', '${tpl.price}', '${tpl.demoPath}', '${tpl.payhipUrl || ''}')" class="btn btn-primary" style="background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);">Unlock & Customize</button>`;
                 }
 
                 templateGrid.innerHTML += `
@@ -1207,6 +1298,136 @@
             };
             verifyAndRegisterPayhip();
         }
+
+        // UPI & Payhip Unified Checkout Modal Logic
+        const ADMIN_UPI_ID = 'oxoredz@ybl';
+        const paymentModal = document.getElementById('payment-modal');
+        let selectedPayTemplate = null;
+
+        function openPaymentCheckout(id, name, price, demoPath, payhipUrl) {
+            if (!userEmail) {
+                alert('Please sign in to complete your purchase and register the template license to your account.');
+                openAuthModal();
+                return;
+            }
+            selectedPayTemplate = { id, name, price, demoPath, payhipUrl };
+            document.getElementById('pay-template-name').textContent = name;
+            document.getElementById('pay-template-price').textContent = price;
+
+            // Pre-configure Payhip Link
+            const finalPayhipUrl = (payhipUrl || 'https://payhip.com/b/mock-pro') + (payhipUrl?.includes('?') ? '&' : '?') + 'email=' + encodeURIComponent(userEmail || '');
+            document.getElementById('payhip-checkout-btn').href = finalPayhipUrl;
+            document.getElementById('payhip-checkout-btn').onclick = (e) => {
+                closePaymentModal();
+                return handlePayhipCheckout(e, finalPayhipUrl);
+            };
+
+            // Pre-configure UPI QR Code details
+            const numericPrice = parseFloat(price.replace(/[^0-9.]/g, '')) || 14.99;
+            const inrPrice = Math.round(numericPrice * 85);
+            document.getElementById('upi-inr-price').textContent = '₹' + inrPrice.toLocaleString('en-IN');
+
+            const upiUri = `upi://pay?pa=${ADMIN_UPI_ID}&pn=SparkWeb&am=${inrPrice}&cu=INR&tn=SparkWeb-${id}`;
+            document.getElementById('upi-qr-image').src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&color=0f172a&data=${encodeURIComponent(upiUri)}`;
+
+            // Reset view state
+            switchPaymentTab('payhip');
+            document.getElementById('upi-form').style.display = 'block';
+            document.getElementById('upi-success-view').style.display = 'none';
+            document.getElementById('upi-utr').value = '';
+
+            paymentModal.classList.add('active');
+        }
+
+        function closePaymentModal() {
+            paymentModal.classList.remove('active');
+        }
+
+        function switchPaymentTab(tabName) {
+            const payhipBtn = document.getElementById('tab-payhip-btn');
+            const upiBtn = document.getElementById('tab-upi-btn');
+            const payhipContent = document.getElementById('payhip-tab-content');
+            const upiContent = document.getElementById('upi-tab-content');
+
+            if (tabName === 'payhip') {
+                payhipBtn.classList.add('active-tab-btn');
+                upiBtn.classList.remove('active-tab-btn');
+                payhipContent.style.display = 'block';
+                upiContent.style.display = 'none';
+            } else {
+                upiBtn.classList.add('active-tab-btn');
+                payhipBtn.classList.remove('active-tab-btn');
+                payhipContent.style.display = 'none';
+                upiContent.style.display = 'block';
+            }
+        }
+
+        function copyUPIId() {
+            const upiId = document.getElementById('upi-id-text').textContent;
+            navigator.clipboard.writeText(upiId).then(() => {
+                const btn = document.querySelector('#upi-tab-content button');
+                const origText = btn.textContent;
+                btn.textContent = 'Copied!';
+                setTimeout(() => { btn.textContent = origText; }, 1500);
+            });
+        }
+
+        async function submitUPIRequest(e) {
+            e.preventDefault();
+            const utr = document.getElementById('upi-utr').value.trim();
+            if (!utr) return;
+
+            const submitBtn = document.getElementById('upi-submit-btn');
+            const btnText = document.getElementById('upi-btn-text');
+            const spinner = document.getElementById('upi-btn-spinner');
+
+            submitBtn.disabled = true;
+            spinner.style.display = 'block';
+            btnText.textContent = 'Submitting Request...';
+
+            if (CLOUDFLARE_WORKER_URL.includes('YOUR_SUBDOMAIN')) {
+                // Mock Mode
+                setTimeout(() => {
+                    document.getElementById('upi-form').style.display = 'none';
+                    document.getElementById('upi-success-view').style.display = 'block';
+                }, 1000);
+                return;
+            }
+
+            try {
+                const response = await fetch(CLOUDFLARE_WORKER_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        action: 'submit_upi_request',
+                        email: userEmail,
+                        templateId: selectedPayTemplate.id,
+                        utr: utr
+                    })
+                });
+                const data = await response.json();
+                if (data.result === 'success') {
+                    document.getElementById('upi-form').style.display = 'none';
+                    document.getElementById('upi-success-view').style.display = 'block';
+                } else {
+                    alert('Submission error: ' + (data.error || 'unknown issue'));
+                    submitBtn.disabled = false;
+                    spinner.style.display = 'none';
+                    btnText.textContent = 'Submit Verification Request';
+                }
+            } catch (err) {
+                console.error("UPI submission failed:", err);
+                alert("Failed to submit UPI verification request.");
+                submitBtn.disabled = false;
+                spinner.style.display = 'none';
+                btnText.textContent = 'Submit Verification Request';
+            }
+        }
+
+        window.openPaymentCheckout = openPaymentCheckout;
+        window.closePaymentModal = closePaymentModal;
+        window.switchPaymentTab = switchPaymentTab;
+        window.copyUPIId = copyUPIId;
+        window.submitUPIRequest = submitUPIRequest;
 
         checkSession();
     </script>

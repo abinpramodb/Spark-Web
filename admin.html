@@ -514,6 +514,29 @@
 
         <!-- TAB 3: WHITELIST & ACCESS REQUESTS -->
         <section id="tab-users" class="tab-content">
+            <!-- UPI Purchase Verification Queue -->
+            <div class="data-card" style="margin-bottom: 24px;">
+                <div class="data-card-header">
+                    <h3>Pending UPI Purchase Approvals</h3>
+                </div>
+                <table class="list-table">
+                    <thead>
+                        <tr>
+                            <th>Email Address</th>
+                            <th>Template ID</th>
+                            <th>Transaction UTR</th>
+                            <th>Timestamp</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="pending-upi-body">
+                        <tr>
+                            <td colspan="5" style="text-align: center; color: #94a3b8;">No pending UPI purchase requests.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
             <div class="data-card">
                 <div class="data-card-header">
                     <h3>Pending Access Approval Queue</h3>
@@ -792,6 +815,9 @@
         let demoWhitelist = [
             { email: 'abinpramodb@gmail.com', date: '7/10/2026' }
         ];
+        let demoUpiRequests = [
+            { id: 1, email: 'buyer.test@gmail.com', templateId: 'template-4', utr: 'UTR9832476512', timestamp: new Date().toLocaleString(), status: 'Pending Verification' }
+        ];
 
         async function loadAdminDashboardData() {
             if (CLOUDFLARE_WORKER_URL.includes('YOUR_SUBDOMAIN')) {
@@ -802,6 +828,7 @@
                 renderTemplates(demoTemplates);
                 renderRequests(demoRequests);
                 renderWhitelist(demoWhitelist);
+                renderUPIRequests(demoUpiRequests);
                 renderActivityLogs([
                     { timestamp: new Date().toLocaleTimeString(), email: 'developer@example.com', templateId: 'Logged in as Admin' }
                 ]);
@@ -828,6 +855,7 @@
                     renderRequests(adminData.requests);
                     renderWhitelist(adminData.verified);
                     renderActivityLogs(adminData.builds);
+                    renderUPIRequests(adminData.upiRequests || []);
 
                     const pendingApprovals = adminData.requests.filter(r => r.status.includes('Pending')).length;
                     updateStats(templates.length, pendingApprovals, adminData.verified.length);
@@ -889,6 +917,96 @@
                     </tr>
                 `;
             });
+        }
+
+        function renderUPIRequests(requests) {
+            const tbody = document.getElementById('pending-upi-body');
+            tbody.innerHTML = '';
+            const pending = requests.filter(r => r.status === 'Pending Verification');
+
+            if (pending.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #94a3b8;">No pending UPI purchase requests.</td></tr>`;
+                return;
+            }
+
+            pending.forEach(req => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td style="font-weight:700;">${req.email}</td>
+                        <td style="font-family:monospace; color:var(--color-secondary);">${req.templateId}</td>
+                        <td style="font-weight:600; color:#cbd5e1;">${req.utr}</td>
+                        <td>${req.timestamp}</td>
+                        <td>
+                            <div style="display:flex; gap:8px;">
+                                <button class="btn btn-success" style="padding: 6px 12px; font-size:12px;" onclick="approveUPIRequest(${req.id}, '${req.email}', '${req.templateId}')">Approve</button>
+                                <button class="btn btn-danger" style="padding: 6px 12px; font-size:12px;" onclick="rejectUPIRequest(${req.id})">Reject</button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        async function approveUPIRequest(id, email, templateId) {
+            if (!confirm(`Approve UPI payment from ${email} and unlock ${templateId}?`)) return;
+
+            if (CLOUDFLARE_WORKER_URL.includes('YOUR_SUBDOMAIN')) {
+                demoUpiRequests = demoUpiRequests.filter(r => r.id !== id);
+                renderUPIRequests(demoUpiRequests);
+                alert('Approved successfully (Demo Mode)! Template unlocked.');
+                return;
+            }
+
+            try {
+                const response = await fetch(CLOUDFLARE_WORKER_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        action: 'approve_upi_request',
+                        id, email, templateId
+                    })
+                });
+                const data = await response.json();
+                if (data.result === 'success') {
+                    alert('UPI Request Approved! Template access granted to buyer.');
+                    loadAdminDashboardData();
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Connection error.');
+            }
+        }
+
+        async function rejectUPIRequest(id) {
+            if (!confirm('Reject this UPI request?')) return;
+
+            if (CLOUDFLARE_WORKER_URL.includes('YOUR_SUBDOMAIN')) {
+                demoUpiRequests = demoUpiRequests.filter(r => r.id !== id);
+                renderUPIRequests(demoUpiRequests);
+                alert('Rejected successfully (Demo Mode).');
+                return;
+            }
+
+            try {
+                const response = await fetch(CLOUDFLARE_WORKER_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        action: 'reject_upi_request',
+                        id
+                    })
+                });
+                const data = await response.json();
+                if (data.result === 'success') {
+                    alert('UPI Request Rejected.');
+                    loadAdminDashboardData();
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Connection error.');
+            }
         }
 
         function renderWhitelist(verified) {

@@ -221,6 +221,66 @@ export default {
       }
 
       // -------------------------------------------------------------
+      // ROUTE: submit_upi_request
+      // -------------------------------------------------------------
+      else if (action === "submit_upi_request") {
+        const { email, templateId, utr } = payload;
+        if (!email || !templateId || !utr) {
+          return returnJson({ result: "error", error: "Missing required parameters for UPI request." }, 400);
+        }
+
+        await env.DB.prepare(
+          "INSERT INTO upi_requests (email, templateId, utr, timestamp, status) VALUES (?, ?, ?, ?, 'Pending Verification')"
+        )
+        .bind(email.toLowerCase().trim(), templateId, utr, new Date().toLocaleString())
+        .run();
+
+        return returnJson({ result: "success" });
+      }
+
+      // -------------------------------------------------------------
+      // ROUTE: approve_upi_request
+      // -------------------------------------------------------------
+      else if (action === "approve_upi_request") {
+        const { id, email, templateId } = payload;
+        if (!id || !email || !templateId) {
+          return returnJson({ result: "error", error: "Missing parameters to approve UPI request." }, 400);
+        }
+
+        // 1. Mark request as Approved
+        await env.DB.prepare("UPDATE upi_requests SET status = 'Approved' WHERE id = ?").bind(id).run();
+
+        // 2. Add to purchases
+        await env.DB.prepare(
+          "INSERT OR IGNORE INTO purchases (email, templateId, purchaseDate) VALUES (?, ?, ?)"
+        )
+        .bind(email.toLowerCase().trim(), templateId, new Date().toLocaleDateString())
+        .run();
+
+        // 3. Log activity
+        await env.DB.prepare(
+          "INSERT INTO builds (timestamp, email, templateId, fields) VALUES (?, ?, ?, ?)"
+        )
+        .bind(new Date().toLocaleString(), email.toLowerCase().trim(), "UPI APPROVED: " + templateId, "{}")
+        .run();
+
+        return returnJson({ result: "success" });
+      }
+
+      // -------------------------------------------------------------
+      // ROUTE: reject_upi_request
+      // -------------------------------------------------------------
+      else if (action === "reject_upi_request") {
+        const { id } = payload;
+        if (!id) {
+          return returnJson({ result: "error", error: "Missing UPI request ID." }, 400);
+        }
+
+        await env.DB.prepare("UPDATE upi_requests SET status = 'Rejected' WHERE id = ?").bind(id).run();
+        return returnJson({ result: "success" });
+      }
+
+      // -------------------------------------------------------------
       // ROUTE: save_build
       // -------------------------------------------------------------
       else if (action === "save_build") {
@@ -248,17 +308,20 @@ export default {
         const requestsQuery = env.DB.prepare("SELECT * FROM access_requests").all();
         const verifiedQuery = env.DB.prepare("SELECT * FROM verified_emails").all();
         const buildsQuery = env.DB.prepare("SELECT * FROM builds ORDER BY id DESC LIMIT 20").all();
+        const upiQuery = env.DB.prepare("SELECT * FROM upi_requests ORDER BY id DESC").all();
 
-        const [requestsRes, verifiedRes, buildsRes] = await Promise.all([
+        const [requestsRes, verifiedRes, buildsRes, upiRes] = await Promise.all([
           requestsQuery,
           verifiedQuery,
-          buildsQuery
+          buildsQuery,
+          upiQuery
         ]);
 
         return returnJson({
           result: "success",
           requests: requestsRes.results || [],
           verified: verifiedRes.results || [],
+          upiRequests: upiRes.results || [],
           builds: (buildsRes.results || []).map(b => ({
             timestamp: b.timestamp,
             email: b.email,

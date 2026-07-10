@@ -48,3 +48,13 @@ CREATE TABLE IF NOT EXISTS purchases (
     purchaseDate TEXT NOT NULL,
     PRIMARY KEY (email, templateId)
 );
+
+-- 7. UPI Purchase Requests Queue
+CREATE TABLE IF NOT EXISTS upi_requests (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    email TEXT NOT NULL,
+    templateId TEXT NOT NULL,
+    utr TEXT NOT NULL,
+    timestamp TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'Pending Verification'
+);
