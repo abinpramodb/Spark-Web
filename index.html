@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -103,8 +104,8 @@
             padding: 80px 20px 40px;
             text-align: center;
             position: relative;
-            background-image: radial-gradient(circle at top right, rgba(99, 102, 241, 0.05), transparent 400px), 
-                              radial-gradient(circle at top left, rgba(168, 85, 247, 0.05), transparent 400px);
+            background-image: radial-gradient(circle at top right, rgba(99, 102, 241, 0.05), transparent 400px),
+                radial-gradient(circle at top left, rgba(168, 85, 247, 0.05), transparent 400px);
         }
 
         .badge {
@@ -250,9 +251,17 @@
             animation: fadeIn 0.5s ease-out both;
         }
 
-        .card:nth-child(1) { animation-delay: 0.1s; }
-        .card:nth-child(2) { animation-delay: 0.2s; }
-        .card:nth-child(3) { animation-delay: 0.3s; }
+        .card:nth-child(1) {
+            animation-delay: 0.1s;
+        }
+
+        .card:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .card:nth-child(3) {
+            animation-delay: 0.3s;
+        }
 
         .card:hover {
             transform: translateY(-6px);
@@ -275,9 +284,11 @@
         .card:nth-child(1) .card-preview {
             background: linear-gradient(135deg, #4f46e5 0%, #818cf8 100%);
         }
+
         .card:nth-child(2) .card-preview {
             background: linear-gradient(135deg, #1e293b 0%, #475569 100%);
         }
+
         .card:nth-child(3) .card-preview {
             background: linear-gradient(135deg, #0d9488 0%, #2dd4bf 100%);
         }
@@ -317,9 +328,18 @@
             border-radius: 50%;
             background: #cbd5e1;
         }
-        .mockup-header .dot:nth-child(1) { background: #ff5f56; }
-        .mockup-header .dot:nth-child(2) { background: #ffbd2e; }
-        .mockup-header .dot:nth-child(3) { background: #27c93f; }
+
+        .mockup-header .dot:nth-child(1) {
+            background: #ff5f56;
+        }
+
+        .mockup-header .dot:nth-child(2) {
+            background: #ffbd2e;
+        }
+
+        .mockup-header .dot:nth-child(3) {
+            background: #27c93f;
+        }
 
         .mockup-body {
             padding: 12px;
@@ -344,7 +364,10 @@
             border-radius: 1px;
             width: 100%;
         }
-        .mockup-line.short { width: 50%; }
+
+        .mockup-line.short {
+            width: 50%;
+        }
 
         .mockup-hero {
             height: 30px;
@@ -360,9 +383,23 @@
         }
 
         /* Template-specific mockup details */
-        .card:nth-child(1) .mockup-hero { color: #4f46e5; border-color: rgba(79, 70, 229, 0.2); background: rgba(79, 70, 229, 0.03); }
-        .card:nth-child(2) .mockup-hero { color: #1e293b; border-color: rgba(30, 41, 59, 0.2); background: rgba(30, 41, 59, 0.03); }
-        .card:nth-child(3) .mockup-hero { color: #0d9488; border-color: rgba(13, 148, 136, 0.2); background: rgba(13, 148, 136, 0.03); }
+        .card:nth-child(1) .mockup-hero {
+            color: #4f46e5;
+            border-color: rgba(79, 70, 229, 0.2);
+            background: rgba(79, 70, 229, 0.03);
+        }
+
+        .card:nth-child(2) .mockup-hero {
+            color: #1e293b;
+            border-color: rgba(30, 41, 59, 0.2);
+            background: rgba(30, 41, 59, 0.03);
+        }
+
+        .card:nth-child(3) .mockup-hero {
+            color: #0d9488;
+            border-color: rgba(13, 148, 136, 0.2);
+            background: rgba(13, 148, 136, 0.03);
+        }
 
         .card-tag {
             position: absolute;
@@ -500,14 +537,37 @@
             border-radius: 50%;
         }
 
-        .badge-github { color: #24292f; }
-        .badge-github .tech-badge-dot { background: #24292f; }
-        .badge-sheets { color: #0f9d58; }
-        .badge-sheets .tech-badge-dot { background: #0f9d58; }
-        .badge-drive { color: #4285f4; }
-        .badge-drive .tech-badge-dot { background: #4285f4; }
-        .badge-script { color: #f4b400; }
-        .badge-script .tech-badge-dot { background: #f4b400; }
+        .badge-github {
+            color: #24292f;
+        }
+
+        .badge-github .tech-badge-dot {
+            background: #24292f;
+        }
+
+        .badge-sheets {
+            color: #0f9d58;
+        }
+
+        .badge-sheets .tech-badge-dot {
+            background: #0f9d58;
+        }
+
+        .badge-drive {
+            color: #4285f4;
+        }
+
+        .badge-drive .tech-badge-dot {
+            background: #4285f4;
+        }
+
+        .badge-script {
+            color: #f4b400;
+        }
+
+        .badge-script .tech-badge-dot {
+            background: #f4b400;
+        }
 
         .footer-copyright {
             margin-top: 30px;
@@ -682,6 +742,7 @@
         }
     </style>
 </head>
+
 <body>
     <nav class="navbar">
         <a href="index.html" class="logo">
@@ -703,27 +764,37 @@
             <button class="auth-modal-close" id="auth-modal-close">&times;</button>
             <div id="auth-google-section" style="text-align: center;">
                 <h2>Welcome to Spark Web</h2>
-                <p style="margin-bottom: 20px;">Sign in using your Google Account to customize premium website templates and enable serverless cloud sync backups.</p>
-                
+                <p style="margin-bottom: 20px;">Sign in using your Google Account to customize premium website templates
+                    and enable serverless cloud sync backups.</p>
+
                 <!-- Google Sign-In API button container (real) -->
-                <div id="g_id_onload"
-                     data-client_id="YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com"
-                     data-callback="handleCredentialResponse"
-                     data-auto_prompt="false">
+                <div id="g_id_onload" data-client_id="YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com"
+                    data-callback="handleCredentialResponse" data-auto_prompt="false">
                 </div>
-                
+
                 <!-- Real Sign In Button wrapper -->
-                <div class="google-btn-container" id="real-google-btn" style="display: none; justify-content: center; margin: 20px 0;">
-                    <div class="g_id_signin" data-type="standard" data-size="large" data-theme="outline" data-text="signin_with" data-shape="rectangular" data-logo_alignment="left"></div>
+                <div class="google-btn-container" id="real-google-btn"
+                    style="display: none; justify-content: center; margin: 20px 0;">
+                    <div class="g_id_signin" data-type="standard" data-size="large" data-theme="outline"
+                        data-text="signin_with" data-shape="rectangular" data-logo_alignment="left"></div>
                 </div>
 
                 <!-- Custom Google Sign In button (opens fallback popup or real prompt) -->
-                <button class="google-signin-btn" id="custom-google-btn" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 12px; background: white; border: 1px solid #dadce0; color: #3c4043; border-radius: var(--radius-md); padding: 14px; font-size: 15px; font-weight: 600; cursor: pointer; transition: background 0.2s; margin: 24px 0 12px;">
+                <button class="google-signin-btn" id="custom-google-btn"
+                    style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 12px; background: white; border: 1px solid #dadce0; color: #3c4043; border-radius: var(--radius-md); padding: 14px; font-size: 15px; font-weight: 600; cursor: pointer; transition: background 0.2s; margin: 24px 0 12px;">
                     <svg width="18" height="18" viewBox="0 0 18 18">
-                        <path d="M17.64 9.2c0-.63-.06-1.25-.16-1.84H9v3.47h4.84c-.21 1.12-.84 2.07-1.8 2.71v2.24h2.91c1.7-1.56 2.69-3.86 2.69-6.58z" fill="#4285F4"/>
-                        <path d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.91-2.24c-.8.54-1.84.87-3.05.87-2.34 0-4.33-1.58-5.03-3.71H.95v2.3C2.43 15.89 5.5 18 9 18z" fill="#34A853"/>
-                        <path d="M3.97 10.74c-.18-.54-.28-1.12-.28-1.74s.1-1.2.28-1.74V4.96H.95C.35 6.17 0 7.55 0 9s.35 2.83.95 4.04l3.02-2.3z" fill="#FBBC05"/>
-                        <path d="M9 3.58c1.32 0 2.5.45 3.44 1.35L15 2.4C13.46.96 11.42 0 9 0 5.5 0 2.43 2.11.95 5.09l3.02 2.3c.7-2.13 2.69-3.71 5.03-3.71z" fill="#EA4335"/>
+                        <path
+                            d="M17.64 9.2c0-.63-.06-1.25-.16-1.84H9v3.47h4.84c-.21 1.12-.84 2.07-1.8 2.71v2.24h2.91c1.7-1.56 2.69-3.86 2.69-6.58z"
+                            fill="#4285F4" />
+                        <path
+                            d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.91-2.24c-.8.54-1.84.87-3.05.87-2.34 0-4.33-1.58-5.03-3.71H.95v2.3C2.43 15.89 5.5 18 9 18z"
+                            fill="#34A853" />
+                        <path
+                            d="M3.97 10.74c-.18-.54-.28-1.12-.28-1.74s.1-1.2.28-1.74V4.96H.95C.35 6.17 0 7.55 0 9s.35 2.83.95 4.04l3.02-2.3z"
+                            fill="#FBBC05" />
+                        <path
+                            d="M9 3.58c1.32 0 2.5.45 3.44 1.35L15 2.4C13.46.96 11.42 0 9 0 5.5 0 2.43 2.11.95 5.09l3.02 2.3c.7-2.13 2.69-3.71 5.03-3.71z"
+                            fill="#EA4335" />
                     </svg>
                     <span>Sign in with Google</span>
                 </button>
@@ -739,19 +810,22 @@
                 100% Free HTML Web Workspace Templates
             </div>
             <h1>Premium Web Frameworks.<br>Customized Live <span>In Your Browser</span>.</h1>
-            <p>Select any premium layout template below to adjust colors, content typography, and export clean HTML or sync configurations live with Google Apps Script.</p>
-            
+            <p>Select any premium layout template below to adjust colors, content typography, and export clean HTML or
+                sync configurations live with Google Apps Script.</p>
+
             <div class="search-container">
-                <input type="text" id="search-input" class="search-input" placeholder="Search templates (e.g. SaaS, Portfolio)...">
+                <input type="text" id="search-input" class="search-input"
+                    placeholder="Search templates (e.g. SaaS, Portfolio)...">
                 <button id="search-btn" class="search-btn">Search</button>
             </div>
         </section>
 
         <section class="container" id="templates">
             <div class="grid-header">
-                <h2 class="grid-title">Available Templates <span class="grid-count" id="count-badge">3 templates</span></h2>
+                <h2 class="grid-title">Available Templates <span class="grid-count" id="count-badge">3 templates</span>
+                </h2>
             </div>
-            
+
             <div class="template-grid" id="template-grid">
                 <!-- Templates rendered dynamically -->
             </div>
@@ -761,10 +835,18 @@
     <footer class="tech-footer">
         <p>Powered by 100% Free Serverless Technology</p>
         <div class="tech-badges">
-            <div class="tech-badge badge-github"><div class="tech-badge-dot"></div>GitHub Pages</div>
-            <div class="tech-badge badge-drive"><div class="tech-badge-dot"></div>Google Drive</div>
-            <div class="tech-badge badge-sheets"><div class="tech-badge-dot"></div>Google Sheets</div>
-            <div class="tech-badge badge-script"><div class="tech-badge-dot"></div>Google Apps Script</div>
+            <div class="tech-badge badge-github">
+                <div class="tech-badge-dot"></div>GitHub Pages
+            </div>
+            <div class="tech-badge badge-drive">
+                <div class="tech-badge-dot"></div>Google Drive
+            </div>
+            <div class="tech-badge badge-sheets">
+                <div class="tech-badge-dot"></div>Google Sheets
+            </div>
+            <div class="tech-badge badge-script">
+                <div class="tech-badge-dot"></div>Google Apps Script
+            </div>
         </div>
         <div class="footer-copyright">
             &copy; 2026 Spark Web. Open Source. Under MIT License.
@@ -869,7 +951,7 @@
         fetchMarketplaceTemplates();
 
         // Google Sign-In & Auth Logic
-        const GOOGLE_CLIENT_ID = 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com';
+        const GOOGLE_CLIENT_ID = '284331318489-304jg5aadjptv3850nlg9uodc7h1kcl8.apps.googleusercontent.com';
 
         const authNavBtn = document.getElementById('auth-nav-btn');
         const authModal = document.getElementById('auth-modal');
@@ -918,7 +1000,7 @@
 
         function openAuthModal() {
             authErrorMsg.textContent = '';
-            
+
             if (GOOGLE_CLIENT_ID.includes('YOUR_GOOGLE_CLIENT_ID')) {
                 realGoogleBtn.style.display = 'none';
                 customGoogleBtn.style.display = 'flex';
@@ -943,13 +1025,13 @@
             const width = 480, height = 600;
             const left = (window.innerWidth - width) / 2 + window.screenX;
             const top = (window.innerHeight - height) / 2 + window.screenY;
-            
+
             const popup = window.open(
                 'templates/mock-google-login.html',
                 'GoogleSignInFallbackPopup',
                 `width=${width},height=${height},left=${left},top=${top},status=no,resizable=yes`
             );
-            
+
             if (window.focus && popup) popup.focus();
         });
 
@@ -957,27 +1039,27 @@
         window.addEventListener('message', (event) => {
             if (event.data && event.data.source === 'tf-google-login') {
                 const { email, name, picture } = event.data;
-                
+
                 localStorage.setItem('tf_user_email', email);
                 localStorage.setItem('tf_user_name', name);
                 localStorage.setItem('tf_user_picture', picture);
                 localStorage.setItem('tf_session_token', 'mock_google_token_' + Date.now());
-                
+
                 checkSession();
                 closeAuthModal();
             }
         });
 
         // Real Google Identity callback
-        window.handleCredentialResponse = function(response) {
+        window.handleCredentialResponse = function (response) {
             try {
                 const responsePayload = decodeJwtResponse(response.credential);
-                
+
                 localStorage.setItem('tf_user_email', responsePayload.email);
                 localStorage.setItem('tf_user_name', responsePayload.name);
                 localStorage.setItem('tf_user_picture', responsePayload.picture);
                 localStorage.setItem('tf_session_token', response.credential);
-                
+
                 checkSession();
                 closeAuthModal();
             } catch (err) {
@@ -989,7 +1071,7 @@
         function decodeJwtResponse(token) {
             var base64Url = token.split('.')[1];
             var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-            var jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
+            var jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function (c) {
                 return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
             }).join(''));
             return JSON.parse(jsonPayload);
@@ -998,4 +1080,5 @@
         checkSession();
     </script>
 </body>
+
 </html>
