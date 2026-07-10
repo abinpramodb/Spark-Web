@@ -95,6 +95,32 @@ export default {
       }
 
       // -------------------------------------------------------------
+      // ROUTE: edit_template
+      // -------------------------------------------------------------
+      else if (action === "edit_template") {
+        const { id, name, category, description, thumbnail, demoPath, price } = payload;
+        if (!id || !name || !category || !description || !demoPath) {
+          return returnJson({ result: "error", error: "Missing required parameters to update template." }, 400);
+        }
+
+        await env.DB.prepare(
+          "UPDATE templates SET name = ?, category = ?, description = ?, thumbnail = ?, demoPath = ?, price = ? WHERE id = ?"
+        )
+        .bind(
+          name,
+          category,
+          description,
+          thumbnail || "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=800&q=80",
+          demoPath,
+          price || "Free",
+          id
+        )
+        .run();
+
+        return returnJson({ result: "success" });
+      }
+
+      // -------------------------------------------------------------
       // ROUTE: save_build
       // -------------------------------------------------------------
       else if (action === "save_build") {

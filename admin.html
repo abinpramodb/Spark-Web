@@ -609,6 +609,55 @@
         </div>
     </div>
 
+    <!-- Modal for Editing Template -->
+    <div class="modal-overlay" id="edit-template-modal">
+        <div class="modal-card">
+            <h3>Edit Web Template</h3>
+            <form id="edit-template-form" onsubmit="submitEditTemplate(event)">
+                <input type="hidden" id="edit-tpl-id">
+                <div class="form-group">
+                    <label for="edit-tpl-name">Template Name</label>
+                    <input type="text" id="edit-tpl-name" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-tpl-category">Category</label>
+                    <select id="edit-tpl-category" class="form-input"
+                        style="background: #111827; border: 1px solid rgba(255,255,255,0.08);" required>
+                        <option value="saas">SaaS Landing Page</option>
+                        <option value="portfolio">Portfolio</option>
+                        <option value="blog">Blog</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="edit-tpl-desc">Description</label>
+                    <textarea id="edit-tpl-desc" class="form-input" rows="3"
+                        required style="resize: none;"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="edit-tpl-thumbnail">Thumbnail Image URL</label>
+                    <input type="url" id="edit-tpl-thumbnail" class="form-input">
+                </div>
+                <div class="form-group">
+                    <label for="edit-tpl-demo">Sandbox Base Frame Path (Template-1/2/3 style)</label>
+                    <select id="edit-tpl-demo" class="form-input"
+                        style="background: #111827; border: 1px solid rgba(255,255,255,0.08);" required>
+                        <option value="template-1">Apex SaaS Framework (Template 1)</option>
+                        <option value="template-2">Zenith Portfolio Framework (Template 2)</option>
+                        <option value="template-3">Echo Blog Framework (Template 3)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="edit-tpl-price">Price Tag</label>
+                    <input type="text" id="edit-tpl-price" class="form-input" required>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-cancel" onclick="closeEditTemplateModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
         const ADMIN_EMAILS = ['oxoredz@gmail.com'];
         const CLOUDFLARE_WORKER_URL = 'https://sparkweb-api.oxoredz.workers.dev';
@@ -695,6 +744,34 @@
         function openAddTemplateModal() { addModal.classList.add('active'); }
         function closeAddTemplateModal() { addModal.classList.remove('active'); }
 
+        let activeTemplatesList = [];
+        const editModal = document.getElementById('edit-template-modal');
+
+        function openEditTemplateModal(id) {
+            let tpl = demoTemplates.find(t => t.id === id);
+            if (activeTemplatesList && activeTemplatesList.length > 0) {
+                const liveTpl = activeTemplatesList.find(t => t.id === id);
+                if (liveTpl) tpl = liveTpl;
+            }
+
+            if (!tpl) {
+                alert('Template not found.');
+                return;
+            }
+
+            document.getElementById('edit-tpl-id').value = tpl.id;
+            document.getElementById('edit-tpl-name').value = tpl.name;
+            document.getElementById('edit-tpl-category').value = tpl.category;
+            document.getElementById('edit-tpl-desc').value = tpl.description;
+            document.getElementById('edit-tpl-thumbnail').value = tpl.thumbnail || '';
+            document.getElementById('edit-tpl-demo').value = tpl.demoPath;
+            document.getElementById('edit-tpl-price').value = tpl.price || 'Free';
+
+            editModal.classList.add('active');
+        }
+
+        function closeEditTemplateModal() { editModal.classList.remove('active'); }
+
         let demoTemplates = [
             { id: 'template-1', name: 'Apex SaaS Landing Page', category: 'saas', description: 'Interactive features viewport switcher, styling variables.', thumbnail: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=800&q=80', demoPath: 'template-1', price: 'Free' },
             { id: 'template-2', name: 'Zenith Personal Portfolio', category: 'portfolio', description: 'Creative custom workspace for designers & developers.', thumbnail: 'https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?auto=format&fit=crop&w=800&q=80', demoPath: 'template-2', price: 'Free' },
@@ -759,6 +836,7 @@
         }
 
         function renderTemplates(templates) {
+            activeTemplatesList = templates;
             const tbody = document.getElementById('templates-list-body');
             tbody.innerHTML = '';
             templates.forEach(tpl => {
@@ -769,6 +847,7 @@
                         <td style="text-transform: capitalize;">${tpl.category}</td>
                         <td style="color: var(--color-secondary); font-weight:700;">${tpl.price}</td>
                         <td>
+                            <button class="btn btn-primary" style="padding: 6px 12px; font-size:12px; margin-right: 6px;" onclick="openEditTemplateModal('${tpl.id}')">Edit</button>
                             <button class="btn btn-danger" style="padding: 6px 12px; font-size:12px;" onclick="deleteTemplate('${tpl.id}')">Delete</button>
                         </td>
                     </tr>
@@ -873,13 +952,61 @@
                 });
                 const data = await response.json();
                 if (data.result === 'success') {
-                    alert('Published successfully to live Google Sheets database!');
+                    alert('Published successfully to live Cloudflare database!');
                     closeAddTemplateModal();
                     loadAdminDashboardData();
                 }
             } catch (err) {
                 console.error(err);
-                alert('Failed to publish template. Verify Apps Script status.');
+                alert('Failed to publish template. Verify Cloudflare Worker status.');
+            }
+        }
+
+        async function submitEditTemplate(e) {
+            e.preventDefault();
+            const id = document.getElementById('edit-tpl-id').value;
+            const name = document.getElementById('edit-tpl-name').value.trim();
+            const category = document.getElementById('edit-tpl-category').value;
+            const description = document.getElementById('edit-tpl-desc').value.trim();
+            const thumbnail = document.getElementById('edit-tpl-thumbnail').value.trim();
+            const demoPath = document.getElementById('edit-tpl-demo').value;
+            const price = document.getElementById('edit-tpl-price').value.trim();
+
+            if (CLOUDFLARE_WORKER_URL.includes('YOUR_SUBDOMAIN')) {
+                const idx = demoTemplates.findIndex(t => t.id === id);
+                if (idx !== -1) {
+                    demoTemplates[idx] = {
+                        id, name, category, description,
+                        thumbnail: thumbnail || "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=800&q=80",
+                        demoPath, price
+                    };
+                    localStorage.setItem('tf_mock_templates', JSON.stringify(demoTemplates));
+                }
+                alert('Updated successfully (Demo Mode)! Template updates are live.');
+                closeEditTemplateModal();
+                loadAdminDashboardData();
+                return;
+            }
+
+            try {
+                const response = await fetch(CLOUDFLARE_WORKER_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        action: 'edit_template',
+                        id, name, category, description, thumbnail, demoPath, price
+                    })
+                });
+                const data = await response.json();
+                if (data.result === 'success') {
+                    alert('Saved changes successfully to live Cloudflare database!');
+                    closeEditTemplateModal();
+                    loadAdminDashboardData();
+                } else {
+                    alert('Failed to update template: ' + (data.error || 'unknown error'));
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Failed to connect to Cloudflare Workers endpoint.');
             }
         }
 
