@@ -802,63 +802,7 @@
         </div>
     </div>
 
-    <!-- Stripe Checkout Modal -->
-    <div id="payment-modal" class="auth-modal-overlay">
-        <div class="auth-modal-card" style="max-width: 500px; padding: 32px;">
-            <button class="auth-modal-close" onclick="closePaymentModal()">&times;</button>
-            <div style="text-align: center; margin-bottom: 24px;">
-                <h2 style="font-size: 22px; color: #0f172a; margin-bottom: 8px;">Secure Payment Checkout</h2>
-                <p style="color: #475569; font-size: 14px;">Complete your purchase to unlock lifetime customizable workspace access.</p>
-            </div>
-            
-            <div id="payment-summary" style="background: rgba(15, 23, 42, 0.04); border: 1px solid rgba(15, 23, 42, 0.08); padding: 16px; border-radius: var(--radius-md); margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center;">
-                <div>
-                    <div id="pay-template-name" style="font-weight: 700; color: #0f172a;">Nova SaaS Landing Page Pro</div>
-                    <div style="color: #6366f1; font-size: 12px; text-transform: uppercase; font-weight: 700; margin-top: 4px;">Lifetime License</div>
-                </div>
-                <div id="pay-template-price" style="font-size: 20px; font-weight: 800; color: var(--color-secondary);">$14.99</div>
-            </div>
 
-            <form id="payment-form" onsubmit="submitPayment(event)">
-                <input type="hidden" id="pay-template-id">
-                <div class="form-group" style="margin-bottom: 16px;">
-                    <label style="display: block; font-size: 12px; font-weight: 600; text-transform: uppercase; color: #475569; margin-bottom: 8px;">Cardholder Name</label>
-                    <input type="text" id="card-name" class="search-input" style="width: 100%; text-transform: uppercase;" placeholder="OXORED ADMIN" required>
-                </div>
-                <div class="form-group" style="margin-bottom: 16px;">
-                    <label style="display: block; font-size: 12px; font-weight: 600; text-transform: uppercase; color: #475569; margin-bottom: 8px;">Card Number</label>
-                    <div style="position: relative;">
-                        <input type="text" id="card-number" class="search-input" style="width: 100%; padding-left: 42px;" placeholder="4242 4242 4242 4242" maxlength="19" required>
-                        <span style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-size: 18px;">💳</span>
-                    </div>
-                </div>
-                <div style="display: flex; gap: 16px; margin-bottom: 24px;">
-                    <div class="form-group" style="flex: 1;">
-                        <label style="display: block; font-size: 12px; font-weight: 600; text-transform: uppercase; color: #475569; margin-bottom: 8px;">Expiration</label>
-                        <input type="text" id="card-expiry" class="search-input" style="width: 100%; text-align: center;" placeholder="MM / YY" maxlength="7" required>
-                    </div>
-                    <div class="form-group" style="flex: 1;">
-                        <label style="display: block; font-size: 12px; font-weight: 600; text-transform: uppercase; color: #475569; margin-bottom: 8px;">CVC / CVV</label>
-                        <input type="text" id="card-cvc" class="search-input" style="width: 100%; text-align: center;" placeholder="123" maxlength="3" required>
-                    </div>
-                </div>
-                
-                <div id="payment-error" style="color: #ef4444; font-size: 13px; font-weight: 600; margin-bottom: 16px; text-align: center; display: none;"></div>
-
-                <button type="submit" class="search-btn" id="payment-submit-btn" style="width: 100%; height: 48px; border-radius: var(--radius-md); font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px;">
-                    <span id="payment-btn-text">Pay & Unlock Template</span>
-                    <div class="auth-btn-spinner" id="payment-btn-spinner" style="margin-left: 0;"></div>
-                </button>
-            </form>
-
-            <div id="payment-success-view" style="display: none; text-align: center; padding: 20px 0;">
-                <div style="width: 64px; height: 64px; border-radius: 50%; background: rgba(16,185,129,0.1); color: #10b981; font-size: 32px; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;">✓</div>
-                <h3 style="font-size: 20px; color: #0f172a; margin-bottom: 8px;">Payment Successful!</h3>
-                <p style="color: #475569; font-size: 14px; margin-bottom: 24px;">Your lifetime template license has been unlocked successfully.</p>
-                <button onclick="launchUnlockedTemplate()" class="search-btn" style="width: 100%; height: 48px;">Proceed to Sandbox Customizer</button>
-            </div>
-        </div>
-    </div>
 
     <main>
         <section class="hero-section">
@@ -960,11 +904,10 @@
                 let actionButton = '';
                 if (isPriceFree || isPurchased) {
                     actionButton = `<a href="templates/live-editor.html?template=${tpl.demoPath}" class="btn btn-primary">Customize & Test Live</a>`;
-                } else if (tpl.payhipUrl) {
-                    const finalPayhipUrl = tpl.payhipUrl + (tpl.payhipUrl.includes('?') ? '&' : '?') + 'email=' + encodeURIComponent(userEmail || '');
-                    actionButton = `<a href="${finalPayhipUrl}" class="payhip-buy-button btn btn-primary" onclick="return handlePayhipCheckout(event, '${finalPayhipUrl}')" style="background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); text-decoration: none; display: flex; align-items: center; justify-content: center;">Unlock & Customize</a>`;
                 } else {
-                    actionButton = `<button onclick="openPaymentCheckout('${tpl.id}', '${tpl.name}', '${tpl.price}', '${tpl.demoPath}')" class="btn btn-primary" style="background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);">Unlock & Customize</button>`;
+                    const payhipUrl = tpl.payhipUrl || 'https://payhip.com/b/mock-pro';
+                    const finalPayhipUrl = payhipUrl + (payhipUrl.includes('?') ? '&' : '?') + 'email=' + encodeURIComponent(userEmail || '');
+                    actionButton = `<a href="${finalPayhipUrl}" class="payhip-buy-button btn btn-primary" onclick="return handlePayhipCheckout(event, '${finalPayhipUrl}')" style="background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); text-decoration: none; display: flex; align-items: center; justify-content: center;">Unlock & Customize</a>`;
                 }
 
                 templateGrid.innerHTML += `
@@ -1167,174 +1110,7 @@
             }
         };
 
-        // Stripe-style simulated checkout portal elements
-        const paymentModal = document.getElementById('payment-modal');
-        let selectedPayTemplate = null;
 
-        function openPaymentModal(name, price, id, demoPath) {
-            selectedPayTemplate = { id, name, price, demoPath };
-            document.getElementById('pay-template-id').value = id;
-            document.getElementById('pay-template-name').textContent = name;
-            document.getElementById('pay-template-price').textContent = price;
-            
-            // Show checkout form, hide success view
-            document.getElementById('payment-form').style.display = 'block';
-            document.getElementById('payment-success-view').style.display = 'none';
-            document.getElementById('payment-error').style.display = 'none';
-            document.getElementById('payment-submit-btn').disabled = false;
-            
-            // Reset input values
-            document.getElementById('card-name').value = '';
-            document.getElementById('card-number').value = '';
-            document.getElementById('card-expiry').value = '';
-            document.getElementById('card-cvc').value = '';
-
-            paymentModal.classList.add('active');
-        }
-
-        function closePaymentModal() {
-            paymentModal.classList.remove('active');
-        }
-
-        window.closePaymentModal = closePaymentModal;
-
-        function openPaymentCheckout(id, name, price, demoPath) {
-            if (!userEmail) {
-                alert('Please sign in to complete your purchase and register the template license to your account.');
-                openAuthModal();
-                return;
-            }
-            openPaymentModal(name, price, id, demoPath);
-        }
-
-        window.openPaymentCheckout = openPaymentCheckout;
-
-        // Live formatting for credit card inputs
-        document.getElementById('card-number').addEventListener('input', (e) => {
-            let v = e.target.value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
-            let matches = v.match(/\d{4,16}/g);
-            let match = matches && matches[0] || '';
-            let parts = [];
-
-            for (let i=0, len=match.length; i<len; i+=4) {
-                parts.push(match.substring(i, i+4));
-            }
-
-            if (parts.length > 0) {
-                e.target.value = parts.join(' ');
-            } else {
-                e.target.value = v;
-            }
-        });
-
-        document.getElementById('card-expiry').addEventListener('input', (e) => {
-            let v = e.target.value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
-            if (v.length >= 2) {
-                e.target.value = v.substring(0, 2) + ' / ' + v.substring(2, 4);
-            } else {
-                e.target.value = v;
-            }
-        });
-
-        document.getElementById('card-cvc').addEventListener('input', (e) => {
-            e.target.value = e.target.value.replace(/[^0-9]/gi, '').substring(0, 3);
-        });
-
-        async function submitPayment(e) {
-            e.preventDefault();
-            const submitBtn = document.getElementById('payment-submit-btn');
-            const spinner = document.getElementById('payment-btn-spinner');
-            const btnText = document.getElementById('payment-btn-text');
-            const errDiv = document.getElementById('payment-error');
-
-            errDiv.style.display = 'none';
-            submitBtn.disabled = true;
-            spinner.style.display = 'block';
-            btnText.textContent = 'Processing Payment...';
-
-            // Simulate stripe payment latency
-            setTimeout(async () => {
-                const cardNum = document.getElementById('card-number').value.replace(/\s/g, '');
-                const expiry = document.getElementById('card-expiry').value.replace(/\s/g, '');
-                const cvc = document.getElementById('card-cvc').value;
-
-                // Simple validation checks
-                if (cardNum.length < 16) {
-                    showPaymentError('Invalid card number. Must be a 16-digit card.');
-                    return;
-                }
-                if (expiry.length < 5) {
-                    showPaymentError('Invalid expiration date. Use MM / YY format.');
-                    return;
-                }
-                if (cvc.length < 3) {
-                    showPaymentError('Invalid CVV code. Must be a 3-digit security key.');
-                    return;
-                }
-
-                if (CLOUDFLARE_WORKER_URL.includes('YOUR_SUBDOMAIN')) {
-                    purchasedTemplates.push(selectedPayTemplate.id);
-                    localStorage.setItem('tf_purchases_' + userEmail, JSON.stringify(purchasedTemplates));
-                    showPaymentSuccess();
-                    return;
-                }
-
-                try {
-                    const response = await fetch(CLOUDFLARE_WORKER_URL, {
-                        method: 'POST',
-                        body: JSON.stringify({
-                            action: 'record_purchase',
-                            email: userEmail,
-                            templateId: selectedPayTemplate.id
-                        })
-                    });
-                    const data = await response.json();
-                    if (data.result === 'success') {
-                        purchasedTemplates.push(selectedPayTemplate.id);
-                        showPaymentSuccess();
-                    } else {
-                        showPaymentError('Payment declined: ' + (data.error || 'unknown issue'));
-                    }
-                } catch (err) {
-                    console.error(err);
-                    showPaymentError('Connection error. Failed to record purchase.');
-                }
-            }, 1800);
-        }
-
-        window.submitPayment = submitPayment;
-
-        function showPaymentError(msg) {
-            const submitBtn = document.getElementById('payment-submit-btn');
-            const spinner = document.getElementById('payment-btn-spinner');
-            const btnText = document.getElementById('payment-btn-text');
-            const errDiv = document.getElementById('payment-error');
-
-            errDiv.textContent = msg;
-            errDiv.style.display = 'block';
-            submitBtn.disabled = false;
-            spinner.style.display = 'none';
-            btnText.textContent = 'Pay & Unlock Template';
-        }
-
-        function showPaymentSuccess() {
-            document.getElementById('payment-form').style.display = 'none';
-            document.getElementById('payment-success-view').style.display = 'block';
-            
-            // Re-render templates to update cards
-            if (currentMarketplaceTemplates) {
-                renderMarketplaceTemplates(currentMarketplaceTemplates);
-            }
-        }
-
-        function launchUnlockedTemplate() {
-            closePaymentModal();
-            if (selectedPayTemplate) {
-                window.location.href = `templates/live-editor.html?template=${selectedPayTemplate.demoPath}`;
-            }
-        }
-
-        window.launchUnlockedTemplate = launchUnlockedTemplate;
 
         async function fetchUserPurchases(email) {
             if (!email) return;
