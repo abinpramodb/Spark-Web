@@ -807,13 +807,13 @@
         <div class="auth-modal-card" style="max-width: 500px; padding: 32px;">
             <button class="auth-modal-close" onclick="closePaymentModal()">&times;</button>
             <div style="text-align: center; margin-bottom: 24px;">
-                <h2 style="font-size: 22px; color: white; margin-bottom: 8px;">Secure Payment Checkout</h2>
-                <p style="color: #94a3b8; font-size: 14px;">Complete your purchase to unlock lifetime customizable workspace access.</p>
+                <h2 style="font-size: 22px; color: #0f172a; margin-bottom: 8px;">Secure Payment Checkout</h2>
+                <p style="color: #475569; font-size: 14px;">Complete your purchase to unlock lifetime customizable workspace access.</p>
             </div>
             
-            <div id="payment-summary" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); padding: 16px; border-radius: var(--radius-md); margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center;">
+            <div id="payment-summary" style="background: rgba(15, 23, 42, 0.04); border: 1px solid rgba(15, 23, 42, 0.08); padding: 16px; border-radius: var(--radius-md); margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center;">
                 <div>
-                    <div id="pay-template-name" style="font-weight: 700; color: white;">Nova SaaS Landing Page Pro</div>
+                    <div id="pay-template-name" style="font-weight: 700; color: #0f172a;">Nova SaaS Landing Page Pro</div>
                     <div style="color: #6366f1; font-size: 12px; text-transform: uppercase; font-weight: 700; margin-top: 4px;">Lifetime License</div>
                 </div>
                 <div id="pay-template-price" style="font-size: 20px; font-weight: 800; color: var(--color-secondary);">$14.99</div>
@@ -822,11 +822,11 @@
             <form id="payment-form" onsubmit="submitPayment(event)">
                 <input type="hidden" id="pay-template-id">
                 <div class="form-group" style="margin-bottom: 16px;">
-                    <label style="display: block; font-size: 12px; font-weight: 600; text-transform: uppercase; color: #94a3b8; margin-bottom: 8px;">Cardholder Name</label>
+                    <label style="display: block; font-size: 12px; font-weight: 600; text-transform: uppercase; color: #475569; margin-bottom: 8px;">Cardholder Name</label>
                     <input type="text" id="card-name" class="search-input" style="width: 100%; text-transform: uppercase;" placeholder="OXORED ADMIN" required>
                 </div>
                 <div class="form-group" style="margin-bottom: 16px;">
-                    <label style="display: block; font-size: 12px; font-weight: 600; text-transform: uppercase; color: #94a3b8; margin-bottom: 8px;">Card Number</label>
+                    <label style="display: block; font-size: 12px; font-weight: 600; text-transform: uppercase; color: #475569; margin-bottom: 8px;">Card Number</label>
                     <div style="position: relative;">
                         <input type="text" id="card-number" class="search-input" style="width: 100%; padding-left: 42px;" placeholder="4242 4242 4242 4242" maxlength="19" required>
                         <span style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-size: 18px;">💳</span>
@@ -834,11 +834,11 @@
                 </div>
                 <div style="display: flex; gap: 16px; margin-bottom: 24px;">
                     <div class="form-group" style="flex: 1;">
-                        <label style="display: block; font-size: 12px; font-weight: 600; text-transform: uppercase; color: #94a3b8; margin-bottom: 8px;">Expiration</label>
+                        <label style="display: block; font-size: 12px; font-weight: 600; text-transform: uppercase; color: #475569; margin-bottom: 8px;">Expiration</label>
                         <input type="text" id="card-expiry" class="search-input" style="width: 100%; text-align: center;" placeholder="MM / YY" maxlength="7" required>
                     </div>
                     <div class="form-group" style="flex: 1;">
-                        <label style="display: block; font-size: 12px; font-weight: 600; text-transform: uppercase; color: #94a3b8; margin-bottom: 8px;">CVC / CVV</label>
+                        <label style="display: block; font-size: 12px; font-weight: 600; text-transform: uppercase; color: #475569; margin-bottom: 8px;">CVC / CVV</label>
                         <input type="text" id="card-cvc" class="search-input" style="width: 100%; text-align: center;" placeholder="123" maxlength="3" required>
                     </div>
                 </div>
@@ -853,8 +853,8 @@
 
             <div id="payment-success-view" style="display: none; text-align: center; padding: 20px 0;">
                 <div style="width: 64px; height: 64px; border-radius: 50%; background: rgba(16,185,129,0.1); color: #10b981; font-size: 32px; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;">✓</div>
-                <h3 style="font-size: 20px; color: white; margin-bottom: 8px;">Payment Successful!</h3>
-                <p style="color: #94a3b8; font-size: 14px; margin-bottom: 24px;">Your lifetime template license has been unlocked successfully.</p>
+                <h3 style="font-size: 20px; color: #0f172a; margin-bottom: 8px;">Payment Successful!</h3>
+                <p style="color: #475569; font-size: 14px; margin-bottom: 24px;">Your lifetime template license has been unlocked successfully.</p>
                 <button onclick="launchUnlockedTemplate()" class="search-btn" style="width: 100%; height: 48px;">Proceed to Sandbox Customizer</button>
             </div>
         </div>
