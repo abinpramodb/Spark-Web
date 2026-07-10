@@ -148,6 +148,183 @@ function doPost(e) {
                            .setMimeType(ContentService.MimeType.JSON);
     }
 
+    // -------------------------------------------------------------
+    // ACTION 4: Get All Templates
+    // -------------------------------------------------------------
+    else if (action === "get_templates") {
+      var templatesSheet = spreadsheet.getSheetByName("Marketplace_Templates");
+      var templates = [];
+      if (templatesSheet) {
+        var values = templatesSheet.getDataRange().getValues();
+        for (var i = 1; i < values.length; i++) {
+          templates.push({
+            id: values[i][0],
+            name: values[i][1],
+            category: values[i][2],
+            description: values[i][3],
+            thumbnail: values[i][4],
+            demoPath: values[i][5],
+            price: values[i][6]
+          });
+        }
+      }
+      return ContentService.createTextOutput(JSON.stringify({ "result": "success", "templates": templates }))
+                           .setMimeType(ContentService.MimeType.JSON);
+    }
+
+    // -------------------------------------------------------------
+    // ACTION 5: Add Template
+    // -------------------------------------------------------------
+    else if (action === "add_template") {
+      var templatesSheet = spreadsheet.getSheetByName("Marketplace_Templates");
+      if (!templatesSheet) {
+        templatesSheet = spreadsheet.insertSheet("Marketplace_Templates");
+        templatesSheet.appendRow(["ID", "Name", "Category", "Description", "Thumbnail URL", "Demo Path", "Price"]);
+      }
+      var newId = "template-" + new Date().getTime();
+      templatesSheet.appendRow([
+        newId,
+        requestData.name,
+        requestData.category,
+        requestData.description,
+        requestData.thumbnail || "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=800&q=80",
+        requestData.demoPath || "template-1",
+        requestData.price || "Free"
+      ]);
+      return ContentService.createTextOutput(JSON.stringify({ "result": "success", "id": newId }))
+                           .setMimeType(ContentService.MimeType.JSON);
+    }
+
+    // -------------------------------------------------------------
+    // ACTION 6: Delete Template
+    // -------------------------------------------------------------
+    else if (action === "delete_template") {
+      var templatesSheet = spreadsheet.getSheetByName("Marketplace_Templates");
+      var idToDelete = requestData.id;
+      if (templatesSheet && idToDelete) {
+        var values = templatesSheet.getDataRange().getValues();
+        for (var i = 1; i < values.length; i++) {
+          if (values[i][0] === idToDelete) {
+            templatesSheet.deleteRow(i + 1);
+            break;
+          }
+        }
+      }
+      return ContentService.createTextOutput(JSON.stringify({ "result": "success" }))
+                           .setMimeType(ContentService.MimeType.JSON);
+    }
+
+    // -------------------------------------------------------------
+    // ACTION 7: Get Admin Dashboard Data
+    // -------------------------------------------------------------
+    else if (action === "get_admin_data") {
+      // 1. Fetch access requests
+      var requestSheet = spreadsheet.getSheetByName("Access_Requests");
+      var requests = [];
+      if (requestSheet) {
+        var values = requestSheet.getDataRange().getValues();
+        for (var i = 1; i < values.length; i++) {
+          requests.push({
+            email: values[i][0],
+            timestamp: values[i][1],
+            status: values[i][2]
+          });
+        }
+      }
+
+      // 2. Fetch whitelisted / verified emails
+      var whitelistSheet = spreadsheet.getSheetByName("Verified_Emails");
+      var verified = [];
+      if (whitelistSheet) {
+        var values = whitelistSheet.getDataRange().getValues();
+        for (var i = 1; i < values.length; i++) {
+          verified.push({
+            email: values[i][0],
+            date: values[i][1]
+          });
+        }
+      }
+
+      // 3. Fetch activity log (Builds)
+      var buildsSheet = spreadsheet.getSheetByName("Builds");
+      var builds = [];
+      if (buildsSheet) {
+        var values = buildsSheet.getDataRange().getValues();
+        for (var i = Math.max(1, values.length - 20); i < values.length; i++) {
+          builds.push({
+            timestamp: values[i][0],
+            email: values[i][1],
+            templateId: values[i][2]
+          });
+        }
+      }
+
+      return ContentService.createTextOutput(JSON.stringify({
+        "result": "success",
+        "requests": requests,
+        "verified": verified,
+        "builds": builds.reverse()
+      })).setMimeType(ContentService.MimeType.JSON);
+    }
+
+    // -------------------------------------------------------------
+    // ACTION 8: Approve Whitelist Access Request
+    // -------------------------------------------------------------
+    else if (action === "approve_request") {
+      var emailToApprove = requestData.email.toLowerCase().trim();
+      
+      var whitelistSheet = spreadsheet.getSheetByName("Verified_Emails");
+      if (!whitelistSheet) {
+        whitelistSheet = spreadsheet.insertSheet("Verified_Emails");
+        whitelistSheet.appendRow(["Email", "Verified Date"]);
+      }
+      
+      var wlValues = whitelistSheet.getDataRange().getValues();
+      var alreadyWhitelisted = false;
+      for (var r = 1; r < wlValues.length; r++) {
+        if (wlValues[r][0].toString().toLowerCase().trim() === emailToApprove) {
+          alreadyWhitelisted = true;
+          break;
+        }
+      }
+      if (!alreadyWhitelisted) {
+        whitelistSheet.appendRow([emailToApprove, new Date().toLocaleString()]);
+      }
+
+      var requestSheet = spreadsheet.getSheetByName("Access_Requests");
+      if (requestSheet) {
+        var reqValues = requestSheet.getDataRange().getValues();
+        for (var i = 1; i < reqValues.length; i++) {
+          if (reqValues[i][0].toString().toLowerCase().trim() === emailToApprove) {
+            requestSheet.getRange(i + 1, 3).setValue("Approved");
+            break;
+          }
+        }
+      }
+
+      return ContentService.createTextOutput(JSON.stringify({ "result": "success" }))
+                           .setMimeType(ContentService.MimeType.JSON);
+    }
+
+    // -------------------------------------------------------------
+    // ACTION 9: Deny Whitelist Access Request
+    // -------------------------------------------------------------
+    else if (action === "deny_request") {
+      var emailToDeny = requestData.email.toLowerCase().trim();
+      var requestSheet = spreadsheet.getSheetByName("Access_Requests");
+      if (requestSheet) {
+        var reqValues = requestSheet.getDataRange().getValues();
+        for (var i = 1; i < reqValues.length; i++) {
+          if (reqValues[i][0].toString().toLowerCase().trim() === emailToDeny) {
+            requestSheet.getRange(i + 1, 3).setValue("Denied");
+            break;
+          }
+        }
+      }
+      return ContentService.createTextOutput(JSON.stringify({ "result": "success" }))
+                           .setMimeType(ContentService.MimeType.JSON);
+    }
+
     else {
       throw new Error("Unsupported actions parameter.");
     }

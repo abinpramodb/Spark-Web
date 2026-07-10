@@ -689,6 +689,7 @@
             Spark<span>Web</span>
         </a>
         <div class="nav-links">
+            <a href="admin.html" class="nav-link">Admin Panel</a>
             <a href="https://github.com" target="_blank" class="nav-link">Documentation</a>
             <a href="https://sheets.new" target="_blank" class="nav-link">Google Sheets Setup</a>
             <span id="user-nav-profile" style="display:none;" class="user-profile-badge"></span>
@@ -752,89 +753,7 @@
             </div>
             
             <div class="template-grid" id="template-grid">
-                <!-- Card 1: Apex SaaS -->
-                <div class="card" data-title="apex saas landing page startup">
-                    <span class="card-tag">Interactive</span>
-                    <div class="card-preview">
-                        <div class="mockup-window">
-                            <div class="mockup-header">
-                                <div class="dot"></div>
-                                <div class="dot"></div>
-                                <div class="dot"></div>
-                            </div>
-                            <div class="mockup-body">
-                                <div class="mockup-title"></div>
-                                <div class="mockup-line"></div>
-                                <div class="mockup-line short"></div>
-                                <div class="mockup-hero">Apex SaaS Live</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <span class="card-category">Landing Page</span>
-                        <h3 class="card-title">Apex SaaS Landing Page</h3>
-                        <p class="card-text">Clean semantic HTML structure with responsive design, pricing matrices, and modern dark-mode gradient elements.</p>
-                        <div class="card-footer">
-                            <a href="templates/live-editor.html?template=template-1" class="btn btn-primary">Customize & Test Live</a>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Card 2: Zenith Portfolio -->
-                <div class="card" data-title="zenith personal portfolio dark developer creator">
-                    <span class="card-tag">Interactive</span>
-                    <div class="card-preview">
-                        <div class="mockup-window">
-                            <div class="mockup-header">
-                                <div class="dot"></div>
-                                <div class="dot"></div>
-                                <div class="dot"></div>
-                            </div>
-                            <div class="mockup-body">
-                                <div class="mockup-title"></div>
-                                <div class="mockup-line"></div>
-                                <div class="mockup-line short"></div>
-                                <div class="mockup-hero">Zenith Dev</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <span class="card-category">Portfolio</span>
-                        <h3 class="card-title">Zenith Personal Portfolio</h3>
-                        <p class="card-text">Stunning developer-focused minimal dark-mode layout. Tailored for showcasing projects, skills, and work histories.</p>
-                        <div class="card-footer">
-                            <a href="templates/live-editor.html?template=template-2" class="btn btn-primary">Customize & Test Live</a>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Card 3: Echo Creator Blog -->
-                <div class="card" data-title="echo blog creator minimal clean typography newsletter">
-                    <span class="card-tag">Interactive</span>
-                    <div class="card-preview">
-                        <div class="mockup-window">
-                            <div class="mockup-header">
-                                <div class="dot"></div>
-                                <div class="dot"></div>
-                                <div class="dot"></div>
-                            </div>
-                            <div class="mockup-body">
-                                <div class="mockup-title"></div>
-                                <div class="mockup-line"></div>
-                                <div class="mockup-line short"></div>
-                                <div class="mockup-hero">Echo Journal</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <span class="card-category">Blog / News</span>
-                        <h3 class="card-title">Echo Creator Blog</h3>
-                        <p class="card-text">Minimalist, typography-focused blog template designed for creators, writers, and newsletters. Includes newsletter signup styles.</p>
-                        <div class="card-footer">
-                            <a href="templates/live-editor.html?template=template-3" class="btn btn-primary">Customize & Test Live</a>
-                        </div>
-                    </div>
-                </div>
+                <!-- Templates rendered dynamically -->
             </div>
         </section>
     </main>
@@ -853,14 +772,83 @@
     </footer>
 
     <script>
-        // Simple search filtering
+        // Search & Dynamic Templates Loading Logic
         const searchInput = document.getElementById('search-input');
-        const cards = document.querySelectorAll('.card');
+        const templateGrid = document.getElementById('template-grid');
         const countBadge = document.getElementById('count-badge');
+
+        const fallbackTemplates = [
+            { id: 'template-1', name: 'Apex SaaS Landing Page', category: 'saas', description: 'Clean semantic HTML structure with responsive design, pricing matrices, and modern dark-mode gradient elements.', thumbnail: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=800&q=80', price: 'Free', demoPath: 'template-1' },
+            { id: 'template-2', name: 'Zenith Personal Portfolio', category: 'portfolio', description: 'Stunning developer-focused minimal dark-mode layout. Tailored for showcasing projects, skills, and work histories.', thumbnail: 'https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?auto=format&fit=crop&w=800&q=80', price: 'Free', demoPath: 'template-2' },
+            { id: 'template-3', name: 'Echo Creator Blog', category: 'blog', description: 'Minimalist, typography-focused blog template designed for creators, writers, and newsletters. Includes newsletter signup styles.', thumbnail: 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?auto=format&fit=crop&w=800&q=80', price: 'Free', demoPath: 'template-3' }
+        ];
+
+        async function fetchMarketplaceTemplates() {
+            let mockTemplates = localStorage.getItem('tf_mock_templates');
+            let activeTemplates = mockTemplates ? JSON.parse(mockTemplates) : fallbackTemplates;
+
+            const backendUrl = 'https://script.google.com/macros/s/PASTE_YOUR_APPS_SCRIPT_ID_HERE/exec';
+
+            if (!backendUrl.includes('PASTE_YOUR_APPS_SCRIPT')) {
+                try {
+                    const response = await fetch(backendUrl, {
+                        method: 'POST',
+                        body: JSON.stringify({ action: 'get_templates' })
+                    });
+                    const data = await response.json();
+                    if (data.result === 'success' && data.templates.length > 0) {
+                        activeTemplates = data.templates;
+                    }
+                } catch (err) {
+                    console.error("Backend fetch error, falling back to local database:", err);
+                }
+            }
+
+            renderMarketplaceTemplates(activeTemplates);
+        }
+
+        function renderMarketplaceTemplates(templates) {
+            templateGrid.innerHTML = '';
+            templates.forEach(tpl => {
+                const mockupName = tpl.name.split(' ')[0] || tpl.name;
+                templateGrid.innerHTML += `
+                    <div class="card" data-title="${tpl.name.toLowerCase()} ${tpl.category.toLowerCase()}">
+                        <span class="card-tag">Interactive</span>
+                        <div class="card-preview">
+                            <div class="mockup-window">
+                                <div class="mockup-header">
+                                    <div class="dot"></div>
+                                    <div class="dot"></div>
+                                    <div class="dot"></div>
+                                </div>
+                                <div class="mockup-body">
+                                    <div class="mockup-title"></div>
+                                    <div class="mockup-line"></div>
+                                    <div class="mockup-line short"></div>
+                                    <div class="mockup-hero">${mockupName}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <span class="card-category" style="text-transform: capitalize;">${tpl.category}</span>
+                            <h3 class="card-title">${tpl.name}</h3>
+                            <p class="card-text">${tpl.description}</p>
+                            <div class="card-footer" style="display: flex; align-items: center; justify-content: space-between;">
+                                <span style="font-weight: 700; color: var(--color-secondary);">${tpl.price}</span>
+                                <a href="templates/live-editor.html?template=${tpl.demoPath}" class="btn btn-primary">Customize & Test Live</a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            countBadge.textContent = `${templates.length} template${templates.length === 1 ? '' : 's'}`;
+        }
 
         function filterTemplates() {
             const query = searchInput.value.toLowerCase().trim();
             let visibleCount = 0;
+            const cards = document.querySelectorAll('.card');
 
             cards.forEach(card => {
                 const text = card.getAttribute('data-title').toLowerCase();
@@ -877,6 +865,8 @@
 
         searchInput.addEventListener('input', filterTemplates);
         document.getElementById('search-btn').addEventListener('click', filterTemplates);
+
+        fetchMarketplaceTemplates();
 
         // Google Sign-In & Auth Logic
         const GOOGLE_CLIENT_ID = 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com';
