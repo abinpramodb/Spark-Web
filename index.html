@@ -1011,12 +1011,13 @@
                                     <div class="dot"></div>
                                     <div class="dot"></div>
                                     <div class="dot"></div>
+                                    <span style="margin-left:8px; font-size:10px; color:#555; font-family:monospace; flex:1;">sparkweb.pages.dev/${tpl.demoPath}</span>
                                 </div>
-                                <div class="mockup-body">
-                                    <div class="mockup-title"></div>
-                                    <div class="mockup-line"></div>
-                                    <div class="mockup-line short"></div>
-                                    <div class="mockup-hero">${mockupName}</div>
+                                <div class="mockup-body" style="padding:0; overflow:hidden; border-radius:0 0 8px 8px;">
+                                    ${tpl.thumbnail
+                                        ? `<img src="${tpl.thumbnail}" alt="${tpl.name}" style="width:100%; height:160px; object-fit:cover; display:block;">`
+                                        : `<div class="mockup-hero">${mockupName}</div>`
+                                    }
                                 </div>
                             </div>
                         </div>
