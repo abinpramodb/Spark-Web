@@ -916,7 +916,7 @@
 
         <section class="container" id="templates">
             <div class="grid-header">
-                <h2 class="grid-title">Available Templates <span class="grid-count" id="count-badge">4 templates</span>
+                <h2 class="grid-title">Available Templates <span class="grid-count" id="count-badge">3 templates</span>
                 </h2>
             </div>
 
@@ -956,10 +956,8 @@
         const fallbackTemplates = [
             { id: 'template-1', name: 'Apex SaaS Landing Page', category: 'saas', description: 'Clean semantic HTML structure with responsive design, pricing matrices, and modern dark-mode gradient elements.', thumbnail: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=800&q=80', price: 'Free', demoPath: 'template-1' },
             { id: 'template-2', name: 'Zenith Personal Portfolio', category: 'portfolio', description: 'Stunning developer-focused minimal dark-mode layout. Tailored for showcasing projects, skills, and work histories.', thumbnail: 'https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?auto=format&fit=crop&w=800&q=80', price: 'Free', demoPath: 'template-2' },
-            { id: 'template-3', name: 'Echo Creator Blog', category: 'blog', description: 'Minimalist, typography-focused blog template designed for creators, writers, and newsletters. Includes newsletter signup styles.', thumbnail: 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?auto=format&fit=crop&w=800&q=80', price: 'Free', demoPath: 'template-3' },
-            { id: 'template-5', name: 'FoodRush — Food Delivery Website', category: 'food', description: 'Vibrant food delivery landing page with live order tracking UI, restaurant cards, categories, promo banners, app download section, and mobile-responsive layout.', thumbnail: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=800&q=80', price: 'Free', demoPath: 'template-5' }
+            { id: 'template-3', name: 'Echo Creator Blog', category: 'blog', description: 'Minimalist, typography-focused blog template designed for creators, writers, and newsletters. Includes newsletter signup styles.', thumbnail: 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?auto=format&fit=crop&w=800&q=80', price: 'Free', demoPath: 'template-3' }
         ];
-
 
         async function fetchMarketplaceTemplates() {
             let mockTemplates = localStorage.getItem('tf_mock_templates');
@@ -1003,9 +1001,27 @@
                     actionButton = `<button onclick="openPaymentCheckout('${tpl.id}', '${tpl.name}', '${tpl.price}', '${tpl.demoPath}', '${tpl.payhipUrl || ''}')" class="btn btn-primary" style="background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);">Unlock & Customize</button>`;
                 }
 
+                const figmaBadge = tpl.figmaUrl
+                    ? `<span class="card-tag" style="left: auto; right: 12px; background: linear-gradient(135deg, #1e1e2e 0%, #a259ff 100%); font-size: 10px; display: flex; align-items: center; gap: 4px;">
+                        <svg width="10" height="10" viewBox="0 0 38 57" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M19 28.5C19 25.9804 20.0009 23.5641 21.7825 21.7825C23.5641 20.0009 25.9804 19 28.5 19C31.0196 19 33.4359 20.0009 35.2175 21.7825C36.9991 23.5641 38 25.9804 38 28.5C38 31.0196 36.9991 33.4359 35.2175 35.2175C33.4359 36.9991 31.0196 38 28.5 38C25.9804 38 23.5641 36.9991 21.7825 35.2175C20.0009 33.4359 19 31.0196 19 28.5Z" fill="white"/><path d="M0 47.5C0 44.9804 1.00089 42.5641 2.78249 40.7825C4.56408 39.0009 6.98044 38 9.5 38H19V47.5C19 50.0196 17.9991 52.4359 16.2175 54.2175C14.4359 55.9991 12.0196 57 9.5 57C6.98044 57 4.56408 55.9991 2.78249 54.2175C1.00089 52.4359 0 50.0196 0 47.5Z" fill="white"/><path d="M19 0V19H28.5C31.0196 19 33.4359 17.9991 35.2175 16.2175C36.9991 14.4359 38 12.0196 38 9.5C38 6.98044 36.9991 4.56408 35.2175 2.78249C33.4359 1.00089 31.0196 0 28.5 0H19Z" fill="white"/><path d="M0 9.5C0 12.0196 1.00089 14.4359 2.78249 16.2175C4.56408 17.9991 6.98044 19 9.5 19H19V0H9.5C6.98044 0 4.56408 1.00089 2.78249 2.78249C1.00089 4.56408 0 6.98044 0 9.5Z" fill="white"/><path d="M0 28.5C0 31.0196 1.00089 33.4359 2.78249 35.2175C4.56408 36.9991 6.98044 38 9.5 38H19V19H9.5C6.98044 19 4.56408 20.0009 2.78249 21.7825C1.00089 23.5641 0 25.9804 0 28.5Z" fill="white"/></svg>
+                        Figma Design
+                       </span>`
+                    : '';
+
+                const figmaButton = tpl.figmaUrl
+                    ? `<a href="${tpl.figmaUrl}" target="_blank" rel="noopener noreferrer"
+                          style="display:inline-flex; align-items: center; gap: 5px; padding: 6px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; color: #a259ff; border: 1px solid rgba(162,89,255,0.35); text-decoration: none; transition: background 0.2s;" 
+                          onmouseover="this.style.background='rgba(162,89,255,0.1)'" 
+                          onmouseout="this.style.background='transparent'">
+                          <svg width="11" height="11" viewBox="0 0 38 57" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M19 28.5C19 25.9804 20.0009 23.5641 21.7825 21.7825C23.5641 20.0009 25.9804 19 28.5 19C31.0196 19 33.4359 20.0009 35.2175 21.7825C36.9991 23.5641 38 25.9804 38 28.5C38 31.0196 36.9991 33.4359 35.2175 35.2175C33.4359 36.9991 31.0196 38 28.5 38C25.9804 38 23.5641 36.9991 21.7825 35.2175C20.0009 33.4359 19 31.0196 19 28.5Z" fill="#a259ff"/><path d="M0 47.5C0 44.9804 1.00089 42.5641 2.78249 40.7825C4.56408 39.0009 6.98044 38 9.5 38H19V47.5C19 50.0196 17.9991 52.4359 16.2175 54.2175C14.4359 55.9991 12.0196 57 9.5 57C6.98044 57 4.56408 55.9991 2.78249 54.2175C1.00089 52.4359 0 50.0196 0 47.5Z" fill="#a259ff"/><path d="M19 0V19H28.5C31.0196 19 33.4359 17.9991 35.2175 16.2175C36.9991 14.4359 38 12.0196 38 9.5C38 6.98044 36.9991 4.56408 35.2175 2.78249C33.4359 1.00089 31.0196 0 28.5 0H19Z" fill="#a259ff"/><path d="M0 9.5C0 12.0196 1.00089 14.4359 2.78249 16.2175C4.56408 17.9991 6.98044 19 9.5 19H19V0H9.5C6.98044 0 4.56408 1.00089 2.78249 2.78249C1.00089 4.56408 0 6.98044 0 9.5Z" fill="#a259ff"/><path d="M0 28.5C0 31.0196 1.00089 33.4359 2.78249 35.2175C4.56408 36.9991 6.98044 38 9.5 38H19V19H9.5C6.98044 19 4.56408 20.0009 2.78249 21.7825C1.00089 23.5641 0 25.9804 0 28.5Z" fill="#a259ff"/></svg>
+                          View Figma
+                       </a>`
+                    : '';
+
                 templateGrid.innerHTML += `
                     <div class="card" data-title="${tpl.name.toLowerCase()} ${tpl.category.toLowerCase()}">
                         <span class="card-tag">Interactive</span>
+                        ${figmaBadge}
                         <div class="card-preview">
                             <div class="mockup-window">
                                 <div class="mockup-header">
@@ -1025,9 +1041,12 @@
                             <span class="card-category" style="text-transform: capitalize;">${tpl.category}</span>
                             <h3 class="card-title">${tpl.name}</h3>
                             <p class="card-text">${tpl.description}</p>
-                            <div class="card-footer" style="display: flex; align-items: center; justify-content: space-between;">
+                            <div class="card-footer" style="display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap;">
                                 <span style="font-weight: 700; color: var(--color-secondary);">${tpl.price}</span>
-                                ${actionButton}
+                                <div style="display: flex; align-items: center; gap: 6px;">
+                                    ${figmaButton}
+                                    ${actionButton}
+                                </div>
                             </div>
                         </div>
                     </div>

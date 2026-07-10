@@ -628,6 +628,11 @@
                     <label for="tpl-payhip">Payhip Product URL (Optional)</label>
                     <input type="url" id="tpl-payhip" class="form-input" placeholder="e.g. https://payhip.com/b/XXXX">
                 </div>
+                <div class="form-group">
+                    <label for="tpl-figma">Figma Design Demo URL (Optional)</label>
+                    <input type="url" id="tpl-figma" class="form-input" placeholder="e.g. https://www.figma.com/design/XXXX/My-Design?node-id=0-1&t=abc">
+                    <small style="color: #64748b; font-size: 11px; margin-top: 4px; display: block;">Paste a public Figma share link. Users will be able to view the full design before purchasing.</small>
+                </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-cancel" onclick="closeAddTemplateModal()">Cancel</button>
                     <button type="submit" class="btn btn-primary">Publish Template</button>
@@ -680,6 +685,11 @@
                 <div class="form-group">
                     <label for="edit-tpl-payhip">Payhip Product URL (Optional)</label>
                     <input type="url" id="edit-tpl-payhip" class="form-input" placeholder="e.g. https://payhip.com/b/XXXX">
+                </div>
+                <div class="form-group">
+                    <label for="edit-tpl-figma">Figma Design Demo URL (Optional)</label>
+                    <input type="url" id="edit-tpl-figma" class="form-input" placeholder="e.g. https://www.figma.com/design/XXXX/My-Design">
+                    <small style="color: #64748b; font-size: 11px; margin-top: 4px; display: block;">Paste a public Figma share link. Users will be able to view the full design before purchasing.</small>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-cancel" onclick="closeEditTemplateModal()">Cancel</button>
@@ -798,6 +808,7 @@
             document.getElementById('edit-tpl-demo').value = tpl.demoPath;
             document.getElementById('edit-tpl-price').value = tpl.price || 'Free';
             document.getElementById('edit-tpl-payhip').value = tpl.payhipUrl || '';
+            document.getElementById('edit-tpl-figma').value = tpl.figmaUrl || '';
 
             editModal.classList.add('active');
         }
@@ -1053,13 +1064,14 @@
             const demoPath = document.getElementById('tpl-demo').value;
             const price = document.getElementById('tpl-price').value.trim();
             const payhipUrl = document.getElementById('tpl-payhip').value.trim();
+            const figmaUrl = document.getElementById('tpl-figma').value.trim();
 
             if (CLOUDFLARE_WORKER_URL.includes('YOUR_SUBDOMAIN')) {
                 const newTpl = {
                     id: 'template-' + Date.now(),
                     name, category, description,
                     thumbnail: thumbnail || "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=800&q=80",
-                    demoPath, price, payhipUrl
+                    demoPath, price, payhipUrl, figmaUrl
                 };
                 demoTemplates.push(newTpl);
                 localStorage.setItem('tf_mock_templates', JSON.stringify(demoTemplates));
@@ -1075,7 +1087,7 @@
                     method: 'POST',
                     body: JSON.stringify({
                         action: 'add_template',
-                        name, category, description, thumbnail, demoPath, price, payhipUrl
+                        name, category, description, thumbnail, demoPath, price, payhipUrl, figmaUrl
                     })
                 });
                 const data = await response.json();
@@ -1099,6 +1111,7 @@
             const demoPath = document.getElementById('edit-tpl-demo').value;
             const price = document.getElementById('edit-tpl-price').value.trim();
             const payhipUrl = document.getElementById('edit-tpl-payhip').value.trim();
+            const figmaUrl = document.getElementById('edit-tpl-figma').value.trim();
 
             if (CLOUDFLARE_WORKER_URL.includes('YOUR_SUBDOMAIN')) {
                 const idx = demoTemplates.findIndex(t => t.id === id);
@@ -1106,7 +1119,7 @@
                     demoTemplates[idx] = {
                         id, name, category, description,
                         thumbnail: thumbnail || "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=800&q=80",
-                        demoPath, price, payhipUrl
+                        demoPath, price, payhipUrl, figmaUrl
                     };
                     localStorage.setItem('tf_mock_templates', JSON.stringify(demoTemplates));
                 }
@@ -1121,7 +1134,7 @@
                     method: 'POST',
                     body: JSON.stringify({
                         action: 'edit_template',
-                        id, name, category, description, thumbnail, demoPath, price, payhipUrl
+                        id, name, category, description, thumbnail, demoPath, price, payhipUrl, figmaUrl
                     })
                 });
                 const data = await response.json();

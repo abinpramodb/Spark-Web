@@ -9,7 +9,8 @@ CREATE TABLE IF NOT EXISTS templates (
     thumbnail TEXT,
     demoPath TEXT NOT NULL,
     price TEXT NOT NULL DEFAULT 'Free',
-    payhipUrl TEXT
+    payhipUrl TEXT,
+    figmaUrl TEXT
 );
 
 -- 2. Customizer Builds Table

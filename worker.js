@@ -71,14 +71,14 @@ export default {
       // -------------------------------------------------------------
       else if (action === "add_template") {
         const id = "template-" + Date.now();
-        const { name, category, description, thumbnail, demoPath, price, payhipUrl } = payload;
+        const { name, category, description, thumbnail, demoPath, price, payhipUrl, figmaUrl } = payload;
 
         if (!name || !category || !description || !demoPath) {
           return returnJson({ result: "error", error: "Missing required parameters to publish template." }, 400);
         }
 
         await env.DB.prepare(
-          "INSERT INTO templates (id, name, category, description, thumbnail, demoPath, price, payhipUrl) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+          "INSERT INTO templates (id, name, category, description, thumbnail, demoPath, price, payhipUrl, figmaUrl) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
         )
         .bind(
           id,
@@ -88,7 +88,8 @@ export default {
           thumbnail || "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=800&q=80",
           demoPath,
           price || "Free",
-          payhipUrl || ""
+          payhipUrl || "",
+          figmaUrl || ""
         )
         .run();
 
@@ -112,13 +113,13 @@ export default {
       // ROUTE: edit_template
       // -------------------------------------------------------------
       else if (action === "edit_template") {
-        const { id, name, category, description, thumbnail, demoPath, price, payhipUrl } = payload;
+        const { id, name, category, description, thumbnail, demoPath, price, payhipUrl, figmaUrl } = payload;
         if (!id || !name || !category || !description || !demoPath) {
           return returnJson({ result: "error", error: "Missing required parameters to update template." }, 400);
         }
 
         await env.DB.prepare(
-          "UPDATE templates SET name = ?, category = ?, description = ?, thumbnail = ?, demoPath = ?, price = ?, payhipUrl = ? WHERE id = ?"
+          "UPDATE templates SET name = ?, category = ?, description = ?, thumbnail = ?, demoPath = ?, price = ?, payhipUrl = ?, figmaUrl = ? WHERE id = ?"
         )
         .bind(
           name,
@@ -128,6 +129,7 @@ export default {
           demoPath,
           price || "Free",
           payhipUrl || "",
+          figmaUrl || "",
           id
         )
         .run();
