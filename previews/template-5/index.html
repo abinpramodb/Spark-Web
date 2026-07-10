@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuickBite — Food Delivery</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --brand: #FF4B2B;
+            --brand-2: #FF416C;
+            --bg: #0D0D0D;
+            --surface: #161616;
+            --card: #1E1E1E;
+            --border: rgba(255,255,255,0.07);
+            --text: #F5F5F5;
+            --muted: #888;
+            --accent: #FFD600;
+            --green: #00E096;
+            --radius: 16px;
+            --radius-lg: 24px;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            overflow-x: hidden;
+        }
+
+        /* ─── NAV ─── */
+        nav {
+            position: sticky; top: 0; z-index: 100;
+            background: rgba(13,13,13,0.92);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            padding: 0 5%;
+            display: flex; align-items: center; justify-content: space-between;
+            height: 70px;
+        }
+        .nav-logo { display: flex; align-items: center; gap: 10px; }
+        .logo-icon {
+            width: 36px; height: 36px; border-radius: 10px;
+            background: linear-gradient(135deg, var(--brand), var(--brand-2));
+            display: flex; align-items: center; justify-content: center;
+            font-size: 18px;
+        }
+        .logo-text { font-size: 20px; font-weight: 800; }
+        .logo-text span { color: var(--brand); }
+        .nav-center {
+            display: flex;
+            align-items: center;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 50px;
+            padding: 6px 10px 6px 20px;
+            gap: 10px;
+            width: 320px;
+        }
+        .nav-center input {
+            background: none; border: none; outline: none;
+            color: var(--text); font-size: 14px; font-family: inherit;
+            flex: 1;
+        }
+        .nav-center input::placeholder { color: var(--muted); }
+        .search-pill {
+            background: var(--brand);
+            color: white; border: none; border-radius: 50px;
+            padding: 8px 16px; font-size: 13px; font-weight: 700;
+            cursor: pointer;
+        }
+        .nav-right { display: flex; align-items: center; gap: 16px; }
+        .nav-link { color: var(--muted); font-size: 14px; font-weight: 600; cursor: pointer; transition: color 0.2s; }
+        .nav-link:hover { color: var(--text); }
+        .cart-btn {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 50px;
+            padding: 10px 20px;
+            font-size: 14px; font-weight: 700;
+            cursor: pointer; color: var(--text);
+            display: flex; align-items: center; gap: 8px;
+            transition: all 0.2s;
+        }
+        .cart-btn:hover { border-color: var(--brand); color: var(--brand); }
+        .cart-count {
+            background: var(--brand);
+            color: white; border-radius: 50%;
+            width: 20px; height: 20px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 11px; font-weight: 800;
+        }
+
+        /* ─── HERO ─── */
+        .hero {
+            min-height: 560px;
+            display: flex; align-items: center;
+            padding: 60px 5%;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero-bg {
+            position: absolute; inset: 0;
+            background:
+                radial-gradient(circle at 70% 50%, rgba(255,75,43,0.15) 0%, transparent 60%),
+                radial-gradient(circle at 20% 80%, rgba(255,65,108,0.1) 0%, transparent 50%);
+        }
+        .hero-content { position: relative; z-index: 2; max-width: 520px; }
+        .hero-badge {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: rgba(255,75,43,0.12);
+            border: 1px solid rgba(255,75,43,0.3);
+            border-radius: 50px; padding: 8px 16px;
+            font-size: 13px; font-weight: 700; color: var(--brand);
+            margin-bottom: 24px;
+        }
+        .hero-badge::before { content: "🔥"; }
+        h1 {
+            font-size: clamp(38px, 5vw, 64px);
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 20px;
+        }
+        h1 span {
+            background: linear-gradient(135deg, var(--brand), var(--brand-2));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .hero-sub { font-size: 17px; color: var(--muted); line-height: 1.7; margin-bottom: 36px; }
+        .hero-cta { display: flex; gap: 14px; flex-wrap: wrap; }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--brand), var(--brand-2));
+            color: white; border: none; border-radius: 50px;
+            padding: 16px 32px; font-size: 15px; font-weight: 800;
+            cursor: pointer; transition: all 0.3s;
+            box-shadow: 0 8px 30px rgba(255,75,43,0.35);
+            font-family: inherit;
+        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(255,75,43,0.5); }
+        .btn-ghost {
+            background: transparent; color: var(--text);
+            border: 1px solid var(--border); border-radius: 50px;
+            padding: 16px 28px; font-size: 15px; font-weight: 700;
+            cursor: pointer; transition: all 0.2s; font-family: inherit;
+        }
+        .btn-ghost:hover { border-color: var(--brand); color: var(--brand); }
+        .hero-stats {
+            display: flex; gap: 32px; margin-top: 48px;
+            padding-top: 32px;
+            border-top: 1px solid var(--border);
+        }
+        .stat { display: flex; flex-direction: column; gap: 4px; }
+        .stat-num { font-size: 28px; font-weight: 900; color: var(--brand); }
+        .stat-label { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+
+        /* Hero visual */
+        .hero-visual {
+            position: absolute;
+            right: 5%; top: 50%; transform: translateY(-50%);
+            width: 420px; z-index: 2;
+        }
+        .food-card-big {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.5);
+        }
+        .food-card-big img {
+            width: 100%; height: 220px; object-fit: cover;
+        }
+        .food-card-big-body { padding: 20px; }
+        .food-tag {
+            display: inline-block;
+            background: rgba(255,75,43,0.12);
+            color: var(--brand);
+            border-radius: 6px; padding: 4px 10px;
+            font-size: 11px; font-weight: 700;
+            text-transform: uppercase; margin-bottom: 10px;
+        }
+        .food-card-big-title { font-size: 20px; font-weight: 800; margin-bottom: 8px; }
+        .food-card-big-meta { display: flex; gap: 16px; align-items: center; }
+        .meta-item { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); font-weight: 500; }
+        .meta-item svg { opacity: 0.7; }
+        .food-price-row { display: flex; align-items: center; justify-content: space-between; margin-top: 16px; }
+        .food-price { font-size: 26px; font-weight: 900; }
+        .add-btn {
+            background: linear-gradient(135deg, var(--brand), var(--brand-2));
+            color: white; border: none; border-radius: 12px;
+            padding: 12px 22px; font-size: 14px; font-weight: 800;
+            cursor: pointer; font-family: inherit; transition: all 0.2s;
+        }
+        .add-btn:hover { transform: scale(1.05); }
+        .floating-badge {
+            position: absolute;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 14px; padding: 12px 16px;
+            display: flex; align-items: center; gap: 10px;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+            font-size: 13px; font-weight: 700;
+        }
+        .badge-top { top: -20px; right: 20px; }
+        .badge-bot { bottom: -20px; left: 20px; }
+        .badge-icon { font-size: 22px; }
+        .badge-label { color: var(--muted); font-size: 11px; margin-top: 2px; }
+
+        /* ─── CATEGORIES ─── */
+        .section { padding: 64px 5%; }
+        .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; }
+        .section-title { font-size: 28px; font-weight: 800; }
+        .section-link { color: var(--brand); font-size: 14px; font-weight: 700; cursor: pointer; }
+        .cats { display: flex; gap: 12px; flex-wrap: wrap; }
+        .cat-pill {
+            display: flex; align-items: center; gap: 10px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 50px;
+            padding: 12px 20px;
+            cursor: pointer; transition: all 0.2s;
+        }
+        .cat-pill:hover, .cat-pill.active {
+            border-color: var(--brand);
+            background: rgba(255,75,43,0.1);
+            color: var(--brand);
+        }
+        .cat-pill .cat-emoji { font-size: 20px; }
+        .cat-pill .cat-name { font-size: 14px; font-weight: 700; }
+
+        /* ─── RESTAURANT GRID ─── */
+        .restaurant-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        .rest-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .rest-card:hover { transform: translateY(-4px); border-color: rgba(255,75,43,0.3); box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
+        .rest-img-wrap { position: relative; height: 180px; overflow: hidden; }
+        .rest-img-wrap img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s; }
+        .rest-card:hover .rest-img-wrap img { transform: scale(1.05); }
+        .rest-promo-badge {
+            position: absolute; top: 12px; left: 12px;
+            background: var(--brand);
+            color: white; border-radius: 8px;
+            padding: 4px 10px; font-size: 11px; font-weight: 800;
+        }
+        .rest-fav {
+            position: absolute; top: 12px; right: 12px;
+            background: rgba(0,0,0,0.5); backdrop-filter: blur(4px);
+            border-radius: 50%; width: 32px; height: 32px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 14px; cursor: pointer;
+        }
+        .rest-body { padding: 16px; }
+        .rest-name { font-size: 16px; font-weight: 800; margin-bottom: 6px; }
+        .rest-cuisine { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+        .rest-meta-row { display: flex; align-items: center; justify-content: space-between; }
+        .rest-meta { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: var(--muted); }
+        .rest-rating { color: var(--accent); }
+        .dot { width: 3px; height: 3px; border-radius: 50%; background: var(--border); }
+
+        /* ─── FEATURED ─── */
+        .featured-section { background: var(--surface); }
+        .featured-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        .featured-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            display: flex;
+            overflow: hidden;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        .featured-card:hover { transform: translateX(4px); border-color: rgba(255,75,43,0.3); }
+        .featured-img { width: 100px; height: 100px; object-fit: cover; flex-shrink: 0; }
+        .featured-body { padding: 16px; flex: 1; }
+        .featured-name { font-size: 15px; font-weight: 800; margin-bottom: 4px; }
+        .featured-rest { font-size: 12px; color: var(--muted); margin-bottom: 8px; }
+        .featured-price-row { display: flex; align-items: center; justify-content: space-between; }
+        .featured-price { font-size: 17px; font-weight: 900; color: var(--brand); }
+        .add-mini {
+            background: var(--brand); color: white;
+            border: none; border-radius: 8px;
+            padding: 6px 12px; font-size: 13px; font-weight: 800;
+            cursor: pointer; font-family: inherit;
+        }
+
+        /* ─── HOW IT WORKS ─── */
+        .how-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
+        .how-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 28px 20px;
+            text-align: center;
+            position: relative;
+        }
+        .how-icon {
+            width: 64px; height: 64px; border-radius: 20px;
+            background: linear-gradient(135deg, rgba(255,75,43,0.2), rgba(255,65,108,0.1));
+            border: 1px solid rgba(255,75,43,0.2);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 28px;
+            margin: 0 auto 16px;
+        }
+        .how-step {
+            position: absolute; top: 16px; right: 16px;
+            width: 28px; height: 28px; border-radius: 50%;
+            background: rgba(255,75,43,0.1);
+            color: var(--brand); font-size: 12px; font-weight: 800;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .how-title { font-size: 16px; font-weight: 800; margin-bottom: 8px; }
+        .how-desc { font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+        /* ─── PROMO BANNER ─── */
+        .promo-banner {
+            background: linear-gradient(135deg, var(--brand) 0%, var(--brand-2) 100%);
+            border-radius: var(--radius-lg);
+            padding: 48px 40px;
+            display: flex; align-items: center; justify-content: space-between;
+            position: relative; overflow: hidden;
+        }
+        .promo-banner::after {
+            content: "🍕";
+            position: absolute; right: 160px; top: 50%;
+            transform: translateY(-50%);
+            font-size: 100px; opacity: 0.15;
+        }
+        .promo-title { font-size: 32px; font-weight: 900; margin-bottom: 8px; }
+        .promo-sub { font-size: 15px; opacity: 0.85; margin-bottom: 24px; }
+        .promo-code {
+            background: rgba(255,255,255,0.2);
+            border: 1px dashed rgba(255,255,255,0.4);
+            border-radius: 10px; padding: 12px 20px;
+            font-family: monospace; font-size: 18px; font-weight: 800;
+            display: inline-block; margin-bottom: 24px;
+            letter-spacing: 2px;
+        }
+        .btn-white {
+            background: white; color: var(--brand);
+            border: none; border-radius: 50px;
+            padding: 16px 32px; font-size: 15px; font-weight: 800;
+            cursor: pointer; font-family: inherit; transition: all 0.2s;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
+        .btn-white:hover { transform: translateY(-2px); box-shadow: 0 12px 30px rgba(0,0,0,0.25); }
+
+        /* ─── FOOTER ─── */
+        footer {
+            background: var(--surface);
+            border-top: 1px solid var(--border);
+            padding: 48px 5% 24px;
+        }
+        .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 40px; margin-bottom: 48px; }
+        .footer-brand { max-width: 280px; }
+        .footer-desc { font-size: 14px; color: var(--muted); line-height: 1.7; margin: 16px 0 24px; }
+        .social-links { display: flex; gap: 10px; }
+        .social-btn {
+            width: 36px; height: 36px; border-radius: 10px;
+            background: var(--card); border: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 16px; cursor: pointer; transition: all 0.2s;
+        }
+        .social-btn:hover { border-color: var(--brand); background: rgba(255,75,43,0.1); }
+        .footer-col h4 { font-size: 14px; font-weight: 800; margin-bottom: 20px; color: var(--text); }
+        .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+        .footer-col li { font-size: 14px; color: var(--muted); cursor: pointer; transition: color 0.2s; }
+        .footer-col li:hover { color: var(--brand); }
+        .footer-bottom {
+            border-top: 1px solid var(--border);
+            padding-top: 24px;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .footer-copy { font-size: 13px; color: var(--muted); }
+        .footer-links { display: flex; gap: 24px; }
+        .footer-links a { font-size: 13px; color: var(--muted); text-decoration: none; transition: color 0.2s; }
+        .footer-links a:hover { color: var(--brand); }
+
+        /* ─── ANIMATION ─── */
+        @keyframes float { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-10px);} }
+        .food-card-big { animation: float 5s ease-in-out infinite; }
+
+        /* ─── SCROLLBAR ─── */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
+        ::-webkit-scrollbar-thumb { background: var(--brand); border-radius: 3px; }
+    </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+    <div class="nav-logo">
+        <div class="logo-icon">🍔</div>
+        <div class="logo-text">Quick<span>Bite</span></div>
+    </div>
+    <div class="nav-center">
+        <input type="text" placeholder="Search restaurants or dishes...">
+        <button class="search-pill">Search</button>
+    </div>
+    <div class="nav-right">
+        <div class="nav-link">Offers</div>
+        <div class="nav-link">Help</div>
+        <div class="nav-link">Sign In</div>
+        <div class="cart-btn">🛒 Cart <div class="cart-count">3</div></div>
+    </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-content">
+        <div class="hero-badge">Delivering to your door in 30 min</div>
+        <h1>Hungry? <br>We've got you <span>covered.</span></h1>
+        <p class="hero-sub">Order from your favourite local restaurants and get hot, fresh food delivered straight to your door. Fast, affordable, delicious.</p>
+        <div class="hero-cta">
+            <button class="btn-primary">Order Now →</button>
+            <button class="btn-ghost">Browse Restaurants</button>
+        </div>
+        <div class="hero-stats">
+            <div class="stat"><div class="stat-num">500+</div><div class="stat-label">Restaurants</div></div>
+            <div class="stat"><div class="stat-num">28 min</div><div class="stat-label">Avg. Delivery</div></div>
+            <div class="stat"><div class="stat-num">4.9★</div><div class="stat-label">Rating</div></div>
+        </div>
+    </div>
+    <div class="hero-visual">
+        <div class="floating-badge badge-top">
+            <div class="badge-icon">⚡</div>
+            <div><div style="font-weight:800;">Express Delivery</div><div class="badge-label">Under 25 minutes</div></div>
+        </div>
+        <div class="food-card-big">
+            <img src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=800&q=80" alt="Burger">
+            <div class="food-card-big-body">
+                <div class="food-tag">🔥 Bestseller</div>
+                <div class="food-card-big-title">Smash Beef Burger Deluxe</div>
+                <div class="food-card-big-meta">
+                    <div class="meta-item">⏱ 20 min</div>
+                    <div class="meta-item">⭐ 4.9</div>
+                    <div class="meta-item">🚀 Free delivery</div>
+                </div>
+                <div class="food-price-row">
+                    <div class="food-price">$12.99</div>
+                    <button class="add-btn">+ Add to Cart</button>
+                </div>
+            </div>
+        </div>
+        <div class="floating-badge badge-bot">
+            <div class="badge-icon">🎉</div>
+            <div><div style="font-weight:800;">New User Offer</div><div class="badge-label">50% off first order</div></div>
+        </div>
+    </div>
+</section>
+
+<!-- CATEGORIES -->
+<section class="section">
+    <div class="section-header">
+        <div class="section-title">What are you craving?</div>
+        <div class="section-link">View all →</div>
+    </div>
+    <div class="cats">
+        <div class="cat-pill active"><span class="cat-emoji">🍔</span><span class="cat-name">Burgers</span></div>
+        <div class="cat-pill"><span class="cat-emoji">🍕</span><span class="cat-name">Pizza</span></div>
+        <div class="cat-pill"><span class="cat-emoji">🍣</span><span class="cat-name">Sushi</span></div>
+        <div class="cat-pill"><span class="cat-emoji">🍜</span><span class="cat-name">Noodles</span></div>
+        <div class="cat-pill"><span class="cat-emoji">🌮</span><span class="cat-name">Mexican</span></div>
+        <div class="cat-pill"><span class="cat-emoji">🍗</span><span class="cat-name">Chicken</span></div>
+        <div class="cat-pill"><span class="cat-emoji">🥗</span><span class="cat-name">Salads</span></div>
+        <div class="cat-pill"><span class="cat-emoji">🧁</span><span class="cat-name">Desserts</span></div>
+        <div class="cat-pill"><span class="cat-emoji">🥤</span><span class="cat-name">Drinks</span></div>
+    </div>
+</section>
+
+<!-- RESTAURANTS -->
+<section class="section" style="padding-top:0;">
+    <div class="section-header">
+        <div class="section-title">Top Restaurants Near You</div>
+        <div class="section-link">See all →</div>
+    </div>
+    <div class="restaurant-grid">
+        <!-- Card 1 -->
+        <div class="rest-card">
+            <div class="rest-img-wrap">
+                <img src="https://images.unsplash.com/photo-1550547660-d9450f859349?auto=format&fit=crop&w=800&q=80" alt="Burger Palace">
+                <div class="rest-promo-badge">20% OFF</div>
+                <div class="rest-fav">🤍</div>
+            </div>
+            <div class="rest-body">
+                <div class="rest-name">The Burger Palace</div>
+                <div class="rest-cuisine">American · Burgers · Fast Food</div>
+                <div class="rest-meta-row">
+                    <div class="rest-meta rest-rating">★ 4.8</div>
+                    <div class="dot"></div>
+                    <div class="rest-meta">25 min</div>
+                    <div class="dot"></div>
+                    <div class="rest-meta">Free delivery</div>
+                </div>
+            </div>
+        </div>
+        <!-- Card 2 -->
+        <div class="rest-card">
+            <div class="rest-img-wrap">
+                <img src="https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=800&q=80" alt="Pizza House">
+                <div class="rest-fav">❤️</div>
+            </div>
+            <div class="rest-body">
+                <div class="rest-name">Bella Pizza House</div>
+                <div class="rest-cuisine">Italian · Pizza · Pasta</div>
+                <div class="rest-meta-row">
+                    <div class="rest-meta rest-rating">★ 4.7</div>
+                    <div class="dot"></div>
+                    <div class="rest-meta">30 min</div>
+                    <div class="dot"></div>
+                    <div class="rest-meta">$2 delivery</div>
+                </div>
+            </div>
+        </div>
+        <!-- Card 3 -->
+        <div class="rest-card">
+            <div class="rest-img-wrap">
+                <img src="https://images.unsplash.com/photo-1579871494447-9811cf80d66c?auto=format&fit=crop&w=800&q=80" alt="Sushi Bar">
+                <div class="rest-promo-badge">NEW</div>
+                <div class="rest-fav">🤍</div>
+            </div>
+            <div class="rest-body">
+                <div class="rest-name">Tokyo Sushi Bar</div>
+                <div class="rest-cuisine">Japanese · Sushi · Ramen</div>
+                <div class="rest-meta-row">
+                    <div class="rest-meta rest-rating">★ 4.9</div>
+                    <div class="dot"></div>
+                    <div class="rest-meta">35 min</div>
+                    <div class="dot"></div>
+                    <div class="rest-meta">Free delivery</div>
+                </div>
+            </div>
+        </div>
+        <!-- Card 4 -->
+        <div class="rest-card">
+            <div class="rest-img-wrap">
+                <img src="https://images.unsplash.com/photo-1593560708920-61dd98c46a4e?auto=format&fit=crop&w=800&q=80" alt="Taco Place">
+                <div class="rest-promo-badge">HOT</div>
+                <div class="rest-fav">🤍</div>
+            </div>
+            <div class="rest-body">
+                <div class="rest-name">El Taco Loco</div>
+                <div class="rest-cuisine">Mexican · Tacos · Burritos</div>
+                <div class="rest-meta-row">
+                    <div class="rest-meta rest-rating">★ 4.6</div>
+                    <div class="dot"></div>
+                    <div class="rest-meta">20 min</div>
+                    <div class="dot"></div>
+                    <div class="rest-meta">$1 delivery</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FEATURED DISHES -->
+<section class="section featured-section">
+    <div class="section-header">
+        <div class="section-title">Popular Dishes Right Now</div>
+        <div class="section-link">View menu →</div>
+    </div>
+    <div class="featured-grid">
+        <div class="featured-card">
+            <img class="featured-img" src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=200&q=80" alt="Smash Burger">
+            <div class="featured-body">
+                <div class="featured-name">Smash Beef Burger</div>
+                <div class="featured-rest">The Burger Palace</div>
+                <div class="featured-price-row">
+                    <div class="featured-price">$12.99</div>
+                    <button class="add-mini">+ Add</button>
+                </div>
+            </div>
+        </div>
+        <div class="featured-card">
+            <img class="featured-img" src="https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=200&q=80" alt="Margherita">
+            <div class="featured-body">
+                <div class="featured-name">Margherita Pizza</div>
+                <div class="featured-rest">Bella Pizza House</div>
+                <div class="featured-price-row">
+                    <div class="featured-price">$15.50</div>
+                    <button class="add-mini">+ Add</button>
+                </div>
+            </div>
+        </div>
+        <div class="featured-card">
+            <img class="featured-img" src="https://images.unsplash.com/photo-1617196034183-421b4040ed20?auto=format&fit=crop&w=200&q=80" alt="Salmon Roll">
+            <div class="featured-body">
+                <div class="featured-name">Salmon Dragon Roll</div>
+                <div class="featured-rest">Tokyo Sushi Bar</div>
+                <div class="featured-price-row">
+                    <div class="featured-price">$18.00</div>
+                    <button class="add-mini">+ Add</button>
+                </div>
+            </div>
+        </div>
+        <div class="featured-card">
+            <img class="featured-img" src="https://images.unsplash.com/photo-1565299585323-38d6b0865b47?auto=format&fit=crop&w=200&q=80" alt="Taco">
+            <div class="featured-body">
+                <div class="featured-name">Street Taco Combo</div>
+                <div class="featured-rest">El Taco Loco</div>
+                <div class="featured-price-row">
+                    <div class="featured-price">$9.99</div>
+                    <button class="add-mini">+ Add</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="section">
+    <div class="section-header">
+        <div class="section-title">How QuickBite Works</div>
+    </div>
+    <div class="how-grid">
+        <div class="how-card">
+            <div class="how-step">1</div>
+            <div class="how-icon">📍</div>
+            <div class="how-title">Set Your Location</div>
+            <div class="how-desc">Enter your delivery address to discover local restaurants near you.</div>
+        </div>
+        <div class="how-card">
+            <div class="how-step">2</div>
+            <div class="how-icon">🍽️</div>
+            <div class="how-title">Browse & Choose</div>
+            <div class="how-desc">Explore menus, check ratings and pick your favourite dishes.</div>
+        </div>
+        <div class="how-card">
+            <div class="how-step">3</div>
+            <div class="how-icon">💳</div>
+            <div class="how-title">Place Your Order</div>
+            <div class="how-desc">Checkout securely with card, UPI, or digital wallets. Zero hassle.</div>
+        </div>
+        <div class="how-card">
+            <div class="how-step">4</div>
+            <div class="how-icon">🚴</div>
+            <div class="how-title">Fast Delivery</div>
+            <div class="how-desc">Track your order live and enjoy freshly prepared food at your door.</div>
+        </div>
+    </div>
+</section>
+
+<!-- PROMO BANNER -->
+<section class="section" style="padding-top:0;">
+    <div class="promo-banner">
+        <div>
+            <div class="promo-title">Get 50% off your first order!</div>
+            <div class="promo-sub">New to QuickBite? Use the code below at checkout.</div>
+            <div class="promo-code">WELCOME50</div><br>
+            <button class="btn-white">Claim Offer →</button>
+        </div>
+        <div style="font-size: 130px; opacity: 0.2; position: relative; z-index: 1;">🎁</div>
+    </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+    <div class="footer-grid">
+        <div class="footer-brand">
+            <div class="nav-logo">
+                <div class="logo-icon">🍔</div>
+                <div class="logo-text">Quick<span>Bite</span></div>
+            </div>
+            <p class="footer-desc">QuickBite connects you to the best restaurants in your city. Fast delivery, great food, and unbeatable prices every time.</p>
+            <div class="social-links">
+                <div class="social-btn">𝕏</div>
+                <div class="social-btn">in</div>
+                <div class="social-btn">📸</div>
+                <div class="social-btn">▶</div>
+            </div>
+        </div>
+        <div class="footer-col">
+            <h4>Company</h4>
+            <ul>
+                <li>About Us</li>
+                <li>Careers</li>
+                <li>Blog</li>
+                <li>Press</li>
+                <li>Partners</li>
+            </ul>
+        </div>
+        <div class="footer-col">
+            <h4>For Users</h4>
+            <ul>
+                <li>How it Works</li>
+                <li>Pricing</li>
+                <li>Promotions</li>
+                <li>Gift Cards</li>
+                <li>QuickBite Pro</li>
+            </ul>
+        </div>
+        <div class="footer-col">
+            <h4>Support</h4>
+            <ul>
+                <li>Help Center</li>
+                <li>Safety</li>
+                <li>Contact Us</li>
+                <li>Privacy Policy</li>
+                <li>Terms of Service</li>
+            </ul>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <div class="footer-copy">© 2026 QuickBite. All rights reserved.</div>
+        <div class="footer-links">
+            <a href="#">Privacy</a>
+            <a href="#">Terms</a>
+            <a href="#">Cookies</a>
+        </div>
+    </div>
+</footer>
+
+<script>
+    // Category click interaction
+    document.querySelectorAll('.cat-pill').forEach(pill => {
+        pill.addEventListener('click', () => {
+            document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('active'));
+            pill.classList.add('active');
+        });
+    });
+
+    // Favourite toggle
+    document.querySelectorAll('.rest-fav').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            btn.textContent = btn.textContent === '🤍' ? '❤️' : '🤍';
+        });
+    });
+</script>
+
+</body>
+</html>
