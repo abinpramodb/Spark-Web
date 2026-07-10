@@ -850,12 +850,14 @@
             try {
                 const tplResponse = await fetch(CLOUDFLARE_WORKER_URL, {
                     method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ action: 'get_templates' })
                 });
                 const tplData = await tplResponse.json();
 
                 const adminResponse = await fetch(CLOUDFLARE_WORKER_URL, {
                     method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ action: 'get_admin_data' })
                 });
                 const adminData = await adminResponse.json();
@@ -971,6 +973,7 @@
             try {
                 const response = await fetch(CLOUDFLARE_WORKER_URL, {
                     method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         action: 'approve_upi_request',
                         id, email, templateId
@@ -1002,6 +1005,7 @@
             try {
                 const response = await fetch(CLOUDFLARE_WORKER_URL, {
                     method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         action: 'reject_upi_request',
                         id
@@ -1085,6 +1089,7 @@
             try {
                 const response = await fetch(CLOUDFLARE_WORKER_URL, {
                     method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         action: 'add_template',
                         name, category, description, thumbnail, demoPath, price, payhipUrl, figmaUrl
@@ -1132,6 +1137,7 @@
             try {
                 const response = await fetch(CLOUDFLARE_WORKER_URL, {
                     method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         action: 'edit_template',
                         id, name, category, description, thumbnail, demoPath, price, payhipUrl, figmaUrl
@@ -1164,6 +1170,7 @@
             try {
                 const response = await fetch(CLOUDFLARE_WORKER_URL, {
                     method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ action: 'delete_template', id })
                 });
                 const data = await response.json();
@@ -1187,6 +1194,7 @@
             try {
                 await fetch(CLOUDFLARE_WORKER_URL, {
                     method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ action: 'approve_request', email })
                 });
                 loadAdminDashboardData();
@@ -1205,6 +1213,7 @@
             try {
                 await fetch(CLOUDFLARE_WORKER_URL, {
                     method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ action: 'deny_request', email })
                 });
                 loadAdminDashboardData();

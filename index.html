@@ -969,6 +969,8 @@
                 try {
                     const response = await fetch(CLOUDFLARE_WORKER_URL, {
                         method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                        headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ action: 'get_templates' })
                     });
                     const data = await response.json();
@@ -1243,6 +1245,7 @@
             try {
                 const response = await fetch(CLOUDFLARE_WORKER_URL, {
                     method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ action: 'get_purchases', email })
                 });
                 const data = await response.json();
@@ -1302,6 +1305,8 @@
                 try {
                     const response = await fetch(CLOUDFLARE_WORKER_URL, {
                         method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                        headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
                             action: 'record_purchase',
                             email: payhipEmail,
@@ -1418,6 +1423,7 @@
             try {
                 const response = await fetch(CLOUDFLARE_WORKER_URL, {
                     method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         action: 'submit_upi_request',
                         email: userEmail,
