@@ -878,7 +878,7 @@
                         body: JSON.stringify({ action: 'get_templates' })
                     });
                     const data = await response.json();
-                    if (data.result === 'success' && data.templates.length > 0) {
+                    if (data.result === 'success') {
                         activeTemplates = data.templates;
                     }
                 } catch (err) {

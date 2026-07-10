@@ -814,7 +814,7 @@
                 const adminData = await adminResponse.json();
 
                 if (tplData.result === 'success' && adminData.result === 'success') {
-                    const templates = tplData.templates.length > 0 ? tplData.templates : demoTemplates;
+                    const templates = tplData.templates;
                     renderTemplates(templates);
                     renderRequests(adminData.requests);
                     renderWhitelist(adminData.verified);
