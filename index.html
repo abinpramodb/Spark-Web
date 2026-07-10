@@ -1037,7 +1037,7 @@
 
         let userEmail = '';
 
-        const ADMIN_EMAILS = ['oxoredz@gmail.com'];
+        const ADMIN_EMAILS = ['oxoredz@gmail.com', 'oxoredx@gmail.com'];
 
         function checkSession() {
             const savedEmail = localStorage.getItem('tf_user_email');
@@ -1126,7 +1126,7 @@
             const top = (window.innerHeight - height) / 2 + window.screenY;
 
             const popup = window.open(
-                'templates/mock-google-login.html',
+                '/templates/mock-google-login.html',
                 'GoogleSignInFallbackPopup',
                 `width=${width},height=${height},left=${left},top=${top},status=no,resizable=yes`
             );
