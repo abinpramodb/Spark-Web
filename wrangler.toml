@@ -1,0 +1,10 @@
+# Wrangler configuration for Spark Web Edge backend API
+name = "sparkweb-api"
+main = "worker.js"
+compatibility_date = "2024-03-01"
+
+# Bind D1 Database instance to the Worker
+[[d1_databases]]
+binding = "DB"
+database_name = "sparkweb-db"
+database_id = "PASTE_YOUR_D1_DATABASE_ID_HERE"
