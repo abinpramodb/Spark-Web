@@ -7,6 +7,7 @@
     <title>Spark Web - Free Interactive HTML Market</title>
     <link rel="stylesheet" href="assets/css/variables.css">
     <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="https://payhip.com/payhip.js"></script>
     <style>
         body {
             background-color: var(--light-neutral);
@@ -959,6 +960,9 @@
                 let actionButton = '';
                 if (isPriceFree || isPurchased) {
                     actionButton = `<a href="templates/live-editor.html?template=${tpl.demoPath}" class="btn btn-primary">Customize & Test Live</a>`;
+                } else if (tpl.payhipUrl) {
+                    const finalPayhipUrl = tpl.payhipUrl + (tpl.payhipUrl.includes('?') ? '&' : '?') + 'email=' + encodeURIComponent(userEmail || '');
+                    actionButton = `<a href="${finalPayhipUrl}" class="payhip-buy-button btn btn-primary" onclick="return handlePayhipCheckout(event, '${finalPayhipUrl}')" style="background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); text-decoration: none; display: flex; align-items: center; justify-content: center;">Unlock & Customize</a>`;
                 } else {
                     actionButton = `<button onclick="openPaymentCheckout('${tpl.id}', '${tpl.name}', '${tpl.price}', '${tpl.demoPath}')" class="btn btn-primary" style="background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);">Unlock & Customize</button>`;
                 }
@@ -1372,6 +1376,60 @@
                 return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
             }).join(''));
             return JSON.parse(jsonPayload);
+        }
+
+        function handlePayhipCheckout(e, payhipUrl) {
+            if (!userEmail) {
+                e.preventDefault();
+                e.stopPropagation();
+                alert('Please sign in to complete your purchase and register the template license to your account.');
+                openAuthModal();
+                return false;
+            }
+            return true;
+        }
+
+        window.handlePayhipCheckout = handlePayhipCheckout;
+
+        // Check if returning from a successful Payhip checkout redirect landing
+        const returningParams = new URLSearchParams(window.location.search);
+        const payhipSuccess = returningParams.get('payhip_success');
+        const payhipEmail = returningParams.get('email');
+        const payhipTemplate = returningParams.get('template');
+        
+        if (payhipSuccess === 'true' && payhipTemplate && payhipEmail) {
+            const verifyAndRegisterPayhip = async () => {
+                if (CLOUDFLARE_WORKER_URL.includes('YOUR_SUBDOMAIN')) {
+                    const localSaved = localStorage.getItem('tf_purchases_' + payhipEmail);
+                    let purchased = localSaved ? JSON.parse(localSaved) : [];
+                    if (!purchased.includes(payhipTemplate)) {
+                        purchased.push(payhipTemplate);
+                        localStorage.setItem('tf_purchases_' + payhipEmail, JSON.stringify(purchased));
+                    }
+                    alert('Payhip license verified successfully! Redirecting to customizer...');
+                    window.location.href = `templates/live-editor.html?template=${payhipTemplate}`;
+                    return;
+                }
+
+                try {
+                    const response = await fetch(CLOUDFLARE_WORKER_URL, {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            action: 'record_purchase',
+                            email: payhipEmail,
+                            templateId: payhipTemplate
+                        })
+                    });
+                    const data = await response.json();
+                    if (data.result === 'success') {
+                        alert('Payhip license verified & synced successfully! Redirecting to customizer...');
+                        window.location.href = `templates/live-editor.html?template=${payhipTemplate}`;
+                    }
+                } catch (err) {
+                    console.error("Payhip success sync error:", err);
+                }
+            };
+            verifyAndRegisterPayhip();
         }
 
         checkSession();

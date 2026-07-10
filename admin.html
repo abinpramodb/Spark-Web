@@ -601,6 +601,10 @@
                     <input type="text" id="tpl-price" class="form-input" placeholder="e.g. Free or $9.00" value="Free"
                         required>
                 </div>
+                <div class="form-group">
+                    <label for="tpl-payhip">Payhip Product URL (Optional)</label>
+                    <input type="url" id="tpl-payhip" class="form-input" placeholder="e.g. https://payhip.com/b/XXXX">
+                </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-cancel" onclick="closeAddTemplateModal()">Cancel</button>
                     <button type="submit" class="btn btn-primary">Publish Template</button>
@@ -649,6 +653,10 @@
                 <div class="form-group">
                     <label for="edit-tpl-price">Price Tag</label>
                     <input type="text" id="edit-tpl-price" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-tpl-payhip">Payhip Product URL (Optional)</label>
+                    <input type="url" id="edit-tpl-payhip" class="form-input" placeholder="e.g. https://payhip.com/b/XXXX">
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-cancel" onclick="closeEditTemplateModal()">Cancel</button>
@@ -766,6 +774,7 @@
             document.getElementById('edit-tpl-thumbnail').value = tpl.thumbnail || '';
             document.getElementById('edit-tpl-demo').value = tpl.demoPath;
             document.getElementById('edit-tpl-price').value = tpl.price || 'Free';
+            document.getElementById('edit-tpl-payhip').value = tpl.payhipUrl || '';
 
             editModal.classList.add('active');
         }
@@ -925,13 +934,14 @@
             const thumbnail = document.getElementById('tpl-thumbnail').value.trim();
             const demoPath = document.getElementById('tpl-demo').value;
             const price = document.getElementById('tpl-price').value.trim();
+            const payhipUrl = document.getElementById('tpl-payhip').value.trim();
 
             if (CLOUDFLARE_WORKER_URL.includes('YOUR_SUBDOMAIN')) {
                 const newTpl = {
                     id: 'template-' + Date.now(),
                     name, category, description,
                     thumbnail: thumbnail || "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=800&q=80",
-                    demoPath, price
+                    demoPath, price, payhipUrl
                 };
                 demoTemplates.push(newTpl);
                 localStorage.setItem('tf_mock_templates', JSON.stringify(demoTemplates));
@@ -947,7 +957,7 @@
                     method: 'POST',
                     body: JSON.stringify({
                         action: 'add_template',
-                        name, category, description, thumbnail, demoPath, price
+                        name, category, description, thumbnail, demoPath, price, payhipUrl
                     })
                 });
                 const data = await response.json();
@@ -961,7 +971,6 @@
                 alert('Failed to publish template. Verify Cloudflare Worker status.');
             }
         }
-
         async function submitEditTemplate(e) {
             e.preventDefault();
             const id = document.getElementById('edit-tpl-id').value;
@@ -971,6 +980,7 @@
             const thumbnail = document.getElementById('edit-tpl-thumbnail').value.trim();
             const demoPath = document.getElementById('edit-tpl-demo').value;
             const price = document.getElementById('edit-tpl-price').value.trim();
+            const payhipUrl = document.getElementById('edit-tpl-payhip').value.trim();
 
             if (CLOUDFLARE_WORKER_URL.includes('YOUR_SUBDOMAIN')) {
                 const idx = demoTemplates.findIndex(t => t.id === id);
@@ -978,7 +988,7 @@
                     demoTemplates[idx] = {
                         id, name, category, description,
                         thumbnail: thumbnail || "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=800&q=80",
-                        demoPath, price
+                        demoPath, price, payhipUrl
                     };
                     localStorage.setItem('tf_mock_templates', JSON.stringify(demoTemplates));
                 }
@@ -993,7 +1003,7 @@
                     method: 'POST',
                     body: JSON.stringify({
                         action: 'edit_template',
-                        id, name, category, description, thumbnail, demoPath, price
+                        id, name, category, description, thumbnail, demoPath, price, payhipUrl
                     })
                 });
                 const data = await response.json();
@@ -1007,7 +1017,6 @@
             } catch (err) {
                 console.error(err);
                 alert('Failed to connect to Cloudflare Workers endpoint.');
-            }
         }
 
         async function deleteTemplate(id) {

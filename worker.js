@@ -27,17 +27,30 @@ export default {
       let payload = {};
 
       if (request.method === "POST") {
-        try {
-          payload = await request.json();
-          action = payload.action;
-        } catch (e) {
-          // JSON parsing failed, check query params instead
+        const contentType = request.headers.get("content-type") || "";
+        if (contentType.includes("application/json")) {
+          try {
+            payload = await request.json();
+            action = payload.action;
+          } catch (e) {}
+        } else {
+          try {
+            const formData = await request.formData();
+            payload = {};
+            for (const [key, val] of formData.entries()) {
+              payload[key] = val;
+            }
+          } catch (e) {}
         }
       }
 
       // Path-based route fallback
       if (!action) {
         action = url.pathname.replace(/^\/api\//, "").replace(/\/$/, "");
+      }
+
+      if (url.pathname.endsWith("/payhip-webhook")) {
+        action = "payhip_webhook";
       }
 
       // Check D1 connection binding
@@ -58,14 +71,14 @@ export default {
       // -------------------------------------------------------------
       else if (action === "add_template") {
         const id = "template-" + Date.now();
-        const { name, category, description, thumbnail, demoPath, price } = payload;
+        const { name, category, description, thumbnail, demoPath, price, payhipUrl } = payload;
 
         if (!name || !category || !description || !demoPath) {
           return returnJson({ result: "error", error: "Missing required parameters to publish template." }, 400);
         }
 
         await env.DB.prepare(
-          "INSERT INTO templates (id, name, category, description, thumbnail, demoPath, price) VALUES (?, ?, ?, ?, ?, ?, ?)"
+          "INSERT INTO templates (id, name, category, description, thumbnail, demoPath, price, payhipUrl) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
         )
         .bind(
           id,
@@ -74,7 +87,8 @@ export default {
           description,
           thumbnail || "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=800&q=80",
           demoPath,
-          price || "Free"
+          price || "Free",
+          payhipUrl || ""
         )
         .run();
 
@@ -98,13 +112,13 @@ export default {
       // ROUTE: edit_template
       // -------------------------------------------------------------
       else if (action === "edit_template") {
-        const { id, name, category, description, thumbnail, demoPath, price } = payload;
+        const { id, name, category, description, thumbnail, demoPath, price, payhipUrl } = payload;
         if (!id || !name || !category || !description || !demoPath) {
           return returnJson({ result: "error", error: "Missing required parameters to update template." }, 400);
         }
 
         await env.DB.prepare(
-          "UPDATE templates SET name = ?, category = ?, description = ?, thumbnail = ?, demoPath = ?, price = ? WHERE id = ?"
+          "UPDATE templates SET name = ?, category = ?, description = ?, thumbnail = ?, demoPath = ?, price = ?, payhipUrl = ? WHERE id = ?"
         )
         .bind(
           name,
@@ -113,7 +127,49 @@ export default {
           thumbnail || "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=800&q=80",
           demoPath,
           price || "Free",
+          payhipUrl || "",
           id
+        )
+        .run();
+
+        return returnJson({ result: "success" });
+      }
+
+      // -------------------------------------------------------------
+      // ROUTE: payhip_webhook
+      // -------------------------------------------------------------
+      else if (action === "payhip_webhook") {
+        const email = (payload.email || "").toLowerCase().trim();
+        const productCode = (payload.product_code || "").trim();
+
+        if (!email || !productCode) {
+          return returnJson({ result: "error", error: "Missing webhook parameters." }, 400);
+        }
+
+        const { results } = await env.DB.prepare("SELECT id FROM templates WHERE payhipUrl LIKE ?")
+          .bind("%" + productCode + "%")
+          .all();
+
+        if (results.length === 0) {
+          return returnJson({ result: "error", error: "No template mapped to product code: " + productCode }, 404);
+        }
+
+        const templateId = results[0].id;
+
+        await env.DB.prepare(
+          "INSERT OR IGNORE INTO purchases (email, templateId, purchaseDate) VALUES (?, ?, ?)"
+        )
+        .bind(email, templateId, new Date().toLocaleDateString())
+        .run();
+
+        await env.DB.prepare(
+          "INSERT INTO builds (timestamp, email, templateId, fields) VALUES (?, ?, ?, ?)"
+        )
+        .bind(
+          new Date().toLocaleString(),
+          email,
+          "PAYHIP PURCHASE: " + templateId,
+          "{}"
         )
         .run();
 
