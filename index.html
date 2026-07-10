@@ -750,7 +750,7 @@
             Spark<span>Web</span>
         </a>
         <div class="nav-links">
-            <a href="admin.html" class="nav-link">Admin Panel</a>
+            <a href="admin.html" id="admin-nav-link" style="display:none;" class="nav-link">Admin Panel</a>
             <a href="https://github.com" target="_blank" class="nav-link">Documentation</a>
             <a href="https://sheets.new" target="_blank" class="nav-link">Google Sheets Setup</a>
             <span id="user-nav-profile" style="display:none;" class="user-profile-badge"></span>
@@ -963,10 +963,14 @@
 
         let userEmail = '';
 
+        const ADMIN_EMAILS = ['abinpramodb@gmail.com', 'developer@example.com', 'admin@example.com'];
+
         function checkSession() {
             const savedEmail = localStorage.getItem('tf_user_email');
             const savedName = localStorage.getItem('tf_user_name');
             const token = localStorage.getItem('tf_session_token');
+            const adminNavLink = document.getElementById('admin-nav-link');
+
             if (savedEmail && token) {
                 userEmail = savedEmail;
                 userNavProfile.textContent = savedName || savedEmail;
@@ -976,12 +980,24 @@
                 authNavBtn.removeAttribute('style');
                 authNavBtn.style.cursor = 'pointer';
                 authNavBtn.style.fontWeight = '600';
+
+                // Display Admin Panel navigation option only to admin whitelisted emails
+                if (adminNavLink) {
+                    if (ADMIN_EMAILS.includes(savedEmail.toLowerCase().trim())) {
+                        adminNavLink.style.display = 'inline-block';
+                    } else {
+                        adminNavLink.style.display = 'none';
+                    }
+                }
             } else {
                 userEmail = '';
                 userNavProfile.style.display = 'none';
                 authNavBtn.textContent = 'Sign In';
                 authNavBtn.className = 'nav-btn';
                 authNavBtn.removeAttribute('style');
+                if (adminNavLink) {
+                    adminNavLink.style.display = 'none';
+                }
             }
         }
 
