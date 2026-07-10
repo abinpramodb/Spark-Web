@@ -121,6 +121,50 @@ export default {
       }
 
       // -------------------------------------------------------------
+      // ROUTE: get_purchases
+      // -------------------------------------------------------------
+      else if (action === "get_purchases") {
+        const email = payload.email ? payload.email.toLowerCase().trim() : "";
+        if (!email) {
+          return returnJson({ result: "error", error: "Email parameter is required." }, 400);
+        }
+
+        const { results } = await env.DB.prepare("SELECT templateId FROM purchases WHERE email = ?").bind(email).all();
+        return returnJson({ result: "success", purchases: results.map(r => r.templateId) });
+      }
+
+      // -------------------------------------------------------------
+      // ROUTE: record_purchase
+      // -------------------------------------------------------------
+      else if (action === "record_purchase") {
+        const email = payload.email ? payload.email.toLowerCase().trim() : "";
+        const templateId = payload.templateId;
+        if (!email || !templateId) {
+          return returnJson({ result: "error", error: "Missing required parameters to record purchase." }, 400);
+        }
+
+        await env.DB.prepare(
+          "INSERT OR IGNORE INTO purchases (email, templateId, purchaseDate) VALUES (?, ?, ?)"
+        )
+        .bind(email, templateId, new Date().toLocaleDateString())
+        .run();
+
+        // Add an activity log entry for the purchase transaction
+        await env.DB.prepare(
+          "INSERT INTO builds (timestamp, email, templateId, fields) VALUES (?, ?, ?, ?)"
+        )
+        .bind(
+          new Date().toLocaleString(),
+          email,
+          "PURCHASED: " + templateId,
+          "{}"
+        )
+        .run();
+
+        return returnJson({ result: "success" });
+      }
+
+      // -------------------------------------------------------------
       // ROUTE: save_build
       // -------------------------------------------------------------
       else if (action === "save_build") {

@@ -585,6 +585,18 @@
 </head>
 
 <body>
+    <!-- Premium Access Lock Screen Overlay -->
+    <div id="premium-lock-screen" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); z-index: 999999; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 24px;">
+        <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); padding: 40px; border-radius: 16px; max-width: 480px; box-shadow: 0 20px 40px rgba(0,0,0,0.5);">
+            <div style="font-size: 64px; margin-bottom: 24px; animation: bounce 2s infinite;">🔒</div>
+            <h2 style="font-size: 24px; color: white; margin-bottom: 12px; font-weight: 700;">Premium Template Locked</h2>
+            <p style="color: #94a3b8; font-size: 15px; line-height: 1.6; margin-bottom: 32px;">This is a premium layout template. You need to purchase a license first to customize and download this project structure.</p>
+            <div style="display: flex; gap: 16px; justify-content: center;">
+                <a href="../index.html" class="nav-btn" style="background: rgba(255, 255, 255, 0.08); color: white; border: 1px solid rgba(255, 255, 255, 0.15); display: flex; align-items: center; justify-content: center; height: 48px; min-width: 140px; border-radius: var(--radius-md); text-decoration: none; font-weight: 600; font-family: var(--font-sans);">Back to Shop</a>
+                <a href="../index.html?purchase=template-4" id="unlock-btn-anchor" class="nav-btn" style="background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); color: white; border: none; display: flex; align-items: center; justify-content: center; height: 48px; min-width: 140px; border-radius: var(--radius-md); text-decoration: none; font-weight: 600; font-family: var(--font-sans); box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);">Purchase License</a>
+            </div>
+        </div>
+    </div>
     <!-- Top Bar -->
     <header class="workspace-header">
         <div class="header-left">
@@ -671,19 +683,20 @@
         // Check query parameter for active template
         const urlParams = new URLSearchParams(window.location.search);
         const templateParam = urlParams.get('template');
-        if (templateParam && ['template-1', 'template-2', 'template-3'].includes(templateParam)) {
+        if (templateParam && ['template-1', 'template-2', 'template-3', 'template-4'].includes(templateParam)) {
             activeTemplate = templateParam;
         }
 
         // Set viewport iframe source and URL mock
-        iframe.src = `../previews/${activeTemplate}/index.html`;
+        iframe.src = `../previews/${activeTemplate === 'template-4' ? 'template-1' : activeTemplate}/index.html`;
         mockUrlBar.textContent = `sparkweb.com/previews/${activeTemplate}/index.html`;
 
         // Update top-level title
         const templateNames = {
             'template-1': 'Apex SaaS Landing Page',
             'template-2': 'Zenith Personal Portfolio',
-            'template-3': 'Echo Creator Blog'
+            'template-3': 'Echo Creator Blog',
+            'template-4': 'Nova SaaS Landing Page Pro'
         };
         workspaceTitle.textContent = `${templateNames[activeTemplate]} Customizer`;
 
@@ -752,6 +765,12 @@
                     }
                 ]
             }
+        };
+
+        // Link template-4 parameters configuration dynamically to clone template-1
+        templateConfigs['template-4'] = {
+            ...templateConfigs['template-1'],
+            name: 'Nova SaaS Pro'
         };
 
         // Render controls on load
@@ -1090,7 +1109,47 @@
                 return JSON.parse(jsonPayload);
             }
 
+            async function verifyPremiumAccess() {
+                if (activeTemplate === 'template-4') {
+                    const savedEmail = localStorage.getItem('tf_user_email');
+                    const token = localStorage.getItem('tf_session_token');
+                    
+                    let isPurchased = false;
+
+                    if (savedEmail && token) {
+                        if (CLOUDFLARE_WORKER_URL.includes('YOUR_SUBDOMAIN')) {
+                            const localSaved = localStorage.getItem('tf_purchases_' + savedEmail);
+                            if (localSaved) {
+                                const purchased = JSON.parse(localSaved);
+                                if (purchased.includes('template-4')) {
+                                    isPurchased = true;
+                                }
+                            }
+                        } else {
+                            try {
+                                const response = await fetch(CLOUDFLARE_WORKER_URL, {
+                                    method: 'POST',
+                                    body: JSON.stringify({ action: 'get_purchases', email: savedEmail })
+                                });
+                                const data = await response.json();
+                                if (data.result === 'success' && data.purchases.includes('template-4')) {
+                                    isPurchased = true;
+                                }
+                            } catch (err) {
+                                console.error("Verification connection error:", err);
+                            }
+                        }
+                    }
+
+                    if (!isPurchased) {
+                        document.getElementById('unlock-btn-anchor').href = `../index.html?purchase=template-4`;
+                        document.getElementById('premium-lock-screen').style.display = 'flex';
+                    }
+                }
+            }
+
             checkSession();
+            verifyPremiumAccess();
 
             // Initialize UI Sidebar elements
             renderSidebar();
