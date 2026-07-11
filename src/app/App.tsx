@@ -580,42 +580,8 @@ interface PaymentCheckoutModalProps {
 }
 
 function PaymentCheckoutModal({ template, userEmail, onClose }: PaymentCheckoutModalProps) {
-  const handlePayhipClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    if ((window as any).Payhip && template.payhipUrl) {
-      (window as any).Payhip.open({
-        product: template.payhipUrl,
-        email: userEmail,
-        success: async () => {
-          try {
-            const response = await fetch(CLOUDFLARE_WORKER_URL, {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                action: "record_purchase",
-                email: userEmail,
-                templateId: String(template.id)
-              })
-            });
-            const data = await response.json();
-            if (data.result === "success") {
-              alert("Payment complete! Your license has been whitelisted.");
-            } else {
-              alert("Payment complete! Sync error: " + data.error);
-            }
-          } catch (err) {
-            console.error("Payhip sync failed:", err);
-            alert("Payment complete! Could not verify license with server, please contact support.");
-          } finally {
-            onClose();
-            window.location.reload();
-          }
-        }
-      });
-    } else {
-      window.open(template.payhipUrl || "#", "_blank");
-    }
-  };
+  const payhipUrl = template.payhipUrl || "#";
+  const finalCheckoutUrl = payhipUrl + (payhipUrl.includes("?") ? "&" : "?") + "email=" + encodeURIComponent(userEmail);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.85)" }}>
@@ -644,13 +610,17 @@ function PaymentCheckoutModal({ template, userEmail, onClose }: PaymentCheckoutM
           <div className="text-2xl font-bold" style={{ color: "#c8ff00", fontFamily: "Fraunces, serif" }}>
             {template.price}
           </div>
-          <button
-            onClick={handlePayhipClick}
-            className="w-full py-3.5 text-sm font-semibold rounded-sm text-[#0a0a0a]"
-            style={{ background: "#c8ff00" }}
+          <a
+            href={finalCheckoutUrl}
+            className="w-full py-3.5 text-center text-sm font-semibold rounded-sm text-[#0a0a0a] transition-all hover:opacity-90 payhip-buy-button"
+            style={{ background: "#c8ff00", display: "block" }}
+            onClick={() => {
+              // Close the modal upon click so it doesn't block the screen
+              onClose();
+            }}
           >
             Proceed to Checkout
-          </button>
+          </a>
         </div>
       </div>
     </div>
@@ -2923,6 +2893,37 @@ export default function App() {
       setPurchasedTemplates([]);
     }
   }, [userEmail]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const payhipSuccess = params.get("payhip_success");
+    const payhipEmail = params.get("email");
+    const payhipTemplate = params.get("template");
+
+    if (payhipSuccess === "true" && payhipTemplate && payhipEmail) {
+      const syncPurchase = async () => {
+        try {
+          const response = await fetch(CLOUDFLARE_WORKER_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              action: "record_purchase",
+              email: payhipEmail,
+              templateId: payhipTemplate
+            })
+          });
+          const data = await response.json();
+          if (data.result === "success") {
+            alert("Payment verified successfully! Redirecting to customizer...");
+            window.location.href = `/templates/live-editor.html?template=${payhipTemplate}`;
+          }
+        } catch (err) {
+          console.error("Payhip redirect sync failed:", err);
+        }
+      };
+      syncPurchase();
+    }
+  }, []);
 
   const handleLogin = (user: AdminUser) => {
     setAdminUser(user);
