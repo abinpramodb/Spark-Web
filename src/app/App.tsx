@@ -604,10 +604,30 @@ function PaymentCheckoutModal({ template, userEmail, onClose }: PaymentCheckoutM
       (window as any).Payhip.open({
         product: template.payhipUrl,
         email: userEmail,
-        success: () => {
-          alert("Payment complete! Your license has been whitelisted.");
-          onClose();
-          window.location.reload();
+        success: async () => {
+          try {
+            const response = await fetch(CLOUDFLARE_WORKER_URL, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                action: "record_purchase",
+                email: userEmail,
+                templateId: String(template.id)
+              })
+            });
+            const data = await response.json();
+            if (data.result === "success") {
+              alert("Payment complete! Your license has been whitelisted.");
+            } else {
+              alert("Payment complete! Sync error: " + data.error);
+            }
+          } catch (err) {
+            console.error("Payhip sync failed:", err);
+            alert("Payment complete! Could not verify license with server, please contact support.");
+          } finally {
+            onClose();
+            window.location.reload();
+          }
         }
       });
     } else {
