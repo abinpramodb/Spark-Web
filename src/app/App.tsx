@@ -917,22 +917,29 @@ function Templates({ templatesList, purchasedTemplates, userEmail, onOpenCheckou
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                   {/* Overlay on hover */}
-                  <div className="absolute inset-0 flex items-center justify-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                  <div className="absolute inset-0 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                     style={{ background: "rgba(10,10,10,0.7)" }}
                   >
                     <button
                       onClick={() => setPreviewId(tmpl.id)}
-                      className="flex items-center gap-1.5 px-3 py-2 rounded-sm text-xs font-semibold transition-colors hover:bg-white/10"
+                      className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-sm text-xs font-semibold transition-colors hover:bg-white/10"
                       style={{ background: "rgba(255,255,255,0.08)", color: "#f0f0ee", fontFamily: "Outfit, sans-serif" }}
                     >
                       <Eye size={12} /> Preview
                     </button>
+                    <a
+                      href={`/templates/product.html?id=${tmpl.id}`}
+                      className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-sm text-xs font-semibold transition-all hover:bg-[#c8ff00] hover:text-[#0a0a0a]"
+                      style={{ background: "rgba(255,255,255,0.08)", color: "#f0f0ee", fontFamily: "Outfit, sans-serif" }}
+                    >
+                      <ExternalLink size={12} /> Details
+                    </a>
                     {tmpl.figmaUrl && (
                       <a
                         href={tmpl.figmaUrl}
                         target="_blank"
                         rel="noreferrer"
-                        className="flex items-center gap-1.5 px-3 py-2 rounded-sm text-xs font-semibold transition-colors hover:bg-white/10"
+                        className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-sm text-xs font-semibold transition-colors hover:bg-white/10"
                         style={{ background: "rgba(255,255,255,0.08)", color: "#f0f0ee", fontFamily: "Outfit, sans-serif" }}
                       >
                         Figma
@@ -954,9 +961,13 @@ function Templates({ templatesList, purchasedTemplates, userEmail, onOpenCheckou
                 <div className="p-4 flex flex-col gap-3 flex-1">
                   <div className="flex items-start justify-between gap-2">
                     <div>
-                      <div className="text-sm font-semibold mb-0.5" style={{ color: "#f0f0ee", fontFamily: "Outfit, sans-serif" }}>
+                      <a
+                        href={`/templates/product.html?id=${tmpl.id}`}
+                        className="text-sm font-semibold mb-0.5 hover:text-[#c8ff00] hover:underline block"
+                        style={{ color: "#f0f0ee", fontFamily: "Outfit, sans-serif" }}
+                      >
                         {tmpl.name}
-                      </div>
+                      </a>
                       <div className="text-xs" style={{ color: "#888880", fontFamily: "Outfit, sans-serif" }}>
                         {tmpl.category}
                       </div>
