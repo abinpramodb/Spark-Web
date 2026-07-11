@@ -636,6 +636,14 @@
         <aside class="sidebar">
             <!-- Dynamic Sidebar content will be injected by JavaScript based on active template -->
             <div id="dynamic-controls"></div>
+            
+            <!-- Predefined Presets Section -->
+            <div class="sidebar-section">
+                <h3>Theme Presets</h3>
+                <div id="presets-container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                    <!-- JS Injected -->
+                </div>
+            </div>
         </aside>
 
         <!-- Canvas Area -->
@@ -1153,7 +1161,100 @@
 
             // Initialize UI Sidebar elements
             renderSidebar();
-    </script>
+
+            // Preset Themes System (Option 3)
+            const presets = {
+                'template-1': [
+                    { name: 'Cyber Neon', primary: '#ff007f', bg: '#00f0ff' },
+                    { name: 'Forest Glass', primary: '#10b981', bg: '#064e3b' },
+                    { name: 'Luxury Gold', primary: '#d97706', bg: '#1e293b' },
+                    { name: 'Sunset Glow', primary: '#f97316', bg: '#db2777' }
+                ],
+                'template-2': [
+                    { name: 'Emerald', primary: '#10b981', bg: '#0b0f19' },
+                    { name: 'Cyberpunk', primary: '#f43f5e', bg: '#0f0f15' },
+                    { name: 'Arctic Blue', primary: '#0ea5e9', bg: '#0f172a' },
+                    { name: 'Royal Velvet', primary: '#8b5cf6', bg: '#0a0915' }
+                ],
+                'template-3': [
+                    { name: 'Teal Clean', primary: '#0d9488', bg: '#ffffff' },
+                    { name: 'Tech Dark', primary: '#c8ff00', bg: '#1e293b' },
+                    { name: 'Warm Sepia', primary: '#78350f', bg: '#fefaf0' },
+                    { name: 'Coral Rose', primary: '#f43f5e', bg: '#fffafb' }
+                ]
+            };
+            presets['template-4'] = presets['template-1'];
+
+            function renderPresets() {
+                const container = document.getElementById('presets-container');
+                const list = presets[activeTemplate] || [];
+                container.innerHTML = '';
+                
+                list.forEach(preset => {
+                    const btn = document.createElement('button');
+                    btn.style.background = '#0f172a';
+                    btn.style.border = '1px solid #334155';
+                    btn.style.padding = '8px';
+                    btn.style.borderRadius = '6px';
+                    btn.style.cursor = 'pointer';
+                    btn.style.color = '#e2e8f0';
+                    btn.style.fontSize = '11px';
+                    btn.style.fontWeight = '600';
+                    btn.style.display = 'flex';
+                    btn.style.alignItems = 'center';
+                    btn.style.justifyContent = 'space-between';
+                    btn.style.gap = '6px';
+                    btn.style.transition = 'all 0.15s ease';
+                    
+                    btn.innerHTML = `
+                        <span>${preset.name}</span>
+                        <div style="display: flex; gap: 3px;">
+                            <span style="width: 8px; height: 8px; border-radius: 50%; background: ${preset.primary}; display: inline-block;"></span>
+                            <span style="width: 8px; height: 8px; border-radius: 50%; background: ${preset.bg}; display: inline-block; border: 1px solid rgba(255,255,255,0.15);"></span>
+                        </div>
+                    `;
+                    
+                    btn.addEventListener('mouseover', () => {
+                        btn.style.borderColor = '#6366f1';
+                    });
+                    btn.addEventListener('mouseout', () => {
+                        btn.style.borderColor = '#334155';
+                    });
+                    
+                    btn.addEventListener('click', () => {
+                        if (activeTemplate === 'template-1' || activeTemplate === 'template-4') {
+                            updatePresetColors('color-brand', preset.primary, 'color-bg', preset.bg);
+                        } else if (activeTemplate === 'template-2') {
+                            updatePresetColors('color-portfolio-accent', preset.primary, 'color-portfolio-bg', preset.bg);
+                        } else if (activeTemplate === 'template-3') {
+                            updatePresetColors('color-blog-accent', preset.primary, 'color-blog-card', preset.bg);
+                        }
+                    });
+                    
+                    container.appendChild(btn);
+                });
+            }
+
+            function updatePresetColors(primaryId, primaryVal, bgId, bgVal) {
+                const primEl = document.getElementById(primaryId);
+                const primText = document.getElementById(`${primaryId}-text`);
+                const bgEl = document.getElementById(bgId);
+                const bgText = document.getElementById(`${bgId}-text`);
+                
+                if (primEl && primText) {
+                    primEl.value = primaryVal;
+                    primText.value = primaryVal;
+                    primEl.dispatchEvent(new Event('input'));
+                }
+                if (bgEl && bgText) {
+                    bgEl.value = bgVal;
+                    bgText.value = bgVal;
+                    bgEl.dispatchEvent(new Event('input'));
+                }
+            }
+
+            renderPresets();
+        </script>
 
     <!-- Glassmorphic Login Modal inside Workspace -->
     <div id="auth-modal" class="auth-modal-overlay">

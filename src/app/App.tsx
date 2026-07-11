@@ -735,6 +735,7 @@ function Templates({ templatesList, purchasedTemplates, userEmail, onOpenCheckou
   const [sortBy, setSortBy] = useState("popular");
   const [searchQuery, setSearchQuery] = useState("");
   const [previewId, setPreviewId] = useState<string | number | null>(null);
+  const [previewDeviceMode, setPreviewDeviceMode] = useState<"desktop" | "tablet" | "mobile">("desktop");
 
   const getPriceNum = (p: any) => {
     if (typeof p === "number") return p;
@@ -1082,13 +1083,13 @@ function Templates({ templatesList, purchasedTemplates, userEmail, onOpenCheckou
           onClick={() => setPreviewId(null)}
         >
           <div
-            className="relative w-full max-w-4xl rounded-sm border overflow-hidden"
+            className="relative w-full max-w-5xl rounded-sm border overflow-hidden flex flex-col"
             style={{ background: "#131313", borderColor: "rgba(255,255,255,0.1)" }}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal header */}
             <div
-              className="flex items-center justify-between px-6 py-4 border-b"
+              className="flex items-center justify-between px-6 py-4 border-b flex-wrap gap-4"
               style={{ borderColor: "rgba(255,255,255,0.06)" }}
             >
               <div>
@@ -1099,6 +1100,35 @@ function Templates({ templatesList, purchasedTemplates, userEmail, onOpenCheckou
                   {previewTemplate.category}
                 </span>
               </div>
+
+              {/* Device switcher tabs (Option 2) */}
+              <div className="flex items-center gap-1 rounded-sm border p-0.5" style={{ background: "#0a0a0a", borderColor: "rgba(255,255,255,0.06)" }}>
+                <button
+                  onClick={() => setPreviewDeviceMode("desktop")}
+                  className={`px-3 py-1.5 text-xs font-semibold rounded-sm transition-all ${
+                    previewDeviceMode === "desktop" ? "bg-[#c8ff00] text-[#0a0a0a]" : "text-[#888880] hover:text-white"
+                  }`}
+                >
+                  🖥️ Desktop
+                </button>
+                <button
+                  onClick={() => setPreviewDeviceMode("tablet")}
+                  className={`px-3 py-1.5 text-xs font-semibold rounded-sm transition-all ${
+                    previewDeviceMode === "tablet" ? "bg-[#c8ff00] text-[#0a0a0a]" : "text-[#888880] hover:text-white"
+                  }`}
+                >
+                  📟 Tablet
+                </button>
+                <button
+                  onClick={() => setPreviewDeviceMode("mobile")}
+                  className={`px-3 py-1.5 text-xs font-semibold rounded-sm transition-all ${
+                    previewDeviceMode === "mobile" ? "bg-[#c8ff00] text-[#0a0a0a]" : "text-[#888880] hover:text-white"
+                  }`}
+                >
+                  📱 Mobile
+                </button>
+              </div>
+
               <div className="flex items-center gap-3">
                 <span className="text-lg font-bold" style={{ color: "#c8ff00", fontFamily: "Fraunces, serif" }}>
                   {previewTemplate.price}
@@ -1130,13 +1160,27 @@ function Templates({ templatesList, purchasedTemplates, userEmail, onOpenCheckou
               </div>
             </div>
 
-            {/* Preview image */}
-            <div style={{ background: "#1a1a1a", aspectRatio: "16/9" }}>
-              <img
-                src={getTmplThumbnail(previewTemplate)}
-                alt={`${previewTemplate.name} full preview`}
-                className="w-full h-full object-cover"
-              />
+            {/* Interactive Preview Iframe Viewport wrapper */}
+            <div className="bg-[#0e0e0e] flex items-center justify-center p-6 h-[60vh] overflow-auto">
+              <div
+                className="transition-all duration-300 shadow-2xl relative bg-white"
+                style={{
+                  width: previewDeviceMode === "desktop" ? "100%" : previewDeviceMode === "tablet" ? "768px" : "375px",
+                  height: previewDeviceMode === "desktop" ? "100%" : previewDeviceMode === "tablet" ? "95%" : "550px",
+                  border: previewDeviceMode === "desktop" ? "none" : previewDeviceMode === "tablet" ? "8px solid #1c1c1c" : "12px solid #1c1c1c",
+                  borderRadius: previewDeviceMode === "desktop" ? "0px" : previewDeviceMode === "tablet" ? "12px" : "32px",
+                  overflow: "hidden"
+                }}
+              >
+                {previewDeviceMode === "mobile" && (
+                  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-4 bg-[#1c1c1c] rounded-b-xl z-20"></div>
+                )}
+                <iframe
+                  src={`/previews/${previewTemplate.demoPath}/index.html`}
+                  className="w-full h-full border-none"
+                  title={`${previewTemplate.name} Live Sandbox`}
+                ></iframe>
+              </div>
             </div>
 
             {/* Modal footer */}
@@ -1393,8 +1437,184 @@ function Pricing() {
             </div>
           ))}
         </div>
+
+        {/* Dynamic Project Estimator Calculator */}
+        <ProjectEstimator />
       </div>
     </section>
+  );
+}
+
+function ProjectEstimator() {
+  const [pages, setPages] = useState(5);
+  const [designTier, setDesignTier] = useState<"standard" | "premium" | "immersive">("premium");
+  const [features, setFeatures] = useState({
+    auth: false,
+    ecommerce: false,
+    admin: false,
+    api: false
+  });
+
+  const tierPrices = {
+    standard: 150,
+    premium: 250,
+    immersive: 350
+  };
+
+  const featurePrices = {
+    auth: 500,
+    ecommerce: 800,
+    admin: 1200,
+    api: 600
+  };
+
+  const calculateTotal = () => {
+    let base = pages * tierPrices[designTier];
+    if (features.auth) base += featurePrices.auth;
+    if (features.ecommerce) base += featurePrices.ecommerce;
+    if (features.admin) base += featurePrices.admin;
+    if (features.api) base += featurePrices.api;
+    return base;
+  };
+
+  const handleApplyQuote = () => {
+    const activeFeatures: string[] = [];
+    if (features.auth) activeFeatures.push("User Authentication & Profiles");
+    if (features.ecommerce) activeFeatures.push("E-Commerce Shop Integration");
+    if (features.admin) activeFeatures.push("Admin Content Dashboard");
+    if (features.api) activeFeatures.push("Custom Third-Party APIs");
+
+    const tierName = designTier === "standard" 
+      ? "Standard Responsive UI" 
+      : designTier === "premium" 
+        ? "Custom Branded Premium UI" 
+        : "Immersive Creative Layout";
+
+    const message = `Hi Spark Web! I used your Project Estimator and would like to request a quote. Here are my project details:
+- Pages: ${pages}
+- Design Style: ${tierName}
+- Features Added: ${activeFeatures.length > 0 ? activeFeatures.join(", ") : "None"}
+- Estimated Project Cost: $${calculateTotal().toLocaleString()}
+
+Please contact me to discuss details!`;
+
+    const textarea = document.getElementById("contact-message") as HTMLTextAreaElement;
+    if (textarea) {
+      textarea.value = message;
+      // Trigger event update for React state listeners
+      textarea.dispatchEvent(new Event("input", { bubbles: true }));
+    }
+
+    const contactSection = document.getElementById("contact");
+    if (contactSection) {
+      contactSection.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
+  return (
+    <div className="mt-20 max-w-4xl mx-auto rounded-sm border p-8 lg:p-12" style={{ background: "#131313", borderColor: "rgba(255,255,255,0.06)" }}>
+      <div className="text-center mb-8">
+        <span className="text-[10px] font-bold tracking-widest uppercase text-[#c8ff00] font-mono">Interactive Estimator</span>
+        <h3 className="text-2xl font-bold mt-1 text-white font-serif">Project Cost Calculator</h3>
+        <p className="text-xs text-[#888880] mt-1">Configure your design choices and features to generate an instant project quote.</p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        {/* Left Side: Configuration Controls */}
+        <div className="flex flex-col gap-6">
+          {/* Pages Range Slider */}
+          <div className="flex flex-col gap-2">
+            <div className="flex justify-between items-center text-xs">
+              <span className="font-semibold text-white">Number of Pages:</span>
+              <span className="font-bold text-[#c8ff00] font-mono">{pages} pages</span>
+            </div>
+            <input
+              type="range"
+              min="1"
+              max="50"
+              value={pages}
+              onChange={(e) => setPages(parseInt(e.target.value))}
+              className="w-full accent-[#c8ff00]"
+              style={{ background: "rgba(255,255,255,0.08)", height: "4px", borderRadius: "2px" }}
+            />
+          </div>
+
+          {/* Design Tier Option Dropdown */}
+          <div className="flex flex-col gap-2">
+            <span className="text-xs font-semibold text-white">Design Style Level:</span>
+            <select
+              value={designTier}
+              onChange={(e) => setDesignTier(e.target.value as any)}
+              className="w-full px-3 py-2.5 text-xs rounded-sm border outline-none bg-black text-white"
+              style={{ borderColor: "rgba(255,255,255,0.08)" }}
+            >
+              <option value="standard">Standard Responsive UI ($150 / pg)</option>
+              <option value="premium">Custom Branded Premium UI ($250 / pg)</option>
+              <option value="immersive">Immersive Luxury WebGL / Creative Layout ($350 / pg)</option>
+            </select>
+          </div>
+
+          {/* Feature Selector Checkboxes */}
+          <div className="flex flex-col gap-3">
+            <span className="text-xs font-semibold text-white">Add Core Integrations:</span>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <label className="flex items-center gap-3 p-3 rounded-sm border cursor-pointer transition-colors" style={{ borderColor: features.auth ? "#c8ff00" : "rgba(255,255,255,0.04)", background: "rgba(255,255,255,0.01)" }}>
+                <input type="checkbox" checked={features.auth} onChange={(e) => setFeatures({ ...features, auth: e.target.checked })} className="accent-[#c8ff00] w-4 h-4" />
+                <div className="flex flex-col">
+                  <span className="text-xs font-bold text-white">Auth &amp; Profiles</span>
+                  <span className="text-[10px] text-[#888880] font-mono">+$500</span>
+                </div>
+              </label>
+
+              <label className="flex items-center gap-3 p-3 rounded-sm border cursor-pointer transition-colors" style={{ borderColor: features.ecommerce ? "#c8ff00" : "rgba(255,255,255,0.04)", background: "rgba(255,255,255,0.01)" }}>
+                <input type="checkbox" checked={features.ecommerce} onChange={(e) => setFeatures({ ...features, ecommerce: e.target.checked })} className="accent-[#c8ff00] w-4 h-4" />
+                <div className="flex flex-col">
+                  <span className="text-xs font-bold text-white">E-Commerce Shop</span>
+                  <span className="text-[10px] text-[#888880] font-mono">+$800</span>
+                </div>
+              </label>
+
+              <label className="flex items-center gap-3 p-3 rounded-sm border cursor-pointer transition-colors" style={{ borderColor: features.admin ? "#c8ff00" : "rgba(255,255,255,0.04)", background: "rgba(255,255,255,0.01)" }}>
+                <input type="checkbox" checked={features.admin} onChange={(e) => setFeatures({ ...features, admin: e.target.checked })} className="accent-[#c8ff00] w-4 h-4" />
+                <div className="flex flex-col">
+                  <span className="text-xs font-bold text-white">Admin Dashboard</span>
+                  <span className="text-[10px] text-[#888880] font-mono">+$1,200</span>
+                </div>
+              </label>
+
+              <label className="flex items-center gap-3 p-3 rounded-sm border cursor-pointer transition-colors" style={{ borderColor: features.api ? "#c8ff00" : "rgba(255,255,255,0.04)", background: "rgba(255,255,255,0.01)" }}>
+                <input type="checkbox" checked={features.api} onChange={(e) => setFeatures({ ...features, api: e.target.checked })} className="accent-[#c8ff00] w-4 h-4" />
+                <div className="flex flex-col">
+                  <span className="text-xs font-bold text-white">Custom APIs</span>
+                  <span className="text-[10px] text-[#888880] font-mono">+$600</span>
+                </div>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Side: Total Cost Projection */}
+        <div className="rounded-sm border p-6 flex flex-col justify-between text-center md:text-left" style={{ background: "rgba(255,255,255,0.01)", borderColor: "rgba(255,255,255,0.04)" }}>
+          <div className="flex flex-col gap-4">
+            <span className="text-[10px] tracking-widest font-mono uppercase text-[#888880]">Estimated Cost Projection</span>
+            <div className="text-5xl font-bold text-[#c8ff00] font-serif">
+              ${calculateTotal().toLocaleString()}
+            </div>
+            <p className="text-xs text-[#888880] leading-relaxed">
+              This interactive projection covers end-to-end coding, layout customization, responsive adjustments, and core integrations. 
+            </p>
+          </div>
+
+          <button
+            onClick={handleApplyQuote}
+            className="w-full mt-6 py-3.5 text-center text-xs font-bold rounded-sm text-[#0a0a0a] transition-all hover:opacity-90 active:scale-95"
+            style={{ background: "#c8ff00" }}
+          >
+            Apply Estimate &amp; Request Project Callback
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -2854,6 +3074,125 @@ function UserProfile({
     return `https://images.unsplash.com/${t.thumbnail}?w=640&h=400&fit=crop&auto=format`;
   };
 
+  const handleDownloadReceipt = (tmpl: any) => {
+    const canvas = document.createElement("canvas");
+    canvas.width = 600;
+    canvas.height = 700;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    // Draw background
+    ctx.fillStyle = "#0a0a0a";
+    ctx.fillRect(0, 0, 600, 700);
+
+    // Draw border
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.08)";
+    ctx.lineWidth = 2;
+    ctx.strokeRect(20, 20, 560, 660);
+
+    // Draw top logo/brand header
+    ctx.fillStyle = "#c8ff00";
+    // Logo square
+    ctx.fillRect(50, 60, 40, 40);
+    ctx.fillStyle = "#0a0a0a";
+    ctx.font = "bold 16px 'Courier New', monospace";
+    ctx.fillText("SP", 58, 86);
+
+    ctx.fillStyle = "#f0f0ee";
+    ctx.font = "bold 20px sans-serif";
+    ctx.fillText("SPARK WEB", 105, 86);
+
+    ctx.fillStyle = "#888880";
+    ctx.font = "12px monospace";
+    ctx.fillText("TRANSACTION RECEIPT", 420, 86);
+
+    // Separator line
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.06)";
+    ctx.beginPath();
+    ctx.moveTo(50, 125);
+    ctx.lineTo(550, 125);
+    ctx.stroke();
+
+    // Invoice Meta (Date, Inv #)
+    const dateStr = new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+    const invId = "INV-" + Math.floor(100000 + Math.random() * 900000);
+
+    ctx.fillStyle = "#888880";
+    ctx.font = "12px sans-serif";
+    ctx.fillText("Date Issued:", 50, 160);
+    ctx.fillStyle = "#f0f0ee";
+    ctx.fillText(dateStr, 150, 160);
+
+    ctx.fillStyle = "#888880";
+    ctx.fillText("Invoice ID:", 50, 190);
+    ctx.fillStyle = "#f0f0ee";
+    ctx.fillText(invId, 150, 190);
+
+    ctx.fillStyle = "#888880";
+    ctx.fillText("Client Account:", 50, 220);
+    ctx.fillStyle = "#f0f0ee";
+    ctx.fillText(userEmail, 150, 220);
+
+    // Separator line
+    ctx.beginPath();
+    ctx.moveTo(50, 250);
+    ctx.lineTo(550, 250);
+    ctx.stroke();
+
+    // Items Header
+    ctx.fillStyle = "#888880";
+    ctx.font = "bold 12px monospace";
+    ctx.fillText("ITEM DESCRIPTION", 50, 280);
+    ctx.fillText("QTY", 400, 280);
+    ctx.fillText("AMOUNT", 490, 280);
+
+    // Separator line
+    ctx.beginPath();
+    ctx.moveTo(50, 295);
+    ctx.lineTo(550, 295);
+    ctx.stroke();
+
+    // Item line
+    ctx.fillStyle = "#f0f0ee";
+    ctx.font = "bold 14px sans-serif";
+    ctx.fillText(tmpl.name + " (" + (tmpl.category || "HTML Template") + ")", 50, 335);
+
+    ctx.fillStyle = "#f0f0ee";
+    ctx.font = "14px sans-serif";
+    ctx.fillText("1", 405, 335);
+
+    ctx.fillStyle = "#c8ff00";
+    ctx.font = "bold 14px sans-serif";
+    ctx.fillText(tmpl.price || "$0.00", 490, 335);
+
+    // Separator line
+    ctx.beginPath();
+    ctx.moveTo(50, 480);
+    ctx.lineTo(550, 480);
+    ctx.stroke();
+
+    // Total section
+    ctx.fillStyle = "#888880";
+    ctx.font = "14px sans-serif";
+    ctx.fillText("Total Amount Paid:", 330, 520);
+    ctx.fillStyle = "#c8ff00";
+    ctx.font = "bold 20px sans-serif";
+    ctx.fillText(tmpl.price || "$0.00", 480, 522);
+
+    // Support Footer
+    ctx.fillStyle = "#888880";
+    ctx.font = "italic 11px sans-serif";
+    ctx.fillText("Thank you for purchasing from Spark Web.", 50, 580);
+    ctx.fillText("This document serves as verification of a Commercial Single-Use License.", 50, 600);
+    ctx.fillText("For customer support, contact support@sparkweb.com", 50, 620);
+
+    // Trigger download
+    const link = document.createElement("a");
+    link.download = `SparkWeb_${tmpl.name.replace(/\s+/g, "_")}_Receipt.png`;
+    link.href = canvas.toDataURL("image/png");
+    link.click();
+  };
+
   const unlocked = templatesList.filter((t) => purchasedTemplates.includes(t.id));
 
   return (
@@ -3004,23 +3343,32 @@ function UserProfile({
                       <p className="text-xs leading-relaxed flex-1" style={{ color: "#888880" }}>
                         {tmpl.description || tmpl.desc}
                       </p>
-                      <div className="flex gap-2">
-                        <a
-                          href={`/templates/live-editor.html?template=${tmpl.demoPath}`}
-                          className="flex-1 py-2 text-center text-xs font-semibold rounded-sm text-[#0a0a0a]"
-                          style={{ background: "#c8ff00" }}
+                      <div className="flex flex-col gap-2">
+                        <div className="flex gap-2">
+                          <a
+                            href={`/templates/live-editor.html?template=${tmpl.demoPath}`}
+                            className="flex-1 py-2 text-center text-xs font-semibold rounded-sm text-[#0a0a0a]"
+                            style={{ background: "#c8ff00" }}
+                          >
+                            Customize &amp; Edit
+                          </a>
+                          <a
+                            href={`/previews/${tmpl.demoPath}/index.html`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="flex-1 py-2 text-center text-xs font-semibold rounded-sm border hover:bg-white/5 transition-all"
+                            style={{ borderColor: "rgba(255,255,255,0.1)", color: "#888880" }}
+                          >
+                            Preview
+                          </a>
+                        </div>
+                        <button
+                          onClick={() => handleDownloadReceipt(tmpl)}
+                          className="w-full py-2 text-center text-xs font-semibold rounded-sm border transition-all duration-200 hover:bg-white/5"
+                          style={{ borderColor: "rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.02)", color: "#f0f0ee" }}
                         >
-                          Customize &amp; Edit
-                        </a>
-                        <a
-                          href={`/previews/${tmpl.demoPath}/index.html`}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="px-3 py-2 text-center text-xs font-semibold rounded-sm border hover:bg-white/5 transition-all"
-                          style={{ borderColor: "rgba(255,255,255,0.1)", color: "#888880" }}
-                        >
-                          Preview
-                        </a>
+                          📥 Download Receipt
+                        </button>
                       </div>
                     </div>
                   </div>
