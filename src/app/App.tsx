@@ -624,10 +624,6 @@ function PaymentCheckoutModal({ template, userEmail, onClose }: PaymentCheckoutM
             href={finalCheckoutUrl}
             className="w-full py-3.5 text-center text-sm font-semibold rounded-sm text-[#0a0a0a] transition-all hover:opacity-90 payhip-buy-button"
             style={{ background: "#c8ff00", display: "block" }}
-            onClick={() => {
-              // Close the modal upon click so it doesn't block the screen
-              onClose();
-            }}
           >
             Proceed to Checkout
           </a>
