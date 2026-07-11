@@ -240,9 +240,10 @@ interface NavbarProps {
   onSignOut: () => void;
   onOpenAuth: () => void;
   onAdminDashboard: () => void;
+  onProfileView: () => void;
 }
 
-function Navbar({ userEmail, userName, userPicture, onSignOut, onOpenAuth, onAdminDashboard }: NavbarProps) {
+function Navbar({ userEmail, userName, userPicture, onSignOut, onOpenAuth, onAdminDashboard, onProfileView }: NavbarProps) {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
@@ -314,6 +315,12 @@ function Navbar({ userEmail, userName, userPicture, onSignOut, onOpenAuth, onAdm
                   <div className="px-4 py-2 border-b text-xs font-semibold" style={{ color: "#f0f0ee", borderColor: "rgba(255,255,255,0.06)" }}>
                     {userName || userEmail}
                   </div>
+                  <button
+                    onClick={() => { onProfileView(); setShowDropdown(false); }}
+                    className="w-full text-left px-4 py-2.5 text-xs text-[#f0f0ee] hover:bg-white/[0.03] transition-colors"
+                  >
+                    My Purchases
+                  </button>
                   {isAdmin && (
                     <button
                       onClick={() => { onAdminDashboard(); setShowDropdown(false); }}
@@ -368,12 +375,20 @@ function Navbar({ userEmail, userName, userPicture, onSignOut, onOpenAuth, onAdm
             </a>
           ))}
           {userEmail ? (
-            <button
-              onClick={() => { onSignOut(); setOpen(false); }}
-              className="mt-2 text-left text-base py-1 text-[#ff6666]"
-            >
-              Sign Out
-            </button>
+            <>
+              <button
+                onClick={() => { onProfileView(); setOpen(false); }}
+                className="text-left text-base py-1 text-[#f0f0ee]"
+              >
+                My Purchases
+              </button>
+              <button
+                onClick={() => { onSignOut(); setOpen(false); }}
+                className="mt-2 text-left text-base py-1 text-[#ff6666]"
+              >
+                Sign Out
+              </button>
+            </>
           ) : (
             <button
               onClick={() => { onOpenAuth(); setOpen(false); }}
@@ -2873,9 +2888,215 @@ function AdminDashboard({ user, onLogout, templatesList, onRefreshTemplates }: A
   );
 }
 
+interface UserProfileProps {
+  userEmail: string;
+  userName: string | null;
+  userPicture: string | null;
+  purchasedTemplates: string[];
+  templatesList: any[];
+  onBack: () => void;
+  onSignOut: () => void;
+}
+
+function UserProfile({
+  userEmail,
+  userName,
+  userPicture,
+  purchasedTemplates,
+  templatesList,
+  onBack,
+  onSignOut,
+}: UserProfileProps) {
+  const getTmplThumbnail = (t: any) => {
+    if (!t.thumbnail) return "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=640&h=400&fit=crop&auto=format";
+    if (t.thumbnail.startsWith("http")) return t.thumbnail;
+    if (t.thumbnail.includes("/")) return t.thumbnail;
+    return `https://images.unsplash.com/${t.thumbnail}?w=640&h=400&fit=crop&auto=format`;
+  };
+
+  const unlocked = templatesList.filter((t) => purchasedTemplates.includes(t.id));
+
+  return (
+    <div className="min-h-screen pb-24" style={{ background: "#0a0a0a" }}>
+      {/* Upper sub-header bar */}
+      <div className="border-b" style={{ background: "#111111", borderColor: "rgba(255,255,255,0.06)" }}>
+        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+          <button
+            onClick={onBack}
+            className="flex items-center gap-2 text-xs font-semibold text-[#888880] hover:text-white transition-colors"
+          >
+            ← Back to Storefront
+          </button>
+          <div className="flex items-center gap-3">
+            <span className="text-xs" style={{ color: "#888880", fontFamily: "JetBrains Mono, monospace" }}>
+              Logged in: {userEmail}
+            </span>
+            <button
+              onClick={onSignOut}
+              className="px-3 py-1.5 rounded-sm border text-xs font-semibold text-[#ff6666] hover:bg-red-500/5 transition-all"
+              style={{ borderColor: "rgba(255,102,102,0.15)" }}
+            >
+              Sign Out
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-6 lg:px-8 mt-12">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          
+          {/* Profile Card Sidebar */}
+          <div
+            className="rounded-sm border p-8 flex flex-col items-center text-center gap-6"
+            style={{ background: "#131313", borderColor: "rgba(255,255,255,0.06)", height: "fit-content" }}
+          >
+            {userPicture ? (
+              <img
+                src={userPicture}
+                alt={userName || "User profile"}
+                className="w-20 h-20 rounded-full border-2 border-[#c8ff00]"
+              />
+            ) : (
+              <div
+                className="w-20 h-20 rounded-full flex items-center justify-center font-bold text-2xl"
+                style={{ background: "#1c1c1c", color: "#c8ff00" }}
+              >
+                {(userName || userEmail).substring(0, 2).toUpperCase()}
+              </div>
+            )}
+            <div>
+              <h2 className="text-xl font-bold" style={{ fontFamily: "Outfit, sans-serif", color: "#f0f0ee" }}>
+                {userName || "Valued Customer"}
+              </h2>
+              <p className="text-xs mt-1" style={{ color: "#888880", fontFamily: "JetBrains Mono, monospace" }}>
+                {userEmail}
+              </p>
+            </div>
+            
+            <div
+              className="w-full rounded-sm border p-4 text-left"
+              style={{ background: "rgba(255,255,255,0.02)", borderColor: "rgba(255,255,255,0.04)" }}
+            >
+              <div className="text-[10px] uppercase font-bold tracking-widest" style={{ color: "#888880" }}>
+                Account Tier
+              </div>
+              <div className="text-sm font-bold text-[#c8ff00] mt-1 flex items-center gap-1.5">
+                <Shield size={14} /> Premium Creator
+              </div>
+            </div>
+
+            <div
+              className="w-full rounded-sm border p-4 text-left"
+              style={{ background: "rgba(255,255,255,0.02)", borderColor: "rgba(255,255,255,0.04)" }}
+            >
+              <div className="text-[10px] uppercase font-bold tracking-widest" style={{ color: "#888880" }}>
+                Statistics
+              </div>
+              <div className="mt-2 text-xs flex justify-between">
+                <span style={{ color: "#888880" }}>Unlocked templates:</span>
+                <span className="font-bold text-white">{purchasedTemplates.length}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Library Section */}
+          <div className="lg:col-span-2 flex flex-col gap-6">
+            <div>
+              <h1 className="text-3xl font-bold mb-2" style={{ fontFamily: "Fraunces, serif", color: "#f0f0ee" }}>
+                My Purchased Library
+              </h1>
+              <p className="text-sm" style={{ color: "#888880" }}>
+                Manage, preview, and download the templates associated with your license.
+              </p>
+            </div>
+
+            {unlocked.length === 0 ? (
+              <div
+                className="rounded-sm border p-12 text-center flex flex-col items-center gap-6"
+                style={{ background: "#131313", borderColor: "rgba(255,255,255,0.06)" }}
+              >
+                <div
+                  className="w-12 h-12 rounded-full flex items-center justify-center"
+                  style={{ background: "rgba(200,255,0,0.05)", color: "#c8ff00" }}
+                >
+                  <Package size={24} />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold mb-1" style={{ color: "#f0f0ee", fontFamily: "Outfit, sans-serif" }}>
+                    Your library is currently empty
+                  </h3>
+                  <p className="text-xs max-w-sm leading-relaxed" style={{ color: "#888880" }}>
+                    You haven't purchased or whitelisted any templates yet. Browse the marketplace and unlock premium layouts to get started!
+                  </p>
+                </div>
+                <button
+                  onClick={onBack}
+                  className="px-6 py-2.5 text-xs font-semibold rounded-sm text-[#0a0a0a]"
+                  style={{ background: "#c8ff00" }}
+                >
+                  Browse Marketplace
+                </button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                {unlocked.map((tmpl) => (
+                  <div
+                    key={tmpl.id}
+                    className="rounded-sm border overflow-hidden flex flex-col"
+                    style={{ background: "#131313", borderColor: "rgba(255,255,255,0.06)" }}
+                  >
+                    <div style={{ aspectRatio: "16/10", overflow: "hidden", background: "#1a1a1a" }}>
+                      <img
+                        src={getTmplThumbnail(tmpl)}
+                        alt={tmpl.name}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div className="p-5 flex flex-col gap-4 flex-1">
+                      <div>
+                        <div className="text-sm font-semibold" style={{ color: "#f0f0ee", fontFamily: "Outfit, sans-serif" }}>
+                          {tmpl.name}
+                        </div>
+                        <div className="text-xs mt-0.5" style={{ color: "#888880", fontFamily: "Outfit, sans-serif" }}>
+                          {tmpl.category}
+                        </div>
+                      </div>
+                      <p className="text-xs leading-relaxed flex-1" style={{ color: "#888880" }}>
+                        {tmpl.description || tmpl.desc}
+                      </p>
+                      <div className="flex gap-2">
+                        <a
+                          href={`/templates/live-editor.html?template=${tmpl.demoPath}`}
+                          className="flex-1 py-2 text-center text-xs font-semibold rounded-sm text-[#0a0a0a]"
+                          style={{ background: "#c8ff00" }}
+                        >
+                          Customize &amp; Edit
+                        </a>
+                        <a
+                          href={`/previews/${tmpl.demoPath}/index.html`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="px-3 py-2 text-center text-xs font-semibold rounded-sm border hover:bg-white/5 transition-all"
+                          style={{ borderColor: "rgba(255,255,255,0.1)", color: "#888880" }}
+                        >
+                          Preview
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── App ──────────────────────────────────────────────────────────────────────
 
-type AppView = "site" | "admin-login" | "admin-dashboard";
+type AppView = "site" | "admin-login" | "admin-dashboard" | "profile";
 
 export default function App() {
   const [view, setView] = useState<AppView>(() => {
@@ -3062,6 +3283,20 @@ export default function App() {
     );
   }
 
+  if (view === "profile" && userEmail) {
+    return (
+      <UserProfile
+        userEmail={userEmail}
+        userName={userName}
+        userPicture={userPicture}
+        purchasedTemplates={purchasedTemplates}
+        templatesList={templatesList}
+        onBack={() => setView("site")}
+        onSignOut={handleSignOut}
+      />
+    );
+  }
+
   return (
     <div className="min-h-screen" style={{ background: "#0a0a0a" }}>
       <Navbar
@@ -3071,6 +3306,7 @@ export default function App() {
         onSignOut={handleSignOut}
         onOpenAuth={() => setShowAuthModal(true)}
         onAdminDashboard={() => setView("admin-dashboard")}
+        onProfileView={() => setView("profile")}
       />
       <Hero />
       <Services />
