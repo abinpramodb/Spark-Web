@@ -288,15 +288,6 @@ function Navbar({ userEmail, userName, userPicture, onSignOut, onOpenAuth, onAdm
               {link}
             </a>
           ))}
-          {isAdmin && (
-            <button
-              onClick={onAdminDashboard}
-              className="text-sm font-semibold text-[#c8ff00] hover:underline"
-              style={{ fontFamily: "Outfit, sans-serif" }}
-            >
-              Admin Dashboard
-            </button>
-          )}
         </div>
 
         <div className="hidden md:flex items-center gap-4">
@@ -376,14 +367,6 @@ function Navbar({ userEmail, userName, userPicture, onSignOut, onOpenAuth, onAdm
               {link}
             </a>
           ))}
-          {isAdmin && (
-            <button
-              onClick={() => { onAdminDashboard(); setOpen(false); }}
-              className="text-left text-base py-1 text-[#c8ff00]"
-            >
-              Admin Dashboard
-            </button>
-          )}
           {userEmail ? (
             <button
               onClick={() => { onSignOut(); setOpen(false); }}
@@ -1891,12 +1874,6 @@ function Footer({ onAdminClick }: { onAdminClick: () => void }) {
           <div className="flex items-center gap-6">
             <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>
             <a href="#" className="hover:text-white transition-colors">Terms of Service</a>
-            <button
-              onClick={onAdminClick}
-              className="flex items-center gap-1.5 hover:text-white transition-colors opacity-40 hover:opacity-100"
-            >
-              <Lock size={10} /> Admin
-            </button>
           </div>
         </div>
       </div>
