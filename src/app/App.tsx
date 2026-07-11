@@ -580,18 +580,58 @@ interface PaymentCheckoutModalProps {
 }
 
 function PaymentCheckoutModal({ template, userEmail, onClose }: PaymentCheckoutModalProps) {
+  const [loading, setLoading] = useState(false);
   const payhipUrl = template.payhipUrl || "#";
-  const finalCheckoutUrl = payhipUrl + (payhipUrl.includes("?") ? "&" : "?") + "email=" + encodeURIComponent(userEmail);
+  const isMock = payhipUrl.includes("mock") || payhipUrl.includes("YOUR_PAYHIP_URL") || payhipUrl === "#";
 
   useEffect(() => {
-    if ((window as any).Payhip && typeof (window as any).Payhip.scan === "function") {
+    // Only bind Payhip overlay script if it's a real product URL (non-mock)
+    if (!isMock && (window as any).Payhip && typeof (window as any).Payhip.scan === "function") {
       try {
         (window as any).Payhip.scan();
       } catch (e) {
         console.error("Payhip scan error:", e);
       }
     }
-  }, []);
+  }, [isMock]);
+
+  const handleCheckoutClick = (e: React.MouseEvent) => {
+    if (isMock) {
+      e.preventDefault();
+      setLoading(true);
+      
+      // Simulate payment processing delay
+      setTimeout(async () => {
+        try {
+          const response = await fetch(CLOUDFLARE_WORKER_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              action: "record_purchase",
+              email: userEmail,
+              templateId: String(template.id)
+            })
+          });
+          const data = await response.json();
+          if (data.result === "success") {
+            alert("Demo Mode Success! Your template license has been whitelisted.");
+          } else {
+            alert("Demo Mode Sync error: " + data.error);
+          }
+        } catch (err) {
+          console.error("Demo Mode Sync failed:", err);
+          alert("Demo Mode Sync failed due to network error.");
+        } finally {
+          setLoading(false);
+          onClose();
+          window.location.reload();
+        }
+      }, 1500);
+    }
+    // If it is a real product, we let the click bubble so Payhip's JS overlay intercepts it
+  };
+
+  const finalCheckoutUrl = payhipUrl + (payhipUrl.includes("?") ? "&" : "?") + "email=" + encodeURIComponent(userEmail);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.85)" }}>
@@ -615,18 +655,31 @@ function PaymentCheckoutModal({ template, userEmail, onClose }: PaymentCheckoutM
         {/* Content */}
         <div className="p-6 flex flex-col gap-4 text-center">
           <p className="text-sm" style={{ color: "#888880" }}>
-            Unlock instantly using PayPal, Credit Card, or Debit Card.
+            {isMock 
+              ? "Demo Mode: Click below to simulate checkout and whitelist this template." 
+              : "Unlock instantly using PayPal, Credit Card, or Debit Card."
+            }
           </p>
           <div className="text-2xl font-bold" style={{ color: "#c8ff00", fontFamily: "Fraunces, serif" }}>
             {template.price}
           </div>
-          <a
-            href={finalCheckoutUrl}
-            className="w-full py-3.5 text-center text-sm font-semibold rounded-sm text-[#0a0a0a] transition-all hover:opacity-90 payhip-buy-button"
-            style={{ background: "#c8ff00", display: "block" }}
-          >
-            Proceed to Checkout
-          </a>
+          {loading ? (
+            <div className="flex flex-col items-center gap-2 py-3">
+              <div className="w-6 h-6 border-2 border-t-[#c8ff00] border-white/10 rounded-full animate-spin"></div>
+              <span className="text-xs" style={{ color: "#888880", fontFamily: "JetBrains Mono, monospace" }}>
+                Processing demo transaction...
+              </span>
+            </div>
+          ) : (
+            <a
+              href={isMock ? "#" : finalCheckoutUrl}
+              onClick={handleCheckoutClick}
+              className="w-full py-3.5 text-center text-sm font-semibold rounded-sm text-[#0a0a0a] transition-all hover:opacity-90 payhip-buy-button"
+              style={{ background: "#c8ff00", display: "block" }}
+            >
+              {isMock ? "Proceed (Demo Unlock)" : "Proceed to Checkout"}
+            </a>
+          )}
         </div>
       </div>
     </div>
