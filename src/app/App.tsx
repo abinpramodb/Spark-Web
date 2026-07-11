@@ -750,7 +750,12 @@ function Templates({ templatesList, purchasedTemplates, userEmail, onOpenCheckou
     return `https://images.unsplash.com/${t.thumbnail}?w=640&h=400&fit=crop&auto=format`;
   };
 
-  const categories = ["All", "SaaS", "Portfolio", "Blog", "Agency", "E-Commerce"];
+  const categories = ["All", ...Array.from(new Set(templatesList.map((t: any) => {
+    const cat = t.category || "Other";
+    if (cat.toLowerCase() === "saas") return "SaaS";
+    if (cat.toLowerCase() === "e-commerce") return "E-Commerce";
+    return cat.charAt(0).toUpperCase() + cat.slice(1);
+  })))];
 
   const filtered = templatesList
     .filter((t) => {
@@ -2434,18 +2439,14 @@ function AdminDashboard({ user, onLogout, templatesList, onRefreshTemplates }: A
                       </div>
                       <div>
                         <label className="block text-xs mb-1.5" style={{ color: "#888880", fontFamily: "JetBrains Mono, monospace" }}>Category</label>
-                        <select
+                        <input
+                          required
                           value={newTemplate.category}
                           onChange={(e) => setNewTemplate({ ...newTemplate, category: e.target.value })}
                           className="w-full px-3 py-2 text-sm rounded-sm border outline-none bg-black text-[#f0f0ee]"
                           style={{ borderColor: "rgba(255,255,255,0.08)" }}
-                        >
-                          <option value="saas">SaaS Landing Page</option>
-                          <option value="portfolio">Portfolio</option>
-                          <option value="blog">Blog</option>
-                          <option value="agency">Agency</option>
-                          <option value="e-commerce">E-Commerce</option>
-                        </select>
+                          placeholder="e.g. SaaS, Portfolio, Blog, Agency, E-Commerce, Corporate"
+                        />
                       </div>
                       <div>
                         <label className="block text-xs mb-1.5" style={{ color: "#888880", fontFamily: "JetBrains Mono, monospace" }}>Description</label>
@@ -2552,18 +2553,14 @@ function AdminDashboard({ user, onLogout, templatesList, onRefreshTemplates }: A
                       </div>
                       <div>
                         <label className="block text-xs mb-1.5" style={{ color: "#888880", fontFamily: "JetBrains Mono, monospace" }}>Category</label>
-                        <select
+                        <input
+                          required
                           value={editingTemplate.category}
                           onChange={(e) => setEditingTemplate({ ...editingTemplate, category: e.target.value })}
                           className="w-full px-3 py-2 text-sm rounded-sm border outline-none bg-black text-[#f0f0ee]"
                           style={{ borderColor: "rgba(255,255,255,0.08)" }}
-                        >
-                          <option value="saas">SaaS Landing Page</option>
-                          <option value="portfolio">Portfolio</option>
-                          <option value="blog">Blog</option>
-                          <option value="agency">Agency</option>
-                          <option value="e-commerce">E-Commerce</option>
-                        </select>
+                          placeholder="e.g. SaaS, Portfolio, Blog, Agency, E-Commerce, Corporate"
+                        />
                       </div>
                       <div>
                         <label className="block text-xs mb-1.5" style={{ color: "#888880", fontFamily: "JetBrains Mono, monospace" }}>Description</label>
