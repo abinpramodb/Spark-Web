@@ -3,7 +3,7 @@ import { ArrowRight, Menu, X, Check, Star, ChevronDown, Mail, Phone, MapPin, Ext
 
 const CLOUDFLARE_WORKER_URL = "https://sparkweb-api.oxoredz.workers.dev";
 const GOOGLE_CLIENT_ID = "284331318489-304jg5aadjptv3850nlg9uodc7h1kcl8.apps.googleusercontent.com";
-const ADMIN_EMAILS = ["oxoredz@gmail.com", "oxoredx@gmail.com"];
+const ADMIN_EMAILS = ["oxoredz@gmail.com"];
 
 // ─── Data ────────────────────────────────────────────────────────────────────
 
