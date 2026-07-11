@@ -583,6 +583,16 @@ function PaymentCheckoutModal({ template, userEmail, onClose }: PaymentCheckoutM
   const payhipUrl = template.payhipUrl || "#";
   const finalCheckoutUrl = payhipUrl + (payhipUrl.includes("?") ? "&" : "?") + "email=" + encodeURIComponent(userEmail);
 
+  useEffect(() => {
+    if ((window as any).Payhip && typeof (window as any).Payhip.scan === "function") {
+      try {
+        (window as any).Payhip.scan();
+      } catch (e) {
+        console.error("Payhip scan error:", e);
+      }
+    }
+  }, []);
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.85)" }}>
       <div
@@ -2846,6 +2856,27 @@ export default function App() {
   const [checkoutTemplate, setCheckoutTemplate] = useState<any | null>(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
 
+  // Helper to normalize template column keys from SQLite (case-insensitive fallback)
+  const normalizeTemplate = (t: any) => {
+    if (!t) return t;
+    return {
+      id: t.id || t.ID,
+      name: t.name || t.NAME,
+      category: t.category || t.CATEGORY,
+      description: t.description || t.desc || t.DESCRIPTION || t.DESC,
+      thumbnail: t.thumbnail || t.THUMBNAIL,
+      demoPath: t.demoPath || t.demopath || t.DEMOPATH,
+      price: t.price || t.PRICE,
+      payhipUrl: t.payhipUrl || t.payhipurl || t.PAYHIPURL,
+      figmaUrl: t.figmaUrl || t.figmaurl || t.FIGMAURL,
+      rating: t.rating || t.RATING,
+      reviews: t.reviews || t.REVIEWS,
+      downloads: t.downloads || t.DOWNLOADS,
+      pages: t.pages || t.PAGES,
+      tech: t.tech ? (typeof t.tech === "string" ? JSON.parse(t.tech) : t.tech) : ["React", "Tailwind"]
+    };
+  };
+
   // 1. Fetch templates from D1 database
   const loadTemplates = async () => {
     try {
@@ -2856,12 +2887,12 @@ export default function App() {
       });
       const data = await res.json();
       if (data.result === "success") {
-        setTemplatesList(data.templates);
+        setTemplatesList((data.templates || []).map(normalizeTemplate));
       }
     } catch (err) {
       console.error("Failed to load templates", err);
       // Fallback
-      setTemplatesList(templates);
+      setTemplatesList(templates.map(normalizeTemplate));
     }
   };
 
