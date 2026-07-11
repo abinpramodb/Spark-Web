@@ -828,6 +828,29 @@ function AuthModal({ onClose, onSuccess }: AuthModalProps) {
     }
   }, [onSuccess]);
 
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data && event.data.source === "tf-google-login") {
+        const { email, name, picture } = event.data;
+        onSuccess(email, name, picture);
+      }
+    };
+    window.addEventListener("message", handleMessage);
+    return () => window.removeEventListener("message", handleMessage);
+  }, [onSuccess]);
+
+  const handleMockPopupClick = () => {
+    const width = 480, height = 600;
+    const left = (window.innerWidth - width) / 2 + window.screenX;
+    const top = (window.innerHeight - height) / 2 + window.screenY;
+    const popup = window.open(
+      "/templates/mock-google-login.html",
+      "GoogleSignInFallbackPopup",
+      `width=${width},height=${height},left=${left},top=${top},status=no,resizable=yes`
+    );
+    if (window.focus && popup) popup.focus();
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.85)" }}>
       <div
@@ -844,6 +867,14 @@ function AuthModal({ onClose, onSuccess }: AuthModalProps) {
           Logging in allows you to unlock premium templates, sync your custom live editor builds, and access your whitelisted downloads.
         </p>
         <div id="google-signin-btn-container" className="my-2"></div>
+        <div className="text-center text-[10px] w-full border-t pt-4" style={{ color: "#444440", borderColor: "rgba(255,255,255,0.06)" }}>OR</div>
+        <button
+          onClick={handleMockPopupClick}
+          className="w-full py-2.5 text-xs font-semibold rounded-sm border hover:bg-white/5 transition-all flex items-center justify-center gap-2"
+          style={{ borderColor: "rgba(255,255,255,0.1)", color: "#888880" }}
+        >
+          Use Webx Demo Login (No OAuth Required)
+        </button>
       </div>
     </div>
   );
@@ -860,6 +891,7 @@ interface TemplatesProps {
 function Templates({ templatesList, purchasedTemplates, userEmail, onOpenCheckout, onOpenAuth }: TemplatesProps) {
   const [activeCategory, setActiveCategory] = useState("All");
   const [sortBy, setSortBy] = useState("popular");
+  const [searchQuery, setSearchQuery] = useState("");
   const [previewId, setPreviewId] = useState<string | number | null>(null);
 
   const getPriceNum = (p: any) => {
@@ -880,8 +912,12 @@ function Templates({ templatesList, purchasedTemplates, userEmail, onOpenCheckou
 
   const filtered = templatesList
     .filter((t) => {
-      if (activeCategory === "All") return true;
-      return t.category.toLowerCase() === activeCategory.toLowerCase();
+      const matchesCategory = activeCategory === "All" || t.category.toLowerCase() === activeCategory.toLowerCase();
+      const matchesSearch = !searchQuery.trim() || 
+        t.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+        (t.description || t.desc || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+        t.category.toLowerCase().includes(searchQuery.toLowerCase());
+      return matchesCategory && matchesSearch;
     })
     .sort((a, b) => {
       const priceA = getPriceNum(a.price);
@@ -949,13 +985,13 @@ function Templates({ templatesList, purchasedTemplates, userEmail, onOpenCheckou
           ))}
         </div>
 
-        {/* Filters */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-          <div className="flex flex-wrap gap-2">
+        {/* Filters & Search */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+          <div className="flex flex-wrap gap-2 order-2 md:order-1">
             {categories.map((cat) => (
               <button
                 key={cat}
-                onClick={() => setActiveCategory(cat)}
+                onClick={() => { setActiveCategory(cat); setSearchQuery(""); }}
                 className="px-4 py-1.5 text-xs font-medium rounded-sm border transition-all duration-200"
                 style={{
                   background: activeCategory === cat ? "#c8ff00" : "transparent",
@@ -969,24 +1005,48 @@ function Templates({ templatesList, purchasedTemplates, userEmail, onOpenCheckou
             ))}
           </div>
 
-          <div className="flex items-center gap-2">
-            <Filter size={12} style={{ color: "#888880" }} />
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              className="text-xs px-3 py-2 rounded-sm border outline-none appearance-none cursor-pointer"
-              style={{
-                background: "#1c1c1c",
-                borderColor: "rgba(255,255,255,0.08)",
-                color: "#888880",
-                fontFamily: "JetBrains Mono, monospace",
-              }}
+          <div className="flex items-center gap-3 order-1 md:order-2 w-full md:w-auto">
+            {/* Search Input */}
+            <div
+              className="flex items-center gap-2 px-3 py-1.5 rounded-sm border flex-1 md:flex-initial md:w-64"
+              style={{ background: "#1c1c1c", borderColor: "rgba(255,255,255,0.08)" }}
             >
-              <option value="popular">Most Popular</option>
-              <option value="rating">Top Rated</option>
-              <option value="price-low">Price: Low to High</option>
-              <option value="price-high">Price: High to Low</option>
-            </select>
+              <Search size={12} style={{ color: "#888880" }} />
+              <input
+                type="text"
+                placeholder="Search templates..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="text-xs outline-none bg-transparent w-full"
+                style={{ color: "#f0f0ee", fontFamily: "Outfit, sans-serif" }}
+              />
+              {searchQuery && (
+                <button onClick={() => setSearchQuery("")} style={{ color: "#888880" }}>
+                  <X size={12} />
+                </button>
+              )}
+            </div>
+
+            {/* Sort Select */}
+            <div className="flex items-center gap-2 shrink-0">
+              <Filter size={12} style={{ color: "#888880" }} />
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="text-xs px-3 py-2 rounded-sm border outline-none appearance-none cursor-pointer"
+                style={{
+                  background: "#1c1c1c",
+                  borderColor: "rgba(255,255,255,0.08)",
+                  color: "#888880",
+                  fontFamily: "JetBrains Mono, monospace",
+                }}
+              >
+                <option value="popular">Most Popular</option>
+                <option value="rating">Top Rated</option>
+                <option value="price-low">Price: Low to High</option>
+                <option value="price-high">Price: High to Low</option>
+              </select>
+            </div>
           </div>
         </div>
 
@@ -2929,7 +2989,12 @@ function AdminDashboard({ user, onLogout, templatesList, onRefreshTemplates }: A
 type AppView = "site" | "admin-login" | "admin-dashboard";
 
 export default function App() {
-  const [view, setView] = useState<AppView>("site");
+  const [view, setView] = useState<AppView>(() => {
+    if (window.location.hash === "#admin" || window.location.search.includes("view=admin")) {
+      return "admin-login";
+    }
+    return "site";
+  });
   const [adminUser, setAdminUser] = useState<AdminUser | null>(null);
 
   const [templatesList, setTemplatesList] = useState<any[]>([]);
