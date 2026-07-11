@@ -2972,7 +2972,17 @@ export default function App() {
     }
     return "site";
   });
-  const [adminUser, setAdminUser] = useState<AdminUser | null>(null);
+  const [adminUser, setAdminUser] = useState<AdminUser | null>(() => {
+    const email = localStorage.getItem("tf_user_email");
+    if (email && ADMIN_EMAILS.includes(email.toLowerCase().trim())) {
+      return {
+        email,
+        name: localStorage.getItem("tf_user_name") || "Admin User",
+        role: "Super Admin"
+      };
+    }
+    return null;
+  });
 
   const [templatesList, setTemplatesList] = useState<any[]>([]);
   const [purchasedTemplates, setPurchasedTemplates] = useState<string[]>([]);
