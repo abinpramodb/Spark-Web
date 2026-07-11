@@ -580,24 +580,6 @@ interface PaymentCheckoutModalProps {
 }
 
 function PaymentCheckoutModal({ template, userEmail, onClose }: PaymentCheckoutModalProps) {
-  const [tab, setTab] = useState<"payhip" | "upi">("payhip");
-  const [utr, setUtr] = useState("");
-  const [submitting, setSubmitting] = useState(false);
-
-  const getPriceNum = (p: any) => {
-    if (typeof p === "number") return p;
-    if (!p || p.toLowerCase() === "free") return 0;
-    const num = parseFloat(p.replace(/[^0-9.]/g, ""));
-    return isNaN(num) ? 0 : num;
-  };
-
-  const usdPrice = getPriceNum(template.price);
-  const inrPrice = Math.round(usdPrice * 84);
-  const upiId = "oxoredz@ybl";
-  const payeeName = "Spark Web Premium Store";
-  const upiUrl = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(payeeName)}&am=${inrPrice}&cu=INR`;
-  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(upiUrl)}`;
-
   const handlePayhipClick = (e: React.MouseEvent) => {
     e.preventDefault();
     if ((window as any).Payhip && template.payhipUrl) {
@@ -635,39 +617,6 @@ function PaymentCheckoutModal({ template, userEmail, onClose }: PaymentCheckoutM
     }
   };
 
-  const handleUPISubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!utr.trim() || utr.trim().length < 6) {
-      alert("Please enter a valid Transaction Ref / UTR number.");
-      return;
-    }
-    setSubmitting(true);
-    try {
-      const response = await fetch(CLOUDFLARE_WORKER_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action: "submit_upi_request",
-          email: userEmail,
-          templateId: template.id,
-          utr: utr.trim()
-        })
-      });
-      const data = await response.json();
-      if (data.result === "success") {
-        alert("UPI Payment request submitted successfully! An admin will review and whitelist your template access shortly.");
-        onClose();
-      } else {
-        alert("Submission failed: " + data.error);
-      }
-    } catch (err) {
-      console.error(err);
-      alert("Network error submitting request.");
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.85)" }}>
       <div
@@ -687,107 +636,21 @@ function PaymentCheckoutModal({ template, userEmail, onClose }: PaymentCheckoutM
           <button onClick={onClose} style={{ color: "#888880" }}><X size={18} /></button>
         </div>
 
-        {/* Tabs */}
-        <div className="flex border-b" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
-          <button
-            onClick={() => setTab("payhip")}
-            className="flex-1 py-3 text-xs font-semibold border-b-2 transition-all"
-            style={{
-              borderColor: tab === "payhip" ? "#c8ff00" : "transparent",
-              color: tab === "payhip" ? "#c8ff00" : "#888880"
-            }}
-          >
-            ⚡ Card / PayPal (Payhip)
-          </button>
-          <button
-            onClick={() => setTab("upi")}
-            className="flex-1 py-3 text-xs font-semibold border-b-2 transition-all"
-            style={{
-              borderColor: tab === "upi" ? "#c8ff00" : "transparent",
-              color: tab === "upi" ? "#c8ff00" : "#888880"
-            }}
-          >
-            🇮🇳 UPI QR (0% Fees)
-          </button>
-        </div>
-
         {/* Content */}
-        <div className="p-6">
-          {tab === "payhip" ? (
-            <div className="flex flex-col gap-4 text-center">
-              <p className="text-sm" style={{ color: "#888880" }}>
-                Unlock instantly using PayPal, Credit Card, or Debit Card.
-              </p>
-              <div className="text-2xl font-bold" style={{ color: "#c8ff00", fontFamily: "Fraunces, serif" }}>
-                {template.price}
-              </div>
-              <button
-                onClick={handlePayhipClick}
-                className="w-full py-3.5 text-sm font-semibold rounded-sm text-[#0a0a0a]"
-                style={{ background: "#c8ff00" }}
-              >
-                Proceed to Checkout
-              </button>
-            </div>
-          ) : (
-            <form onSubmit={handleUPISubmit} className="flex flex-col gap-4 text-center items-center">
-              <p className="text-xs" style={{ color: "#888880" }}>
-                Scan to pay using any UPI app (GPay, PhonePe, Paytm).
-              </p>
-              <div className="bg-white p-3 rounded-sm">
-                <img src={qrUrl} alt="UPI QR Code" className="w-40 h-40" />
-              </div>
-              <div className="text-xl font-bold" style={{ color: "#c8ff00", fontFamily: "Fraunces, serif" }}>
-                ₹{inrPrice} <span className="text-xs text-[#888880]">(@ ₹84/$)</span>
-              </div>
-              <div className="w-full text-left">
-                <label className="block text-[10px] uppercase mb-1" style={{ color: "#888880", fontFamily: "JetBrains Mono, monospace" }}>
-                  UPI ID
-                </label>
-                <div className="flex gap-2">
-                  <input
-                    readOnly
-                    value={upiId}
-                    className="flex-1 px-3 py-2 text-xs rounded-sm border outline-none bg-black"
-                    style={{ borderColor: "rgba(255,255,255,0.08)", color: "#f0f0ee" }}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => {
-                      navigator.clipboard.writeText(upiId);
-                      alert("UPI ID copied to clipboard!");
-                    }}
-                    className="px-3 py-2 text-xs font-semibold rounded-sm border transition-colors hover:bg-white/5"
-                    style={{ borderColor: "rgba(255,255,255,0.1)", color: "#888880" }}
-                  >
-                    Copy
-                  </button>
-                </div>
-              </div>
-              <div className="w-full text-left">
-                <label className="block text-[10px] uppercase mb-1" style={{ color: "#888880", fontFamily: "JetBrains Mono, monospace" }}>
-                  Transaction UTR / Reference No. (12 digits)
-                </label>
-                <input
-                  required
-                  type="text"
-                  placeholder="e.g. 529384729103"
-                  value={utr}
-                  onChange={(e) => setUtr(e.target.value)}
-                  className="w-full px-3 py-2 text-xs rounded-sm border outline-none"
-                  style={{ background: "#0a0a0a", borderColor: "rgba(255,255,255,0.08)", color: "#f0f0ee" }}
-                />
-              </div>
-              <button
-                type="submit"
-                disabled={submitting}
-                className="w-full py-3 text-xs font-semibold rounded-sm text-[#0a0a0a] disabled:opacity-60"
-                style={{ background: "#c8ff00" }}
-              >
-                {submitting ? "Submitting..." : "Submit Transaction Ref"}
-              </button>
-            </form>
-          )}
+        <div className="p-6 flex flex-col gap-4 text-center">
+          <p className="text-sm" style={{ color: "#888880" }}>
+            Unlock instantly using PayPal, Credit Card, or Debit Card.
+          </p>
+          <div className="text-2xl font-bold" style={{ color: "#c8ff00", fontFamily: "Fraunces, serif" }}>
+            {template.price}
+          </div>
+          <button
+            onClick={handlePayhipClick}
+            className="w-full py-3.5 text-sm font-semibold rounded-sm text-[#0a0a0a]"
+            style={{ background: "#c8ff00" }}
+          >
+            Proceed to Checkout
+          </button>
         </div>
       </div>
     </div>
