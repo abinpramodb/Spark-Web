@@ -3208,7 +3208,6 @@ export default function App() {
         onProfileView={() => setView("profile")}
       />
       <Hero />
-      <Services />
       <Templates
         templatesList={templatesList}
         purchasedTemplates={purchasedTemplates}
@@ -3216,6 +3215,7 @@ export default function App() {
         onOpenCheckout={(tmpl) => setCheckoutTemplate(tmpl)}
         onOpenAuth={() => setShowAuthModal(true)}
       />
+      <Services />
       <Work />
       <Process />
       <Contact />
