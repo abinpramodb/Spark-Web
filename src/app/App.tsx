@@ -3236,25 +3236,39 @@ export default function App() {
   const [userPicture, setUserPicture] = useState<string | null>(localStorage.getItem("tf_user_picture"));
 
   const [checkoutTemplate, setCheckoutTemplate] = useState<any | null>(null);
-  const [showAuthModal, setShowAuthModal] = useState(false);
-
-  // Helper to normalize template column keys from SQLite (case-insensitive fallback)
+  const [showAuthModal, setShowAuthModal] = useState(false);  // Helper to normalize template column keys from SQLite (case-insensitive fallback)
   const normalizeTemplate = (t: any) => {
     if (!t) return t;
+
+    // Map numerical IDs or names to demoPath and payhipUrl if missing
+    let defaultDemoPath = "template-1";
+    const tid = String(t.id || t.ID);
+    const tname = String(t.name || t.NAME || "").toLowerCase();
+
+    if (tid === "2" || tid.includes("template-2") || tname.includes("portfolio") || tname.includes("zenith")) {
+      defaultDemoPath = "template-2";
+    } else if (tid === "3" || tid.includes("template-3") || tname.includes("blog") || tname.includes("echo")) {
+      defaultDemoPath = "template-3";
+    } else if (tid === "4" || tid.includes("template-4") || tname.includes("nova")) {
+      defaultDemoPath = "template-4";
+    } else if (tid === "5" || tid.includes("template-5")) {
+      defaultDemoPath = "template-5";
+    }
+
     return {
       id: t.id || t.ID,
       name: t.name || t.NAME,
       category: t.category || t.CATEGORY,
       description: t.description || t.desc || t.DESCRIPTION || t.DESC,
-      thumbnail: t.thumbnail || t.THUMBNAIL,
-      demoPath: t.demoPath || t.demopath || t.DEMOPATH,
-      price: t.price || t.PRICE,
-      payhipUrl: t.payhipUrl || t.payhipurl || t.PAYHIPURL,
+      thumbnail: t.thumbnail || t.THUMBNAIL || t.img || "",
+      demoPath: t.demoPath || t.demopath || t.DEMOPATH || defaultDemoPath,
+      price: t.price || t.PRICE || "Free",
+      payhipUrl: t.payhipUrl || t.payhipurl || t.PAYHIPURL || (t.price && t.price !== "Free" ? "https://payhip.com/b/mock-pro" : ""),
       figmaUrl: t.figmaUrl || t.figmaurl || t.FIGMAURL,
-      rating: t.rating || t.RATING,
-      reviews: t.reviews || t.REVIEWS,
-      downloads: t.downloads || t.DOWNLOADS,
-      pages: t.pages || t.PAGES,
+      rating: t.rating || t.RATING || 4.8,
+      reviews: t.reviews || t.REVIEWS || 120,
+      downloads: t.downloads || t.DOWNLOADS || 1200,
+      pages: t.pages || t.PAGES || 5,
       tech: t.tech ? (typeof t.tech === "string" ? JSON.parse(t.tech) : t.tech) : ["React", "Tailwind"]
     };
   };
@@ -3268,17 +3282,18 @@ export default function App() {
         body: JSON.stringify({ action: "get_templates" })
       });
       const data = await res.json();
-      if (data.result === "success") {
-        setTemplatesList((data.templates || []).map(normalizeTemplate));
+      if (data.result === "success" && data.templates && data.templates.length > 0) {
+        setTemplatesList(data.templates.map(normalizeTemplate));
+      } else {
+        // Fallback to static seed data if D1 returns empty results
+        setTemplatesList(templates.map(normalizeTemplate));
       }
     } catch (err) {
       console.error("Failed to load templates", err);
-      // Fallback
+      // Fallback to static seed data if network or server error occurs
       setTemplatesList(templates.map(normalizeTemplate));
     }
-  };
-
-  // 2. Fetch user whitelist purchases from D1 database
+  };  // 2. Fetch user whitelist purchases from D1 database
   const loadUserPurchases = async (email: string) => {
     try {
       const res = await fetch(CLOUDFLARE_WORKER_URL, {

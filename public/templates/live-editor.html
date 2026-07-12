@@ -662,7 +662,7 @@
             <!-- Device Chassis and IFrame Wrapper -->
             <div class="preview-viewport-wrapper viewport-desktop" id="viewport-wrapper">
                 <div class="phone-notch"></div>
-                <iframe id="preview-viewport" src="../previews/template-1/index.html"></iframe>
+                <iframe id="preview-viewport" src="/previews/template-1/index.html"></iframe>
                 <div class="phone-home-indicator"></div>
             </div>
         </main>
@@ -691,12 +691,12 @@
         // Check query parameter for active template
         const urlParams = new URLSearchParams(window.location.search);
         const templateParam = urlParams.get('template');
-        if (templateParam && ['template-1', 'template-2', 'template-3', 'template-4'].includes(templateParam)) {
+        if (templateParam) {
             activeTemplate = templateParam;
         }
 
         // Set viewport iframe source and URL mock
-        iframe.src = `../previews/${activeTemplate === 'template-4' ? 'template-1' : activeTemplate}/index.html`;
+        iframe.src = `/previews/${activeTemplate}/index.html`;
         mockUrlBar.textContent = `sparkweb.com/previews/${activeTemplate}/index.html`;
 
         // Update top-level title
@@ -780,6 +780,28 @@
             ...templateConfigs['template-1'],
             name: 'Nova SaaS Pro'
         };
+
+        // Fallback for dynamically added templates
+        if (!templateConfigs[activeTemplate]) {
+            let fallbackSource = 'template-1';
+            let displayName = 'Custom SaaS';
+            
+            if (activeTemplate.includes('template-2') || activeTemplate.toLowerCase().includes('portfolio') || activeTemplate.toLowerCase().includes('zenith')) {
+                fallbackSource = 'template-2';
+                displayName = 'Custom Portfolio';
+            } else if (activeTemplate.includes('template-3') || activeTemplate.toLowerCase().includes('blog') || activeTemplate.toLowerCase().includes('echo')) {
+                fallbackSource = 'template-3';
+                displayName = 'Custom Blog';
+            } else if (activeTemplate.includes('template-5')) {
+                fallbackSource = 'template-2';
+                displayName = 'Custom Portfolio';
+            }
+            
+            templateConfigs[activeTemplate] = {
+                ...templateConfigs[fallbackSource],
+                name: displayName
+            };
+        }
 
         // Render controls on load
         function renderSidebar() {
