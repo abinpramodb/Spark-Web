@@ -7,7 +7,47 @@
     <title>Design Workshop Workspace Customizer - Live Sandbox</title>
     <link rel="stylesheet" href="../assets/css/variables.css">
     <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <!-- GrapesJS Core & Webpage Preset -->
+    <link rel="stylesheet" href="https://unpkg.com/grapesjs/dist/css/grapes.min.css">
+    <script src="https://unpkg.com/grapesjs"></script>
+    <script src="https://unpkg.com/grapesjs-preset-webpage"></script>
     <style>
+        /* GrapesJS Premium Dark Theme Overrides */
+        .gjs-one-bg {
+            background-color: #0f172a !important; /* Tech slate-900 */
+        }
+        .gjs-two-color {
+            color: #94a3b8 !important; /* slate-400 */
+        }
+        .gjs-three-bg {
+            background-color: #1e293b !important; /* slate-800 */
+        }
+        .gjs-four-color, .gjs-four-color-h:hover {
+            color: #c8ff00 !important; /* Spark Web Accent */
+        }
+        .gjs-pn-btn.gjs-pn-active {
+            color: #c8ff00 !important;
+            background-color: #1e293b !important;
+        }
+        .gjs-pn-btn:hover {
+            background-color: #1e293b !important;
+        }
+        .gjs-field {
+            background-color: #0f172a !important;
+            border: 1px solid #334155 !important;
+            color: #e2e8f0 !important;
+        }
+        .gjs-block {
+            background-color: #1e293b !important;
+            color: #cbd5e1 !important;
+            border: 1px solid #334155 !important;
+            transition: all 0.2s ease !important;
+        }
+        .gjs-block:hover {
+            border-color: #c8ff00 !important;
+            color: #ffffff !important;
+        }
+
         body {
             background-color: #0f172a;
             /* Tech dark theme for builder workspace */
@@ -631,41 +671,10 @@
     </header>
 
     <!-- Workspace Main Body -->
-    <div class="workspace-body">
-        <!-- Sidebar Controls -->
-        <aside class="sidebar">
-            <!-- Dynamic Sidebar content will be injected by JavaScript based on active template -->
-            <div id="dynamic-controls"></div>
-            
-            <!-- Predefined Presets Section -->
-            <div class="sidebar-section">
-                <h3>Theme Presets</h3>
-                <div id="presets-container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-                    <!-- JS Injected -->
-                </div>
-            </div>
-        </aside>
-
-        <!-- Canvas Area -->
-        <main class="canvas-area">
-            <div class="canvas-header">
-                <div class="canvas-header-left">
-                    <div class="live-badge">
-                        <div class="pulse-dot"></div>
-                        Live Sandbox
-                    </div>
-                </div>
-                <div class="canvas-url-bar" id="mock-url-bar">template-1/index.html</div>
-                <div style="font-size: 11px; color: #64748b;">Isolated Frame</div>
-            </div>
-
-            <!-- Device Chassis and IFrame Wrapper -->
-            <div class="preview-viewport-wrapper viewport-desktop" id="viewport-wrapper">
-                <div class="phone-notch"></div>
-                <iframe id="preview-viewport" src="/previews/template-1/index.html"></iframe>
-                <div class="phone-home-indicator"></div>
-            </div>
-        </main>
+    <div class="workspace-body" style="height: calc(100vh - 64px); background-color: #0f172a; overflow: hidden; display: flex; flex-direction: column;">
+        <div id="gjs" style="height: 100%; width: 100%;">
+            <!-- GrapesJS canvas will load dynamically -->
+        </div>
     </div>
 
     <!-- Notification toast -->
@@ -674,15 +683,12 @@
     <script>
         // Setup state variables
         let activeTemplate = 'template-1';
+        let userEmail = '';
         const CLOUDFLARE_WORKER_URL = 'https://sparkweb-api.oxoredz.workers.dev';
         const GOOGLE_CLIENT_ID = '284331318489-304jg5aadjptv3850nlg9uodc7h1kcl8.apps.googleusercontent.com';
 
-
         // Elements
-        const viewportWrapper = document.getElementById('viewport-wrapper');
-        const iframe = document.getElementById('preview-viewport');
         const workspaceTitle = document.getElementById('workspace-title');
-        const mockUrlBar = document.getElementById('mock-url-bar');
         const syncBtn = document.getElementById('sync-btn');
         const syncSpinner = document.getElementById('sync-spinner');
         const downloadBtn = document.getElementById('download-btn');
@@ -695,251 +701,87 @@
             activeTemplate = templateParam;
         }
 
-        // Set viewport iframe source and URL mock
-        iframe.src = `/previews/${activeTemplate}/index.html`;
-        mockUrlBar.textContent = `sparkweb.com/previews/${activeTemplate}/index.html`;
-
         // Update top-level title
         const templateNames = {
             'template-1': 'Apex SaaS Landing Page',
             'template-2': 'Zenith Personal Portfolio',
             'template-3': 'Echo Creator Blog',
-            'template-4': 'Nova SaaS Landing Page Pro'
+            'template-4': 'Nova SaaS Landing Page Pro',
+            'template-5': 'Zenith Portfolio Pro'
         };
-        workspaceTitle.textContent = `${templateNames[activeTemplate]} Customizer`;
+        workspaceTitle.textContent = `${templateNames[activeTemplate] || 'Custom Template'} Customizer Workspace`;
 
-        // Configuration structures for each template
-        const templateConfigs = {
-            'template-1': {
-                name: 'Apex SaaS',
-                sections: [
-                    {
-                        title: 'Hero Section Content',
-                        controls: [
-                            { id: 'text-hero-title', label: 'Hero Headline', type: 'text', selector: '#template-headline', target: 'text', default: 'Build Beautiful Websites Faster' },
-                            { id: 'text-hero-subtitle', label: 'Hero Subtitle', type: 'text', selector: '#template-subheading', target: 'text', default: 'Deploy your next SaaS product in record time using our production-ready, beautiful HTML layout elements.' },
-                            { id: 'text-hero-btn', label: 'Primary CTA Button', type: 'text', selector: '#template-btn', target: 'text', default: 'Get Started Free' }
-                        ]
-                    },
-                    {
-                        title: 'Design Aesthetics',
-                        controls: [
-                            { id: 'color-brand', label: 'Brand Accent Color', type: 'color', cssVar: '--primary-color', default: '#6366f1' },
-                            { id: 'color-bg', label: 'Hero Gradient Color 2', type: 'color', cssVar: '--accent-secondary', default: '#a855f7' },
-                            { id: 'select-radius', label: 'Corner Styling', type: 'select', cssVar: '--radius-md', options: [{ name: 'Sharp (0px)', val: '0px' }, { name: 'Normal (8px)', val: '8px' }, { name: 'Premium Round (16px)', val: '16px' }, { name: 'Max Circle (9999px)', val: '9999px' }], default: '8px' }
-                        ]
-                    }
-                ]
+        // Initialize GrapesJS editor
+        const editor = grapesjs.init({
+            container: '#gjs',
+            fromElement: false,
+            height: '100%',
+            width: 'auto',
+            storageManager: false, // Turn off default localstorage saving
+            plugins: ['gjs-preset-webpage'],
+            pluginsOpts: {
+                'gjs-preset-webpage': {}
             },
-            'template-2': {
-                name: 'Zenith Portfolio',
-                sections: [
-                    {
-                        title: 'Profile Details',
-                        controls: [
-                            { id: 'text-name', label: 'Developer Name', type: 'text', selector: '#profile-name', target: 'text', default: 'Alexander Zenith' },
-                            { id: 'text-bio', label: 'Short Bio', type: 'text', selector: '#profile-bio', target: 'text', default: 'Interactive Frontend Developer & UI Designer creating clean web experiences.' },
-                            { id: 'text-cta', label: 'Contact Button', type: 'text', selector: '#contact-cta', target: 'text', default: 'Let\'s Collaborate' }
-                        ]
-                    },
-                    {
-                        title: 'Visual Theme',
-                        controls: [
-                            { id: 'color-portfolio-accent', label: 'Highlight Accent', type: 'color', cssVar: '--accent-color', default: '#10b981' },
-                            { id: 'color-portfolio-bg', label: 'Dark Mode Background', type: 'color', cssVar: '--bg-dark', default: '#0b0f19' },
-                            { id: 'select-font', label: 'Typography Font', type: 'select', cssVar: '--portfolio-font', options: [{ name: 'Plus Jakarta Sans', val: "'Plus Jakarta Sans', sans-serif" }, { name: 'Courier Code Mono', val: "'Courier New', monospace" }, { name: 'Georgia Editorial', val: 'Georgia, serif' }], default: "'Plus Jakarta Sans', sans-serif" }
-                        ]
-                    }
-                ]
-            },
-            'template-3': {
-                name: 'Echo Blog',
-                sections: [
-                    {
-                        title: 'Journal Brand Details',
-                        controls: [
-                            { id: 'text-blog-title', label: 'Journal Logo Title', type: 'text', selector: '#blog-title', target: 'text', default: 'Echo Journal' },
-                            { id: 'text-newsletter', label: 'Newsletter Heading', type: 'text', selector: '#newsletter-title', target: 'text', default: 'Subscribe to Weekly Echoes' },
-                            { id: 'text-btn-subscribe', label: 'Subscribe Button', type: 'text', selector: '#btn-subscribe', target: 'text', default: 'Join Mailing List' }
-                        ]
-                    },
-                    {
-                        title: 'Typography & Colors',
-                        controls: [
-                            { id: 'color-blog-accent', label: 'Blog Primary Tone', type: 'color', cssVar: '--blog-accent', default: '#0d9488' },
-                            { id: 'color-blog-card', label: 'Card Background Fill', type: 'color', cssVar: '--card-bg', default: '#ffffff' },
-                            { id: 'select-alignment', label: 'Header Text Alignment', type: 'select', cssVar: '--header-align', options: [{ name: 'Left-aligned', val: 'left' }, { name: 'Centered text', val: 'center' }, { name: 'Right-aligned', val: 'right' }], default: 'left' }
-                        ]
-                    }
+            deviceManager: {
+                devices: [
+                    { name: 'Desktop', width: '' },
+                    { name: 'Tablet', width: '768px', widthMedia: '992px' },
+                    { name: 'Mobile', width: '375px', widthMedia: '480px' }
                 ]
             }
-        };
-
-        // Link template-4 parameters configuration dynamically to clone template-1
-        templateConfigs['template-4'] = {
-            ...templateConfigs['template-1'],
-            name: 'Nova SaaS Pro'
-        };
-
-        // Fallback for dynamically added templates
-        if (!templateConfigs[activeTemplate]) {
-            let fallbackSource = 'template-1';
-            let displayName = 'Custom SaaS';
-            
-            if (activeTemplate.includes('template-2') || activeTemplate.toLowerCase().includes('portfolio') || activeTemplate.toLowerCase().includes('zenith')) {
-                fallbackSource = 'template-2';
-                displayName = 'Custom Portfolio';
-            } else if (activeTemplate.includes('template-3') || activeTemplate.toLowerCase().includes('blog') || activeTemplate.toLowerCase().includes('echo')) {
-                fallbackSource = 'template-3';
-                displayName = 'Custom Blog';
-            } else if (activeTemplate.includes('template-5')) {
-                fallbackSource = 'template-2';
-                displayName = 'Custom Portfolio';
-            }
-            
-            templateConfigs[activeTemplate] = {
-                ...templateConfigs[fallbackSource],
-                name: displayName
-            };
-        }
-
-        // Render controls on load
-        function renderSidebar() {
-            const container = document.getElementById('dynamic-controls');
-            const config = templateConfigs[activeTemplate];
-            let html = '';
-
-            config.sections.forEach(section => {
-                html += `
-                    <div class="sidebar-section">
-                        <h3>${section.title}</h3>
-                `;
-
-                section.controls.forEach(ctrl => {
-                    html += `<div class="control-group">`;
-                    html += `<label for="${ctrl.id}">${ctrl.label}</label>`;
-
-                    if (ctrl.type === 'text') {
-                        html += `<input type="text" id="${ctrl.id}" value="${ctrl.default}" data-control-id="${ctrl.id}">`;
-                    } else if (ctrl.type === 'color') {
-                        html += `
-                            <div class="color-picker-wrapper">
-                                <input type="color" id="${ctrl.id}" value="${ctrl.default}" data-control-id="${ctrl.id}">
-                                <input type="text" class="color-text-input" id="${ctrl.id}-text" value="${ctrl.default}">
-                            </div>
-                        `;
-                    } else if (ctrl.type === 'select') {
-                        html += `<select id="${ctrl.id}" data-control-id="${ctrl.id}">`;
-                        ctrl.options.forEach(opt => {
-                            const selected = opt.val === ctrl.default ? 'selected' : '';
-                            html += `<option value="${opt.val}" ${selected}>${opt.name}</option>`;
-                        });
-                        html += `</select>`;
-                    }
-
-                    html += `</div>`;
-                });
-
-                html += `</div>`;
-            });
-
-            container.innerHTML = html;
-
-            // Add Event Listeners for inputs
-            config.sections.forEach(section => {
-                section.controls.forEach(ctrl => {
-                    const el = document.getElementById(ctrl.id);
-                    if (ctrl.type === 'text') {
-                        el.addEventListener('input', () => updateSandboxValue(ctrl));
-                    } else if (ctrl.type === 'color') {
-                        const txtEl = document.getElementById(`${ctrl.id}-text`);
-                        el.addEventListener('input', () => {
-                            txtEl.value = el.value;
-                            updateSandboxValue(ctrl);
-                        });
-                        txtEl.addEventListener('input', () => {
-                            if (/^#[0-9A-F]{6}$/i.test(txtEl.value)) {
-                                el.value = txtEl.value;
-                                updateSandboxValue(ctrl);
-                            }
-                        });
-                    } else if (ctrl.type === 'select') {
-                        el.addEventListener('change', () => updateSandboxValue(ctrl));
-                    }
-                });
-            });
-        }
-
-        // Apply mutations directly into preview iframe
-        function updateSandboxValue(ctrl) {
-            try {
-                const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-                if (!iframeDoc) return;
-
-                const inputEl = document.getElementById(ctrl.id);
-                const value = inputEl.value;
-
-                if (ctrl.selector) {
-                    const targetEl = iframeDoc.querySelector(ctrl.selector);
-                    if (targetEl) {
-                        if (ctrl.target === 'text') {
-                            targetEl.textContent = value;
-                        } else if (ctrl.target === 'html') {
-                            targetEl.innerHTML = value;
-                        }
-                    }
-                } else if (ctrl.cssVar) {
-                    iframeDoc.documentElement.style.setProperty(ctrl.cssVar, value);
-                }
-            } catch (e) {
-                console.error("Iframe script block update warning. Verify origin permissions.", e);
-            }
-        }
-
-        // Apply all variables on iframe render completion
-        function initializePreviewMutation() {
-            const config = templateConfigs[activeTemplate];
-            config.sections.forEach(section => {
-                section.controls.forEach(ctrl => {
-                    updateSandboxValue(ctrl);
-                });
-            });
-        }
-
-        // Sync iframe trigger on load
-        iframe.addEventListener('load', () => {
-            initializePreviewMutation();
         });
 
-        // Device Switcher logic
-        const devButtons = {
-            desktop: document.getElementById('btn-desktop'),
-            tablet: document.getElementById('btn-tablet'),
-            mobile: document.getElementById('btn-mobile')
-        };
+        // Fetch and load template assets dynamically
+        async function loadTemplateInEditor() {
+            try {
+                const htmlUrl = `/previews/${activeTemplate}/index.html`;
+                const cssUrl = `/previews/${activeTemplate}/style.css`;
 
-        Object.keys(devButtons).forEach(mode => {
-            devButtons[mode].addEventListener('click', () => {
-                // Remove active classes
-                Object.values(devButtons).forEach(btn => btn.classList.remove('active'));
-                devButtons[mode].classList.add('active');
+                const htmlRes = await fetch(htmlUrl);
+                let htmlContent = await htmlRes.text();
 
-                // Adjust viewport wrapper classes
-                viewportWrapper.className = 'preview-viewport-wrapper';
-
-                if (mode === 'desktop') {
-                    viewportWrapper.classList.add('viewport-desktop');
-                } else if (mode === 'tablet') {
-                    viewportWrapper.classList.add('viewport-tablet');
-                } else if (mode === 'mobile') {
-                    viewportWrapper.classList.add('viewport-mobile');
+                // Strip out full html body wrapper to avoid duplicate wrappers in canvas
+                const bodyMatch = htmlContent.match(/<body[^>]*>([\s\S]*)<\/body>/i);
+                if (bodyMatch) {
+                    htmlContent = bodyMatch[1];
                 }
-            });
+
+                const cssRes = await fetch(cssUrl);
+                const cssContent = await cssRes.text();
+
+                editor.setComponents(htmlContent);
+                editor.setStyle(cssContent);
+            } catch (err) {
+                console.error("GrapesJS Template assets loading error:", err);
+                showToast("Sandbox loading error. Verify preview directories.");
+            }
+        }
+
+        loadTemplateInEditor();
+
+        // Device Switcher triggers
+        const btnDesktop = document.getElementById('btn-desktop');
+        const btnTablet = document.getElementById('btn-tablet');
+        const btnMobile = document.getElementById('btn-mobile');
+
+        btnDesktop.addEventListener('click', () => {
+            document.querySelectorAll('.device-btn').forEach(b => b.classList.remove('active'));
+            btnDesktop.classList.add('active');
+            editor.setDevice('Desktop');
+        });
+        btnTablet.addEventListener('click', () => {
+            document.querySelectorAll('.device-btn').forEach(b => b.classList.remove('active'));
+            btnTablet.classList.add('active');
+            editor.setDevice('Tablet');
+        });
+        btnMobile.addEventListener('click', () => {
+            document.querySelectorAll('.device-btn').forEach(b => b.classList.remove('active'));
+            btnMobile.classList.add('active');
+            editor.setDevice('Mobile');
         });
 
         // Save to Google Cloud webhook trigger
         syncBtn.addEventListener('click', async () => {
-            // Gating: check if user is logged in
             if (!userEmail) {
                 showToast("Please Sign In to save builds to Google Drive.");
                 openAuthModal();
@@ -949,41 +791,33 @@
             syncSpinner.style.display = 'inline-block';
             syncBtn.disabled = true;
 
-            // Harvest values
+            const finalHtml = editor.getHtml();
+            const finalCss = editor.getCss();
+
             const dataToUpload = {
                 action: 'save_build',
                 email: userEmail,
                 templateId: activeTemplate,
                 generatedTime: new Date().toLocaleString(),
-                fields: {}
+                fields: JSON.stringify({ html: finalHtml, css: finalCss })
             };
 
-            const config = templateConfigs[activeTemplate];
-            config.sections.forEach(section => {
-                section.controls.forEach(ctrl => {
-                    const inputEl = document.getElementById(ctrl.id);
-                    dataToUpload.fields[ctrl.id] = inputEl.value;
-                });
-            });
-
             try {
-                // Post request to Cloudflare Worker
                 if (CLOUDFLARE_WORKER_URL.includes('YOUR_SUBDOMAIN')) {
                     showToast('Success! Live settings saved locally (Demo Mode).');
-                    syncSpinner.style.display = 'none';
-                    syncBtn.disabled = false;
                     return;
                 }
 
                 await fetch(CLOUDFLARE_WORKER_URL, {
                     method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(dataToUpload)
                 });
 
-                showToast('Success! Live settings uploaded to Cloudflare SQL database.');
+                showToast('Success! Custom layout uploaded to Cloudflare database.');
             } catch (err) {
                 console.error(err);
-                showToast('Upload error. Verify Cloudflare Worker endpoints.');
+                showToast('Upload error. Verify Cloudflare Worker connection.');
             } finally {
                 syncSpinner.style.display = 'none';
                 syncBtn.disabled = false;
@@ -993,18 +827,27 @@
         // Interactive compiler download html functionality
         downloadBtn.addEventListener('click', () => {
             try {
-                const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-                if (!iframeDoc) return;
+                const finalHtml = editor.getHtml();
+                const finalCss = editor.getCss();
 
-                // Clone template HTML so original remains intact in preview
-                const docClone = iframeDoc.documentElement.cloneNode(true);
+                const fullHTML = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${templateNames[activeTemplate] || 'Customized Template'} - Spark Web</title>
+    <style>
+        ${finalCss}
+    </style>
+</head>
+<body>
+    ${finalHtml}
+</body>
+</html>`;
 
-                // Package and serialise
-                const fullHTML = "<!DOCTYPE html>\n" + docClone.outerHTML;
                 const blob = new Blob([fullHTML], { type: 'text/html;charset=utf-8' });
                 const url = URL.createObjectURL(blob);
 
-                // Fire download link
                 const anchor = document.createElement('a');
                 anchor.href = url;
                 anchor.download = `${activeTemplate}-customized.html`;
@@ -1016,7 +859,7 @@
                 showToast('Success! Custom template downloaded.');
             } catch (e) {
                 console.error(e);
-                alert("Cannot compile HTML locally in sandbox due to iframe browser lock. Run a web server to resolve local files paths.");
+                alert("Cannot compile HTML locally. Please retry.");
             }
         });
 
@@ -1027,6 +870,7 @@
             setTimeout(() => {
                 toast.style.display = 'none';
             }, 3000);
+        }  }, 3000);
         }
 
         // OTP Authentication Logic
@@ -1180,102 +1024,6 @@
 
             checkSession();
             verifyPremiumAccess();
-
-            // Initialize UI Sidebar elements
-            renderSidebar();
-
-            // Preset Themes System (Option 3)
-            const presets = {
-                'template-1': [
-                    { name: 'Cyber Neon', primary: '#ff007f', bg: '#00f0ff' },
-                    { name: 'Forest Glass', primary: '#10b981', bg: '#064e3b' },
-                    { name: 'Luxury Gold', primary: '#d97706', bg: '#1e293b' },
-                    { name: 'Sunset Glow', primary: '#f97316', bg: '#db2777' }
-                ],
-                'template-2': [
-                    { name: 'Emerald', primary: '#10b981', bg: '#0b0f19' },
-                    { name: 'Cyberpunk', primary: '#f43f5e', bg: '#0f0f15' },
-                    { name: 'Arctic Blue', primary: '#0ea5e9', bg: '#0f172a' },
-                    { name: 'Royal Velvet', primary: '#8b5cf6', bg: '#0a0915' }
-                ],
-                'template-3': [
-                    { name: 'Teal Clean', primary: '#0d9488', bg: '#ffffff' },
-                    { name: 'Tech Dark', primary: '#c8ff00', bg: '#1e293b' },
-                    { name: 'Warm Sepia', primary: '#78350f', bg: '#fefaf0' },
-                    { name: 'Coral Rose', primary: '#f43f5e', bg: '#fffafb' }
-                ]
-            };
-            presets['template-4'] = presets['template-1'];
-
-            function renderPresets() {
-                const container = document.getElementById('presets-container');
-                const list = presets[activeTemplate] || [];
-                container.innerHTML = '';
-                
-                list.forEach(preset => {
-                    const btn = document.createElement('button');
-                    btn.style.background = '#0f172a';
-                    btn.style.border = '1px solid #334155';
-                    btn.style.padding = '8px';
-                    btn.style.borderRadius = '6px';
-                    btn.style.cursor = 'pointer';
-                    btn.style.color = '#e2e8f0';
-                    btn.style.fontSize = '11px';
-                    btn.style.fontWeight = '600';
-                    btn.style.display = 'flex';
-                    btn.style.alignItems = 'center';
-                    btn.style.justifyContent = 'space-between';
-                    btn.style.gap = '6px';
-                    btn.style.transition = 'all 0.15s ease';
-                    
-                    btn.innerHTML = `
-                        <span>${preset.name}</span>
-                        <div style="display: flex; gap: 3px;">
-                            <span style="width: 8px; height: 8px; border-radius: 50%; background: ${preset.primary}; display: inline-block;"></span>
-                            <span style="width: 8px; height: 8px; border-radius: 50%; background: ${preset.bg}; display: inline-block; border: 1px solid rgba(255,255,255,0.15);"></span>
-                        </div>
-                    `;
-                    
-                    btn.addEventListener('mouseover', () => {
-                        btn.style.borderColor = '#6366f1';
-                    });
-                    btn.addEventListener('mouseout', () => {
-                        btn.style.borderColor = '#334155';
-                    });
-                    
-                    btn.addEventListener('click', () => {
-                        if (activeTemplate === 'template-1' || activeTemplate === 'template-4') {
-                            updatePresetColors('color-brand', preset.primary, 'color-bg', preset.bg);
-                        } else if (activeTemplate === 'template-2') {
-                            updatePresetColors('color-portfolio-accent', preset.primary, 'color-portfolio-bg', preset.bg);
-                        } else if (activeTemplate === 'template-3') {
-                            updatePresetColors('color-blog-accent', preset.primary, 'color-blog-card', preset.bg);
-                        }
-                    });
-                    
-                    container.appendChild(btn);
-                });
-            }
-
-            function updatePresetColors(primaryId, primaryVal, bgId, bgVal) {
-                const primEl = document.getElementById(primaryId);
-                const primText = document.getElementById(`${primaryId}-text`);
-                const bgEl = document.getElementById(bgId);
-                const bgText = document.getElementById(`${bgId}-text`);
-                
-                if (primEl && primText) {
-                    primEl.value = primaryVal;
-                    primText.value = primaryVal;
-                    primEl.dispatchEvent(new Event('input'));
-                }
-                if (bgEl && bgText) {
-                    bgEl.value = bgVal;
-                    bgText.value = bgVal;
-                    bgEl.dispatchEvent(new Event('input'));
-                }
-            }
-
-            renderPresets();
         </script>
 
     <!-- Glassmorphic Login Modal inside Workspace -->
