@@ -1,0 +1,2 @@
+/*
+  Content-Security-Policy: default-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.effectivecpmnetwork.com; frame-src 'self' https://*.effectivecpmnetwork.com; child-src 'self' https://*.effectivecpmnetwork.com;
