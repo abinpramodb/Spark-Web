@@ -1557,6 +1557,21 @@ function Footer({ onAdminClick }: { onAdminClick: () => void }) {
           ))}
         </div>
 
+        {/* Adsterra Secure Banner Container */}
+        <div className="my-8 flex justify-center w-full">
+          <iframe 
+            srcDoc={`
+              <script async='async' data-cfasync='false' src='https://pl30380278.effectivecpmnetwork.com/a7a1d2a2081edca16d38b99f0370eb2f/invoke.js'></script>
+              <div id='container-a7a1d2a2081edca16d38b99f0370eb2f'></div>
+            `}
+            sandbox="allow-scripts allow-same-origin"
+            width="100%" 
+            height="250" 
+            style={{ border: "none", overflow: "hidden" }}
+            title="Advertisement"
+          />
+        </div>
+
         <div
           className="pt-8 border-t flex flex-col sm:flex-row items-center justify-between gap-4 text-xs"
           style={{ borderColor: "rgba(255,255,255,0.06)", color: "#666660", fontFamily: "Outfit, sans-serif" }}
@@ -3215,27 +3230,6 @@ export default function App() {
         onOpenCheckout={(tmpl) => setCheckoutTemplate(tmpl)}
         onOpenAuth={() => setShowAuthModal(true)}
       />
-      {/* Advertisement Banner */}
-      <div className="py-12 max-w-7xl mx-auto px-6 lg:px-8">
-        <div 
-          className="rounded-sm border p-4 flex flex-col items-center justify-center relative overflow-hidden" 
-          style={{ background: "#131313", borderColor: "rgba(255,255,255,0.06)" }}
-        >
-          <div className="absolute top-2 right-3 text-[9px] uppercase tracking-wider text-[#888880] font-mono">
-            Advertisement
-          </div>
-          <iframe 
-            srcDoc="
-              <script async='async' data-cfasync='false' src='https://pl30380278.effectivecpmnetwork.com/a7a1d2a2081edca16d38b99f0370eb2f/invoke.js'></script>
-              <div id='container-a7a1d2a2081edca16d38b99f0370eb2f' style='display:flex;justify-content:center;align-items:center;'></div>
-            "
-            sandbox="allow-scripts allow-same-origin"
-            width="100%" 
-            height="250" 
-            style={{ border: "none", overflow: "hidden" }}
-          ></iframe>
-        </div>
-      </div>
       <Services />
       <Work />
       <Process />
