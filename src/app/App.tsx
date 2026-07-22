@@ -1564,7 +1564,7 @@ function Footer({ onAdminClick }: { onAdminClick: () => void }) {
               <script async='async' data-cfasync='false' src='https://pl30380278.effectivecpmnetwork.com/a7a1d2a2081edca16d38b99f0370eb2f/invoke.js'></script>
               <div id='container-a7a1d2a2081edca16d38b99f0370eb2f'></div>
             `}
-            sandbox="allow-scripts allow-same-origin"
+            sandbox="allow-scripts"
             width="100%" 
             height="250" 
             style={{ border: "none", overflow: "hidden" }}
