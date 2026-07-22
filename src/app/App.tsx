@@ -1033,28 +1033,12 @@ function Templates({ templatesList, purchasedTemplates, userEmail, onOpenCheckou
                         </svg>
                       </a>
                     )}
-                    {isUnlocked ? (
-                      <a
-                        href={`/templates/live-editor.html?template=${tmpl.demoPath}`}
-                        className="flex-1 py-2 text-center text-xs font-semibold rounded-sm border border-[#c8ff00]/40 bg-rgba(200,255,0,0.05) text-[#c8ff00] transition-colors hover:bg-rgba(200,255,0,0.1)"
-                      >
-                        Customize &amp; Test Live
-                      </a>
-                    ) : (
-                      <button
-                        onClick={() => {
-                          if (!userEmail) {
-                            onOpenAuth();
-                          } else {
-                            onOpenCheckout(tmpl);
-                          }
-                        }}
-                        className="flex-1 py-2 text-xs font-semibold rounded-sm text-[#0a0a0a] transition-all hover:opacity-90"
-                        style={{ background: "linear-gradient(135deg, #6366f1 0%, #a855f7 100%)" }}
-                      >
-                        Unlock &amp; Customize
-                      </button>
-                    )}
+                    <a
+                      href={`/templates/live-editor.html?template=${tmpl.demoPath}`}
+                      className="flex-1 py-2 text-center text-xs font-semibold rounded-sm border border-[#c8ff00]/40 bg-[rgba(200,255,0,0.05)] text-[#c8ff00] transition-colors hover:bg-[rgba(200,255,0,0.1)]"
+                    >
+                      Customize &amp; Edit
+                    </a>
                   </div>
                 </div>
               </div>
@@ -1133,27 +1117,13 @@ function Templates({ templatesList, purchasedTemplates, userEmail, onOpenCheckou
                 <span className="text-lg font-bold" style={{ color: "#c8ff00", fontFamily: "Fraunces, serif" }}>
                   {previewTemplate.price}
                 </span>
-                {getPriceNum(previewTemplate.price) === 0 || purchasedTemplates.includes(previewTemplate.id) ? (
-                  <a
-                    href={`/templates/live-editor.html?template=${previewTemplate.demoPath}`}
-                    className="px-4 py-2 text-xs font-semibold rounded-sm transition-all hover:opacity-90"
-                    style={{ background: "#c8ff00", color: "#0a0a0a", fontFamily: "Outfit, sans-serif" }}
-                  >
-                    Customize &amp; Test
-                  </a>
-                ) : (
-                  <button
-                    onClick={() => {
-                      setPreviewId(null);
-                      if (!userEmail) onOpenAuth();
-                      else onOpenCheckout(previewTemplate);
-                    }}
-                    className="flex items-center gap-2 px-4 py-2 text-xs font-semibold rounded-sm transition-all hover:opacity-90"
-                    style={{ background: "linear-gradient(135deg, #6366f1 0%, #a855f7 100%)", color: "white", fontFamily: "Outfit, sans-serif" }}
-                  >
-                    <ShoppingCart size={12} /> Unlock Template
-                  </button>
-                )}
+                <a
+                  href={`/templates/live-editor.html?template=${previewTemplate.demoPath}`}
+                  className="px-4 py-2 text-xs font-semibold rounded-sm transition-all hover:opacity-90"
+                  style={{ background: "#c8ff00", color: "#0a0a0a", fontFamily: "Outfit, sans-serif" }}
+                >
+                  Customize &amp; Edit
+                </a>
                 <button onClick={() => setPreviewId(null)} style={{ color: "#888880" }}>
                   <X size={18} />
                 </button>

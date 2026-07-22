@@ -627,12 +627,13 @@
 <body>
     <!-- Premium Access Lock Screen Overlay -->
     <div id="premium-lock-screen" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); z-index: 999999; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 24px;">
-        <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); padding: 40px; border-radius: 16px; max-width: 480px; box-shadow: 0 20px 40px rgba(0,0,0,0.5);">
+        <div style="position: relative; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); padding: 40px; border-radius: 16px; max-width: 480px; box-shadow: 0 20px 40px rgba(0,0,0,0.5);">
+            <button id="lock-screen-close" style="position: absolute; top: 16px; right: 16px; background: transparent; border: none; color: #94a3b8; font-size: 24px; cursor: pointer; transition: color 0.15s; line-height: 1;">&times;</button>
             <div style="font-size: 64px; margin-bottom: 24px; animation: bounce 2s infinite;">🔒</div>
-            <h2 style="font-size: 24px; color: white; margin-bottom: 12px; font-weight: 700;">Premium Template Locked</h2>
-            <p style="color: #94a3b8; font-size: 15px; line-height: 1.6; margin-bottom: 32px;">This is a premium layout template. You need to purchase a license first to customize and download this project structure.</p>
+            <h2 style="font-size: 24px; color: white; margin-bottom: 12px; font-weight: 700;">Premium Export Locked</h2>
+            <p style="color: #94a3b8; font-size: 15px; line-height: 1.6; margin-bottom: 32px;">This is a premium template layout. Please purchase a license key to unlock download & save access for your customized code files.</p>
             <div style="display: flex; gap: 16px; justify-content: center;">
-                <a href="../index.html" class="nav-btn" style="background: rgba(255, 255, 255, 0.08); color: white; border: 1px solid rgba(255, 255, 255, 0.15); display: flex; align-items: center; justify-content: center; height: 48px; min-width: 140px; border-radius: var(--radius-md); text-decoration: none; font-weight: 600; font-family: var(--font-sans);">Back to Shop</a>
+                <button id="lock-screen-continue-btn" class="nav-btn" style="background: rgba(255, 255, 255, 0.08); color: white; border: 1px solid rgba(255, 255, 255, 0.15); display: flex; align-items: center; justify-content: center; height: 48px; min-width: 140px; border-radius: var(--radius-md); font-weight: 600; font-family: var(--font-sans); cursor: pointer;">Keep Editing</button>
                 <a href="../index.html?purchase=template-4" id="unlock-btn-anchor" class="nav-btn" style="background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); color: white; border: none; display: flex; align-items: center; justify-content: center; height: 48px; min-width: 140px; border-radius: var(--radius-md); text-decoration: none; font-weight: 600; font-family: var(--font-sans); box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);">Purchase License</a>
             </div>
         </div>
@@ -782,6 +783,12 @@
 
         // Save to Google Cloud webhook trigger
         syncBtn.addEventListener('click', async () => {
+            if (!isPurchased) {
+                document.getElementById('premium-lock-screen').style.display = 'flex';
+                showToast('Purchase a license key to sync or save this template.');
+                return;
+            }
+
             if (!userEmail) {
                 showToast("Please Sign In to save builds to Google Drive.");
                 openAuthModal();
@@ -824,8 +831,13 @@
             }
         });
 
-        // Interactive compiler download html functionality
         downloadBtn.addEventListener('click', () => {
+            if (!isPurchased) {
+                document.getElementById('premium-lock-screen').style.display = 'flex';
+                showToast('Purchase a license key to download this template.');
+                return;
+            }
+
             try {
                 const finalHtml = editor.getHtml();
                 const finalCss = editor.getCss();
@@ -983,19 +995,22 @@
                 return JSON.parse(jsonPayload);
             }
 
+            // Global flag for feature customisation activation
+            let isPurchased = true;
+
             async function verifyPremiumAccess() {
-                if (activeTemplate === 'template-4') {
+                const premiumTemplates = ['template-4', 'template-5'];
+                if (premiumTemplates.includes(activeTemplate)) {
+                    isPurchased = false; // Locked by default for premium templates
                     const savedEmail = localStorage.getItem('tf_user_email');
                     const token = localStorage.getItem('tf_session_token');
-                    
-                    let isPurchased = false;
 
                     if (savedEmail && token) {
                         if (CLOUDFLARE_WORKER_URL.includes('YOUR_SUBDOMAIN')) {
                             const localSaved = localStorage.getItem('tf_purchases_' + savedEmail);
                             if (localSaved) {
                                 const purchased = JSON.parse(localSaved);
-                                if (purchased.includes('template-4')) {
+                                if (purchased.includes(activeTemplate)) {
                                     isPurchased = true;
                                 }
                             }
@@ -1006,7 +1021,7 @@
                                     body: JSON.stringify({ action: 'get_purchases', email: savedEmail })
                                 });
                                 const data = await response.json();
-                                if (data.result === 'success' && data.purchases.includes('template-4')) {
+                                if (data.result === 'success' && data.purchases.includes(activeTemplate)) {
                                     isPurchased = true;
                                 }
                             } catch (err) {
@@ -1015,12 +1030,18 @@
                         }
                     }
 
-                    if (!isPurchased) {
-                        document.getElementById('unlock-btn-anchor').href = `../index.html?purchase=template-4`;
-                        document.getElementById('premium-lock-screen').style.display = 'flex';
-                    }
+                    // Dynamically map purchase link to index.html with query parameter
+                    document.getElementById('unlock-btn-anchor').href = `../index.html?purchase=${activeTemplate}`;
                 }
             }
+
+            // Close button listeners for the export lock overlay
+            document.getElementById('lock-screen-close').addEventListener('click', () => {
+                document.getElementById('premium-lock-screen').style.display = 'none';
+            });
+            document.getElementById('lock-screen-continue-btn').addEventListener('click', () => {
+                document.getElementById('premium-lock-screen').style.display = 'none';
+            });
 
             checkSession();
             verifyPremiumAccess();
