@@ -1528,7 +1528,7 @@ function Footer({ onAdminClick }: { onAdminClick: () => void }) {
         <div className="my-8 flex justify-center w-full">
           <iframe
             src="/ad-banner.html"
-            sandbox="allow-scripts allow-same-origin"
+            sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-forms"
             width="100%"
             height="250"
             style={{ border: "none", overflow: "hidden" }}
