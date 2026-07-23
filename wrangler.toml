@@ -7,4 +7,4 @@ compatibility_date = "2024-03-01"
 [[d1_databases]]
 binding = "DB"
 database_name = "sparkweb-db"
-database_id = "63b64db9-317a-46c3-b47a-786792ebafc3"
+database_id = "8341b44f-6cb8-40b7-ade0-5b227ea7d76e"

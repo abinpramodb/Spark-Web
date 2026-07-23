@@ -1,24 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Product Details - Spark Web</title>
-  
+
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,100..900;1,9..144,100..900&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Outfit:wght@100..900&display=swap" rel="stylesheet">
-  
+  <link
+    href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,100..900;1,9..144,100..900&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Outfit:wght@100..900&display=swap"
+    rel="stylesheet">
+
   <!-- Tailwind CSS Play CDN for layouts -->
   <script src="https://cdn.tailwindcss.com"></script>
-  
+
   <!-- Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
-  
+
   <!-- Payhip Overlay JS -->
   <script src="https://payhip.com/payhip.js"></script>
-  
+
   <!-- Google Sign-In SDK -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 
@@ -28,22 +31,27 @@
       color: #f0f0ee;
       font-family: 'Outfit', sans-serif;
     }
+
     .neon-text-glow {
       text-shadow: 0 0 12px rgba(200, 255, 0, 0.4);
     }
+
     .glass-card {
       background: #131313;
       border: 1px solid rgba(255, 255, 255, 0.06);
     }
   </style>
 </head>
+
 <body class="min-h-screen flex flex-col">
 
   <!-- Header -->
-  <header class="border-b bg-[#111111]/80 backdrop-blur-md sticky top-0 z-50" style="border-color: rgba(255,255,255,0.06);">
+  <header class="border-b bg-[#111111]/80 backdrop-blur-md sticky top-0 z-50"
+    style="border-color: rgba(255,255,255,0.06);">
     <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
       <a href="/" class="flex items-center gap-2 group">
-        <span class="w-7 h-7 rounded-sm flex items-center justify-center text-xs font-bold bg-[#c8ff00] text-[#0a0a0a] font-mono">
+        <span
+          class="w-7 h-7 rounded-sm flex items-center justify-center text-xs font-bold bg-[#c8ff00] text-[#0a0a0a] font-mono">
           SP
         </span>
         <span class="text-sm font-semibold tracking-tight text-[#f0f0ee]">
@@ -71,11 +79,12 @@
     <div id="error-state" class="hidden text-center py-24">
       <h2 class="text-2xl font-bold text-[#ff6666] font-serif mb-2">Template Not Found</h2>
       <p class="text-sm text-[#888880] mb-6">The requested product could not be loaded or does not exist.</p>
-      <a href="/" class="px-5 py-2.5 bg-[#c8ff00] text-[#0a0a0a] font-semibold text-xs rounded-sm">Return to Storefront</a>
+      <a href="/" class="px-5 py-2.5 bg-[#c8ff00] text-[#0a0a0a] font-semibold text-xs rounded-sm">Return to
+        Storefront</a>
     </div>
 
     <div id="product-container" class="hidden grid grid-cols-1 lg:grid-cols-12 gap-12">
-      
+
       <!-- Left Column: Visuals & Spec Grid -->
       <div class="lg:col-span-7 flex flex-col gap-8">
         <!-- Mockup Display -->
@@ -88,7 +97,7 @@
           <div>
             <div class="text-[10px] uppercase font-bold tracking-widest text-[#888880] font-mono">Rating</div>
             <div class="text-lg font-bold text-white mt-1 flex items-center justify-center gap-1">
-              <i data-lucide="star" class="w-4 h-4 fill-[#c8ff00] text-[#c8ff00]"></i> 
+              <i data-lucide="star" class="w-4 h-4 fill-[#c8ff00] text-[#c8ff00]"></i>
               <span id="product-rating">4.8</span>
             </div>
           </div>
@@ -112,7 +121,8 @@
       <!-- Right Column: Checkout & Info -->
       <div class="lg:col-span-5 flex flex-col gap-8">
         <div>
-          <div id="product-category" class="text-xs font-semibold uppercase tracking-widest text-[#c8ff00] font-mono mb-2">
+          <div id="product-category"
+            class="text-xs font-semibold uppercase tracking-widest text-[#c8ff00] font-mono mb-2">
             CATEGORY
           </div>
           <h1 id="product-title" class="text-4xl lg:text-5xl font-bold font-serif text-[#f0f0ee] leading-tight">
@@ -132,7 +142,7 @@
           <div id="user-status-text" class="text-xs text-[#888880] text-center">
             Sign in to purchase and customize this template.
           </div>
-          
+
           <div id="cta-button-container" class="flex flex-col gap-3">
             <!-- Populated dynamically by JS based on login/purchase state -->
           </div>
@@ -157,26 +167,30 @@
   </main>
 
   <!-- Auth modal popup -->
-  <div id="auth-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4" style="background: rgba(0,0,0,0.85);">
-    <div class="w-full max-w-sm rounded-sm border p-8 flex flex-col items-center gap-6 glass-card" style="border-color: rgba(255,255,255,0.1);">
+  <div id="auth-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4"
+    style="background: rgba(0,0,0,0.85);">
+    <div class="w-full max-w-sm rounded-sm border p-8 flex flex-col items-center gap-6 glass-card"
+      style="border-color: rgba(255,255,255,0.1);">
       <div class="w-full flex justify-between items-center border-b pb-4" style="border-color: rgba(255,255,255,0.06);">
         <h3 class="text-sm font-semibold text-[#f0f0ee]">Sign In with Google</h3>
         <button onclick="toggleAuthModal(false)" class="text-[#888880]"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
       <p class="text-xs text-center leading-relaxed text-[#888880]">
-        Logging in allows you to unlock premium templates, sync your custom live editor builds, and access your whitelisted downloads.
+        Logging in allows you to unlock premium templates, sync your custom live editor builds, and access your
+        whitelisted downloads.
       </p>
       <div id="google-signin-btn-container" class="my-2"></div>
     </div>
   </div>
 
-  <footer class="border-t py-12 text-center text-xs text-[#444440] font-mono mt-12" style="border-color: rgba(255,255,255,0.06);">
+  <footer class="border-t py-12 text-center text-xs text-[#444440] font-mono mt-12"
+    style="border-color: rgba(255,255,255,0.06);">
     &copy; 2026 Spark Web. Powered by Payhip.
   </footer>
 
   <script>
     const CLOUDFLARE_WORKER_URL = "https://sparkweb-api.oxoredz.workers.dev";
-    const GOOGLE_CLIENT_ID = "284331318489-304jg5aadjptv3850nlg9uodc7h1kcl8.apps.googleusercontent.com";
+    const GOOGLE_CLIENT_ID = "915707234297-n0c94s32q1gtje708bhckeapdg676adu.apps.googleusercontent.com";
 
     // Application state
     let currentTemplate = null;
@@ -215,7 +229,7 @@
     }
 
     // Handle credentials from Google Sign-In
-    window.handleCredentialResponse = async function(response) {
+    window.handleCredentialResponse = async function (response) {
       try {
         const payload = JSON.parse(
           decodeURIComponent(
@@ -226,15 +240,15 @@
           )
         );
         const { email, name, picture } = payload;
-        
+
         userEmail = email;
         userName = name;
         userPicture = picture;
-        
+
         localStorage.setItem("tf_user_email", email);
         localStorage.setItem("tf_user_name", name);
         localStorage.setItem("tf_user_picture", picture);
-        
+
         toggleAuthModal(false);
         await loadUserPurchases(email);
         renderUserProfile();
@@ -308,7 +322,7 @@
       document.getElementById("product-category").innerText = currentTemplate.category;
       document.getElementById("product-price").innerText = currentTemplate.price;
       document.getElementById("product-description").innerText = currentTemplate.description;
-      
+
       const thumb = currentTemplate.thumbnail;
       const fullThumb = thumb.startsWith("http") || thumb.includes("/") ? thumb : `https://images.unsplash.com/${thumb}?w=800&h=500&fit=crop&auto=format`;
       document.getElementById("product-thumbnail").src = fullThumb;
@@ -333,10 +347,10 @@
       widget.innerHTML = "";
 
       if (userEmail) {
-        const avatar = userPicture 
+        const avatar = userPicture
           ? `<img src="${userPicture}" alt="Avatar" class="w-6 h-6 rounded-full border border-[#c8ff00]/40" />`
           : `<div class="w-6 h-6 rounded-full bg-[#1c1c1c] text-[#c8ff00] flex items-center justify-center font-bold text-[10px]">${userEmail.substring(0, 2).toUpperCase()}</div>`;
-        
+
         widget.innerHTML = `
           <div class="flex items-center gap-2">
             ${avatar}
@@ -384,13 +398,13 @@
         statusText.innerText = "Unlock instantly to customize, preview, and download full source code.";
         if (currentTemplate.payhipUrl) {
           const finalCheckoutUrl = currentTemplate.payhipUrl + (currentTemplate.payhipUrl.includes("?") ? "&" : "?") + "email=" + encodeURIComponent(userEmail);
-          
+
           btnContainer.innerHTML = `
             <a href="${finalCheckoutUrl}" class="w-full py-3.5 text-center text-sm font-semibold rounded-sm bg-[#c8ff00] text-[#0a0a0a] hover:opacity-90 payhip-buy-button block">
               Unlock &amp; Customize
             </a>
           `;
-          
+
           // Re-scan DOM so Payhip overlay binds to the new anchor tag
           setTimeout(() => {
             if (window.Payhip && typeof window.Payhip.scan === "function") {
@@ -431,7 +445,7 @@
     }
 
     // Sign Out
-    window.signOut = function() {
+    window.signOut = function () {
       localStorage.removeItem("tf_user_email");
       localStorage.removeItem("tf_user_name");
       localStorage.removeItem("tf_user_picture");
@@ -444,7 +458,7 @@
     };
 
     // Toggle Modal
-    window.toggleAuthModal = function(show) {
+    window.toggleAuthModal = function (show) {
       const modal = document.getElementById("auth-modal");
       if (show) {
         modal.classList.remove("hidden");
@@ -475,4 +489,5 @@
     init();
   </script>
 </body>
+
 </html>

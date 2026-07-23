@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { ArrowRight, Menu, X, Check, Star, ChevronDown, Mail, Phone, MapPin, ExternalLink, Zap, Globe, Code2, Palette, BarChart3, Shield, ShoppingCart, Eye, Download, Tag, Layers, Filter, LogOut, Users, Package, TrendingUp, DollarSign, AlertCircle, Edit3, Trash2, Plus, Lock, LayoutDashboard, Settings, Bell, Search, ChevronUp, MoreVertical } from "lucide-react";
 
 const CLOUDFLARE_WORKER_URL = "https://sparkweb-api.oxoredz.workers.dev";
-const GOOGLE_CLIENT_ID = "284331318489-304jg5aadjptv3850nlg9uodc7h1kcl8.apps.googleusercontent.com";
+const GOOGLE_CLIENT_ID = "915707234297-n0c94s32q1gtje708bhckeapdg676adu.apps.googleusercontent.com";
 const ADMIN_EMAILS = ["oxoredz@gmail.com"];
 
 // ─── Data ────────────────────────────────────────────────────────────────────
@@ -608,7 +608,7 @@ function PaymentCheckoutModal({ template, userEmail, onClose }: PaymentCheckoutM
     }
   }, [payhipUrl]);
 
-  const finalCheckoutUrl = payhipUrl 
+  const finalCheckoutUrl = payhipUrl
     ? payhipUrl + (payhipUrl.includes("?") ? "&" : "?") + "email=" + encodeURIComponent(userEmail)
     : "";
 
@@ -761,8 +761,8 @@ function Templates({ templatesList, purchasedTemplates, userEmail, onOpenCheckou
   const filtered = templatesList
     .filter((t) => {
       const matchesCategory = activeCategory === "All" || t.category.toLowerCase() === activeCategory.toLowerCase();
-      const matchesSearch = !searchQuery.trim() || 
-        t.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+      const matchesSearch = !searchQuery.trim() ||
+        t.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         (t.description || t.desc || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
         t.category.toLowerCase().includes(searchQuery.toLowerCase());
       return matchesCategory && matchesSearch;
@@ -903,7 +903,7 @@ function Templates({ templatesList, purchasedTemplates, userEmail, onOpenCheckou
           {filtered.map((tmpl) => {
             const isFree = getPriceNum(tmpl.price) === 0;
             const isUnlocked = isFree || purchasedTemplates.includes(tmpl.id);
-            
+
             return (
               <div
                 key={tmpl.id}
@@ -1025,11 +1025,11 @@ function Templates({ templatesList, purchasedTemplates, userEmail, onOpenCheckou
                         title="View Figma Design"
                       >
                         <svg width="12" height="12" viewBox="0 0 38 57" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M19 28.5C19 25.9804 20.0009 23.5641 21.7825 21.7825C23.5641 20.0009 25.9804 19 28.5 19C31.0196 19 33.4359 20.0009 35.2175 21.7825C36.9991 23.5641 38 25.9804 38 28.5C38 31.0196 36.9991 33.4359 35.2175 35.2175C33.4359 36.9991 31.0196 38 28.5 38C25.9804 38 23.5641 36.9991 21.7825 35.2175C20.0009 33.4359 19 28.5 19 28.5Z" fill="#a259ff"/>
-                          <path d="M0 47.5C0 44.9804 1.00089 42.5641 2.78249 40.7825C4.56408 39.0009 6.98044 38 9.5 38H19V47.5C19 50.0196 17.9991 52.4359 16.2175 54.2175C14.4359 55.9991 12.0196 57 9.5 57C6.98044 57 4.56408 55.9991 2.78249 54.2175C1.00089 52.4359 0 50.0196 0 47.5Z" fill="#a259ff"/>
-                          <path d="M19 0V19H28.5C31.0196 19 33.4359 17.9991 35.2175 16.2175C36.9991 14.4359 38 12.0196 38 9.5C38 6.98044 36.9991 4.56408 35.2175 2.78249C33.4359 1.00089 31.0196 0 28.5 0H19Z" fill="#a259ff"/>
-                          <path d="M0 9.5C0 12.0196 1.00089 14.4359 2.78249 16.2175C4.56408 17.9991 6.98044 19 9.5 19H19V0H9.5C6.98044 0 4.56408 1.00089 2.78249 2.78249C1.00089 4.56408 0 6.98044 0 9.5Z" fill="#a259ff"/>
-                          <path d="M0 28.5C0 31.0196 1.00089 33.4359 2.78249 35.2175C4.56408 36.9991 6.98044 38 9.5 38H19V19H9.5C6.98044 19 4.56408 20.0009 2.78249 21.7825C1.00089 23.5641 0 25.9804 0 28.5Z" fill="#a259ff"/>
+                          <path d="M19 28.5C19 25.9804 20.0009 23.5641 21.7825 21.7825C23.5641 20.0009 25.9804 19 28.5 19C31.0196 19 33.4359 20.0009 35.2175 21.7825C36.9991 23.5641 38 25.9804 38 28.5C38 31.0196 36.9991 33.4359 35.2175 35.2175C33.4359 36.9991 31.0196 38 28.5 38C25.9804 38 23.5641 36.9991 21.7825 35.2175C20.0009 33.4359 19 28.5 19 28.5Z" fill="#a259ff" />
+                          <path d="M0 47.5C0 44.9804 1.00089 42.5641 2.78249 40.7825C4.56408 39.0009 6.98044 38 9.5 38H19V47.5C19 50.0196 17.9991 52.4359 16.2175 54.2175C14.4359 55.9991 12.0196 57 9.5 57C6.98044 57 4.56408 55.9991 2.78249 54.2175C1.00089 52.4359 0 50.0196 0 47.5Z" fill="#a259ff" />
+                          <path d="M19 0V19H28.5C31.0196 19 33.4359 17.9991 35.2175 16.2175C36.9991 14.4359 38 12.0196 38 9.5C38 6.98044 36.9991 4.56408 35.2175 2.78249C33.4359 1.00089 31.0196 0 28.5 0H19Z" fill="#a259ff" />
+                          <path d="M0 9.5C0 12.0196 1.00089 14.4359 2.78249 16.2175C4.56408 17.9991 6.98044 19 9.5 19H19V0H9.5C6.98044 0 4.56408 1.00089 2.78249 2.78249C1.00089 4.56408 0 6.98044 0 9.5Z" fill="#a259ff" />
+                          <path d="M0 28.5C0 31.0196 1.00089 33.4359 2.78249 35.2175C4.56408 36.9991 6.98044 38 9.5 38H19V19H9.5C6.98044 19 4.56408 20.0009 2.78249 21.7825C1.00089 23.5641 0 25.9804 0 28.5Z" fill="#a259ff" />
                         </svg>
                       </a>
                     )}
@@ -1089,25 +1089,22 @@ function Templates({ templatesList, purchasedTemplates, userEmail, onOpenCheckou
               <div className="flex items-center gap-1 rounded-sm border p-0.5" style={{ background: "#0a0a0a", borderColor: "rgba(255,255,255,0.06)" }}>
                 <button
                   onClick={() => setPreviewDeviceMode("desktop")}
-                  className={`px-3 py-1.5 text-xs font-semibold rounded-sm transition-all ${
-                    previewDeviceMode === "desktop" ? "bg-[#c8ff00] text-[#0a0a0a]" : "text-[#888880] hover:text-white"
-                  }`}
+                  className={`px-3 py-1.5 text-xs font-semibold rounded-sm transition-all ${previewDeviceMode === "desktop" ? "bg-[#c8ff00] text-[#0a0a0a]" : "text-[#888880] hover:text-white"
+                    }`}
                 >
                   🖥️ Desktop
                 </button>
                 <button
                   onClick={() => setPreviewDeviceMode("tablet")}
-                  className={`px-3 py-1.5 text-xs font-semibold rounded-sm transition-all ${
-                    previewDeviceMode === "tablet" ? "bg-[#c8ff00] text-[#0a0a0a]" : "text-[#888880] hover:text-white"
-                  }`}
+                  className={`px-3 py-1.5 text-xs font-semibold rounded-sm transition-all ${previewDeviceMode === "tablet" ? "bg-[#c8ff00] text-[#0a0a0a]" : "text-[#888880] hover:text-white"
+                    }`}
                 >
                   📟 Tablet
                 </button>
                 <button
                   onClick={() => setPreviewDeviceMode("mobile")}
-                  className={`px-3 py-1.5 text-xs font-semibold rounded-sm transition-all ${
-                    previewDeviceMode === "mobile" ? "bg-[#c8ff00] text-[#0a0a0a]" : "text-[#888880] hover:text-white"
-                  }`}
+                  className={`px-3 py-1.5 text-xs font-semibold rounded-sm transition-all ${previewDeviceMode === "mobile" ? "bg-[#c8ff00] text-[#0a0a0a]" : "text-[#888880] hover:text-white"
+                    }`}
                 >
                   📱 Mobile
                 </button>
@@ -1529,11 +1526,11 @@ function Footer({ onAdminClick }: { onAdminClick: () => void }) {
 
         {/* Adsterra Secure Banner Container */}
         <div className="my-8 flex justify-center w-full">
-          <iframe 
+          <iframe
             src="/ad-banner.html"
             sandbox="allow-scripts allow-same-origin"
-            width="100%" 
-            height="250" 
+            width="100%"
+            height="250"
             style={{ border: "none", overflow: "hidden" }}
             title="Advertisement"
           />
@@ -1558,26 +1555,26 @@ function Footer({ onAdminClick }: { onAdminClick: () => void }) {
 
 const ADMIN_USERS = [
   { email: "admin@webxstudio.co", password: "admin2026", name: "Alex Rivera", role: "Super Admin" },
-  { email: "dev@webxstudio.co",   password: "devpass",   name: "Sam Chen",    role: "Developer"   },
+  { email: "dev@webxstudio.co", password: "devpass", name: "Sam Chen", role: "Developer" },
 ];
 
 const mockOrders = [
-  { id: "#ORD-1041", customer: "Tomas Bray",    email: "tomas@bray.io",       template: "Launchpad SaaS",  amount: 79,  status: "completed", date: "Jul 9, 2026" },
-  { id: "#ORD-1040", customer: "Nina Vasquez",  email: "nina@nv.design",       template: "Storefront Pro",  amount: 99,  status: "completed", date: "Jul 8, 2026" },
-  { id: "#ORD-1039", customer: "Chen Wei",      email: "c.wei@product.co",     template: "Nexus Dashboard", amount: 119, status: "pending",   date: "Jul 8, 2026" },
-  { id: "#ORD-1038", customer: "Amara Okafor",  email: "amara@okafor.ng",      template: "Convert Land",    amount: 29,  status: "completed", date: "Jul 7, 2026" },
-  { id: "#ORD-1037", customer: "Louis Petit",   email: "louis@atelier.fr",     template: "Agency One",      amount: 69,  status: "refunded",  date: "Jul 7, 2026" },
-  { id: "#ORD-1036", customer: "Sara Kim",      email: "sara@kimdesign.kr",    template: "Folio Dark",      amount: 49,  status: "completed", date: "Jul 6, 2026" },
-  { id: "#ORD-1035", customer: "Marco Rossi",   email: "marco@studio.it",      template: "Beacon Blog",     amount: 39,  status: "completed", date: "Jul 6, 2026" },
-  { id: "#ORD-1034", customer: "Priya Nair",    email: "priya@nair.in",        template: "Launchpad SaaS",  amount: 79,  status: "pending",   date: "Jul 5, 2026" },
+  { id: "#ORD-1041", customer: "Tomas Bray", email: "tomas@bray.io", template: "Launchpad SaaS", amount: 79, status: "completed", date: "Jul 9, 2026" },
+  { id: "#ORD-1040", customer: "Nina Vasquez", email: "nina@nv.design", template: "Storefront Pro", amount: 99, status: "completed", date: "Jul 8, 2026" },
+  { id: "#ORD-1039", customer: "Chen Wei", email: "c.wei@product.co", template: "Nexus Dashboard", amount: 119, status: "pending", date: "Jul 8, 2026" },
+  { id: "#ORD-1038", customer: "Amara Okafor", email: "amara@okafor.ng", template: "Convert Land", amount: 29, status: "completed", date: "Jul 7, 2026" },
+  { id: "#ORD-1037", customer: "Louis Petit", email: "louis@atelier.fr", template: "Agency One", amount: 69, status: "refunded", date: "Jul 7, 2026" },
+  { id: "#ORD-1036", customer: "Sara Kim", email: "sara@kimdesign.kr", template: "Folio Dark", amount: 49, status: "completed", date: "Jul 6, 2026" },
+  { id: "#ORD-1035", customer: "Marco Rossi", email: "marco@studio.it", template: "Beacon Blog", amount: 39, status: "completed", date: "Jul 6, 2026" },
+  { id: "#ORD-1034", customer: "Priya Nair", email: "priya@nair.in", template: "Launchpad SaaS", amount: 79, status: "pending", date: "Jul 5, 2026" },
 ];
 
 const mockUsers = [
-  { id: 1, name: "Tomas Bray",   email: "tomas@bray.io",      plan: "Pro",   joined: "Mar 2026", purchases: 3, spent: 247, avatar: "photo-1570295999919-56ceb5ecca61" },
-  { id: 2, name: "Nina Vasquez", email: "nina@nv.design",      plan: "Starter", joined: "Apr 2026", purchases: 1, spent: 99,  avatar: "photo-1580489944761-15a19d654956" },
-  { id: 3, name: "Chen Wei",     email: "c.wei@product.co",   plan: "Pro",   joined: "Jan 2026", purchases: 5, spent: 481, avatar: "photo-1507003211169-0a1dd7228f2d" },
-  { id: 4, name: "Amara Okafor", email: "amara@okafor.ng",    plan: "Free",  joined: "Jun 2026", purchases: 1, spent: 29,  avatar: "photo-1494790108755-2616b612b786" },
-  { id: 5, name: "Sara Kim",     email: "sara@kimdesign.kr",  plan: "Pro",   joined: "Feb 2026", purchases: 4, spent: 316, avatar: "photo-1438761681033-6461ffad8d80" },
+  { id: 1, name: "Tomas Bray", email: "tomas@bray.io", plan: "Pro", joined: "Mar 2026", purchases: 3, spent: 247, avatar: "photo-1570295999919-56ceb5ecca61" },
+  { id: 2, name: "Nina Vasquez", email: "nina@nv.design", plan: "Starter", joined: "Apr 2026", purchases: 1, spent: 99, avatar: "photo-1580489944761-15a19d654956" },
+  { id: 3, name: "Chen Wei", email: "c.wei@product.co", plan: "Pro", joined: "Jan 2026", purchases: 5, spent: 481, avatar: "photo-1507003211169-0a1dd7228f2d" },
+  { id: 4, name: "Amara Okafor", email: "amara@okafor.ng", plan: "Free", joined: "Jun 2026", purchases: 1, spent: 29, avatar: "photo-1494790108755-2616b612b786" },
+  { id: 5, name: "Sara Kim", email: "sara@kimdesign.kr", plan: "Pro", joined: "Feb 2026", purchases: 4, spent: 316, avatar: "photo-1438761681033-6461ffad8d80" },
 ];
 
 type AdminUser = typeof ADMIN_USERS[0];
@@ -1747,11 +1744,11 @@ function AdminDashboard({ user, onLogout, templatesList, onRefreshTemplates }: A
   });
 
   const sidebarItems: { id: AdminTab; icon: React.ElementType; label: string }[] = [
-    { id: "overview",   icon: LayoutDashboard, label: "Overview"  },
-    { id: "templates",  icon: Package,         label: "Templates" },
-    { id: "orders",     icon: DollarSign,      label: "Approvals"    },
-    { id: "users",      icon: Users,           label: "Whitelisted"     },
-    { id: "settings",   icon: Settings,        label: "Settings"  },
+    { id: "overview", icon: LayoutDashboard, label: "Overview" },
+    { id: "templates", icon: Package, label: "Templates" },
+    { id: "orders", icon: DollarSign, label: "Approvals" },
+    { id: "users", icon: Users, label: "Whitelisted" },
+    { id: "settings", icon: Settings, label: "Settings" },
   ];
 
   const loadAdminData = async () => {
@@ -2047,10 +2044,10 @@ function AdminDashboard({ user, onLogout, templatesList, onRefreshTemplates }: A
               {/* Stat cards */}
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 {[
-                  { label: "Active Whitelisted",    val: String(data.verified.length), sub: "Access granted", icon: Users,  up: true  },
-                  { label: "Marketplace Templates",  val: String(templatesList.length),   sub: "Templates live",     icon: Package,     up: true  },
-                  { label: "Sync Action Logs",       val: String(data.builds.length),     sub: "Developer builds",      icon: LayoutDashboard,       up: true  },
-                  { label: "Pending Approvals",      val: String(pendingRequestsCount + pendingUPIRequestsCount), sub: "Needs review",       icon: AlertCircle, up: false },
+                  { label: "Active Whitelisted", val: String(data.verified.length), sub: "Access granted", icon: Users, up: true },
+                  { label: "Marketplace Templates", val: String(templatesList.length), sub: "Templates live", icon: Package, up: true },
+                  { label: "Sync Action Logs", val: String(data.builds.length), sub: "Developer builds", icon: LayoutDashboard, up: true },
+                  { label: "Pending Approvals", val: String(pendingRequestsCount + pendingUPIRequestsCount), sub: "Needs review", icon: AlertCircle, up: false },
                 ].map((s) => (
                   <div
                     key={s.label}
@@ -2801,7 +2798,7 @@ function UserProfile({
 
       <div className="max-w-7xl mx-auto px-6 lg:px-8 mt-12">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          
+
           {/* Profile Card Sidebar */}
           <div
             className="rounded-sm border p-8 flex flex-col items-center text-center gap-6"
@@ -2829,7 +2826,7 @@ function UserProfile({
                 {userEmail}
               </p>
             </div>
-            
+
             <div
               className="w-full rounded-sm border p-4 text-left"
               style={{ background: "rgba(255,255,255,0.02)", borderColor: "rgba(255,255,255,0.04)" }}

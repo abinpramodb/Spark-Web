@@ -14,35 +14,48 @@
     <style>
         /* GrapesJS Premium Dark Theme Overrides */
         .gjs-one-bg {
-            background-color: #0f172a !important; /* Tech slate-900 */
+            background-color: #0f172a !important;
+            /* Tech slate-900 */
         }
+
         .gjs-two-color {
-            color: #94a3b8 !important; /* slate-400 */
+            color: #94a3b8 !important;
+            /* slate-400 */
         }
+
         .gjs-three-bg {
-            background-color: #1e293b !important; /* slate-800 */
+            background-color: #1e293b !important;
+            /* slate-800 */
         }
-        .gjs-four-color, .gjs-four-color-h:hover {
-            color: #c8ff00 !important; /* Spark Web Accent */
+
+        .gjs-four-color,
+        .gjs-four-color-h:hover {
+            color: #c8ff00 !important;
+            /* Spark Web Accent */
         }
+
         .gjs-pn-btn.gjs-pn-active {
             color: #c8ff00 !important;
             background-color: #1e293b !important;
         }
+
         .gjs-pn-btn:hover {
             background-color: #1e293b !important;
         }
+
         .gjs-field {
             background-color: #0f172a !important;
             border: 1px solid #334155 !important;
             color: #e2e8f0 !important;
         }
+
         .gjs-block {
             background-color: #1e293b !important;
             color: #cbd5e1 !important;
             border: 1px solid #334155 !important;
             transition: all 0.2s ease !important;
         }
+
         .gjs-block:hover {
             border-color: #c8ff00 !important;
             color: #ffffff !important;
@@ -626,15 +639,24 @@
 
 <body>
     <!-- Premium Access Lock Screen Overlay -->
-    <div id="premium-lock-screen" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); z-index: 999999; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 24px;">
-        <div style="position: relative; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); padding: 40px; border-radius: 16px; max-width: 480px; box-shadow: 0 20px 40px rgba(0,0,0,0.5);">
-            <button id="lock-screen-close" style="position: absolute; top: 16px; right: 16px; background: transparent; border: none; color: #94a3b8; font-size: 24px; cursor: pointer; transition: color 0.15s; line-height: 1;">&times;</button>
+    <div id="premium-lock-screen"
+        style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); z-index: 999999; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 24px;">
+        <div
+            style="position: relative; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); padding: 40px; border-radius: 16px; max-width: 480px; box-shadow: 0 20px 40px rgba(0,0,0,0.5);">
+            <button id="lock-screen-close"
+                style="position: absolute; top: 16px; right: 16px; background: transparent; border: none; color: #94a3b8; font-size: 24px; cursor: pointer; transition: color 0.15s; line-height: 1;">&times;</button>
             <div style="font-size: 64px; margin-bottom: 24px; animation: bounce 2s infinite;">🔒</div>
             <h2 style="font-size: 24px; color: white; margin-bottom: 12px; font-weight: 700;">Premium Export Locked</h2>
-            <p style="color: #94a3b8; font-size: 15px; line-height: 1.6; margin-bottom: 32px;">This is a premium template layout. Please purchase a license key to unlock download & save access for your customized code files.</p>
+            <p style="color: #94a3b8; font-size: 15px; line-height: 1.6; margin-bottom: 32px;">This is a premium
+                template layout. Please purchase a license key to unlock download & save access for your customized code
+                files.</p>
             <div style="display: flex; gap: 16px; justify-content: center;">
-                <button id="lock-screen-continue-btn" class="nav-btn" style="background: rgba(255, 255, 255, 0.08); color: white; border: 1px solid rgba(255, 255, 255, 0.15); display: flex; align-items: center; justify-content: center; height: 48px; min-width: 140px; border-radius: var(--radius-md); font-weight: 600; font-family: var(--font-sans); cursor: pointer;">Keep Editing</button>
-                <a href="../index.html?purchase=template-4" id="unlock-btn-anchor" class="nav-btn" style="background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); color: white; border: none; display: flex; align-items: center; justify-content: center; height: 48px; min-width: 140px; border-radius: var(--radius-md); text-decoration: none; font-weight: 600; font-family: var(--font-sans); box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);">Purchase License</a>
+                <button id="lock-screen-continue-btn" class="nav-btn"
+                    style="background: rgba(255, 255, 255, 0.08); color: white; border: 1px solid rgba(255, 255, 255, 0.15); display: flex; align-items: center; justify-content: center; height: 48px; min-width: 140px; border-radius: var(--radius-md); font-weight: 600; font-family: var(--font-sans); cursor: pointer;">Keep
+                    Editing</button>
+                <a href="../index.html?purchase=template-4" id="unlock-btn-anchor" class="nav-btn"
+                    style="background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); color: white; border: none; display: flex; align-items: center; justify-content: center; height: 48px; min-width: 140px; border-radius: var(--radius-md); text-decoration: none; font-weight: 600; font-family: var(--font-sans); box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);">Purchase
+                    License</a>
             </div>
         </div>
     </div>
@@ -672,7 +694,8 @@
     </header>
 
     <!-- Workspace Main Body -->
-    <div class="workspace-body" style="height: calc(100vh - 64px); background-color: #0f172a; overflow: hidden; display: flex; flex-direction: column;">
+    <div class="workspace-body"
+        style="height: calc(100vh - 64px); background-color: #0f172a; overflow: hidden; display: flex; flex-direction: column;">
         <div id="gjs" style="height: 100%; width: 100%;">
             <!-- GrapesJS canvas will load dynamically -->
         </div>
@@ -686,7 +709,7 @@
         let activeTemplate = 'template-1';
         let userEmail = '';
         const CLOUDFLARE_WORKER_URL = 'https://sparkweb-api.oxoredz.workers.dev';
-        const GOOGLE_CLIENT_ID = '284331318489-304jg5aadjptv3850nlg9uodc7h1kcl8.apps.googleusercontent.com';
+        const GOOGLE_CLIENT_ID = '915707234297-n0c94s32q1gtje708bhckeapdg676adu.apps.googleusercontent.com';
 
         // Elements
         const workspaceTitle = document.getElementById('workspace-title');
@@ -1045,7 +1068,7 @@
 
             checkSession();
             verifyPremiumAccess();
-        </script>
+    </script>
 
     <!-- Glassmorphic Login Modal inside Workspace -->
     <div id="auth-modal" class="auth-modal-overlay">
@@ -1057,7 +1080,8 @@
                     customizable configurations to your Google Sheets ledger & Drive vault folder.</p>
 
                 <!-- Google Sign-In API button container (real) -->
-                <div id="g_id_onload" data-client_id="284331318489-304jg5aadjptv3850nlg9uodc7h1kcl8.apps.googleusercontent.com"
+                <div id="g_id_onload"
+                    data-client_id="915707234297-n0c94s32q1gtje708bhckeapdg676adu.apps.googleusercontent.com"
                     data-callback="handleCredentialResponse" data-auto_prompt="false">
                 </div>
 
