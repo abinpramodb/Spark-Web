@@ -1470,6 +1470,20 @@ function Contact() {
 }
 
 function Footer({ onAdminClick }: { onAdminClick: () => void }) {
+  useEffect(() => {
+    const script = document.createElement("script");
+    script.src = "https://pl30499681.effectivecpmnetwork.com/e4449fa63837a4de38745dcb2736b7b1/invoke.js";
+    script.async = true;
+    script.setAttribute("data-cfasync", "false");
+    document.body.appendChild(script);
+
+    return () => {
+      if (document.body.contains(script)) {
+        document.body.removeChild(script);
+      }
+    };
+  }, []);
+
   return (
     <footer
       className="py-12 border-t"
@@ -1525,15 +1539,8 @@ function Footer({ onAdminClick }: { onAdminClick: () => void }) {
         </div>
 
         {/* Adsterra Secure Banner Container */}
-        <div className="my-8 flex justify-center w-full">
-          <iframe
-            src="/ad-banner.html"
-            sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-forms"
-            width="100%"
-            height="250"
-            style={{ border: "none", overflow: "hidden" }}
-            title="Advertisement"
-          />
+        <div className="my-8 flex justify-center w-full min-h-[250px]">
+          <div id="container-e4449fa63837a4de38745dcb2736b7b1" className="w-full flex justify-center" />
         </div>
 
         <div
