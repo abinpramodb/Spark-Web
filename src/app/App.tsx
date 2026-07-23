@@ -1554,8 +1554,15 @@ function Footer({ onAdminClick }: { onAdminClick: () => void }) {
         </div>
 
         {/* Adsterra Secure Banner Container */}
-        <div className="my-8 flex justify-center w-full min-h-[180px]">
-          <div id="container-e4449fa63837a4de38745dcb2736b7b1" className="w-full"></div>
+        <div className="my-8 flex justify-center w-full">
+          <iframe
+            src="/ad-banner.html"
+            width="100%"
+            height="180"
+            style={{ border: "none", overflow: "hidden" }}
+            scrolling="no"
+            title="Advertisement"
+          />
         </div>
 
         <div
@@ -3095,21 +3102,7 @@ export default function App() {
     }
   }, [userEmail]);
 
-  useEffect(() => {
-    if (view === "site") {
-      const containerId = "container-e4449fa63837a4de38745dcb2736b7b1";
-      const container = document.getElementById(containerId);
-      if (container && !container.querySelector('script')) {
-        container.innerHTML = "";
-        const script = document.createElement("script");
-        script.type = "text/javascript";
-        script.async = true;
-        script.setAttribute("data-cfasync", "false");
-        script.src = "https://pl30499681.effectivecpmnetwork.com/e4449fa63837a4de38745dcb2736b7b1/invoke.js";
-        container.appendChild(script);
-      }
-    }
-  }, [view]);
+
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
