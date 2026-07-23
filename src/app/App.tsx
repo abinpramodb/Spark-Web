@@ -1470,18 +1470,20 @@ function Contact() {
 }
 
 function Footer({ onAdminClick }: { onAdminClick: () => void }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
+    if (!containerRef.current) return;
+
+    // Clear any existing children to prevent double renders
+    containerRef.current.innerHTML = "";
+
     const script = document.createElement("script");
     script.src = "https://pl30499681.effectivecpmnetwork.com/e4449fa63837a4de38745dcb2736b7b1/invoke.js";
     script.async = true;
     script.setAttribute("data-cfasync", "false");
-    document.body.appendChild(script);
-
-    return () => {
-      if (document.body.contains(script)) {
-        document.body.removeChild(script);
-      }
-    };
+    
+    containerRef.current.appendChild(script);
   }, []);
 
   return (
@@ -1540,7 +1542,11 @@ function Footer({ onAdminClick }: { onAdminClick: () => void }) {
 
         {/* Adsterra Secure Banner Container */}
         <div className="my-8 flex justify-center w-full min-h-[250px]">
-          <div id="container-e4449fa63837a4de38745dcb2736b7b1" className="w-full flex justify-center" />
+          <div
+            ref={containerRef}
+            id="container-e4449fa63837a4de38745dcb2736b7b1"
+            className="w-full flex justify-center"
+          />
         </div>
 
         <div
