@@ -1553,8 +1553,6 @@ function Footer({ onAdminClick }: { onAdminClick: () => void }) {
           ))}
         </div>
 
-
-
         <div
           className="pt-8 border-t flex flex-col sm:flex-row items-center justify-between gap-4 text-xs"
           style={{ borderColor: "rgba(255,255,255,0.06)", color: "#666660", fontFamily: "Outfit, sans-serif" }}
@@ -3091,8 +3089,6 @@ export default function App() {
       setPurchasedTemplates([]);
     }
   }, [userEmail]);
-
-
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
