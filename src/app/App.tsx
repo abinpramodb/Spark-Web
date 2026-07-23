@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { ArrowRight, Menu, X, Check, Star, ChevronDown, Mail, Phone, MapPin, ExternalLink, Zap, Globe, Code2, Palette, BarChart3, Shield, ShoppingCart, Eye, Download, Tag, Layers, Filter, LogOut, Users, Package, TrendingUp, DollarSign, AlertCircle, Edit3, Trash2, Plus, Lock, LayoutDashboard, Settings, Bell, Search, ChevronUp, MoreVertical } from "lucide-react";
 
-const CLOUDFLARE_WORKER_URL = "https://sparkweb-api.sparkwebtemp.workers.dev";
+const CLOUDFLARE_WORKER_URL = "https://sparkweb-api.oxoredz.workers.dev";
 const GOOGLE_CLIENT_ID = "915707234297-n0c94s32q1gtje708bhckeapdg676adu.apps.googleusercontent.com";
 const ADMIN_EMAILS = ["oxoredz@gmail.com"];
 
@@ -717,6 +717,35 @@ function AuthModal({ onClose, onSuccess }: AuthModalProps) {
           Logging in allows you to unlock premium templates, sync your custom live editor builds, and access your whitelisted downloads.
         </p>
         <div id="google-signin-btn-container" className="my-2"></div>
+
+        {/* Developer Bypass Login */}
+        <div className="w-full border-t pt-4 text-center" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
+          <p className="text-[10px] uppercase tracking-wider mb-2" style={{ color: "#666", fontFamily: "JetBrains Mono, monospace" }}>
+            Bypass / Dev Login
+          </p>
+          <div className="flex gap-2 w-full">
+            <input 
+              id="dev-login-email"
+              type="email" 
+              placeholder="e.g. oxoredz@gmail.com"
+              className="flex-1 text-xs px-3 py-2 rounded-sm border bg-[#0a0a0a]"
+              style={{ color: "#fff", borderColor: "rgba(255,255,255,0.1)", outline: "none" }}
+              defaultValue="oxoredz@gmail.com"
+            />
+            <button 
+              onClick={() => {
+                const el = document.getElementById("dev-login-email") as HTMLInputElement;
+                const email = el?.value || "oxoredz@gmail.com";
+                const name = email.split('@')[0];
+                onSuccess(email, name, `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=c8ff00&color=0a0a0a`);
+              }}
+              className="px-4 py-2 text-xs font-semibold rounded-sm transition-colors"
+              style={{ background: "#c8ff00", color: "#0a0a0a" }}
+            >
+              Sign In
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -1525,9 +1554,10 @@ function Footer({ onAdminClick }: { onAdminClick: () => void }) {
         </div>
 
         {/* Adsterra Secure Banner Container */}
-        <div className="my-8 flex justify-center w-full min-h-[250px]">
+        <div className="my-8 flex justify-center w-full">
           <iframe
             src="/ad-banner.html"
+            sandbox="allow-scripts allow-same-origin"
             width="100%"
             height="250"
             style={{ border: "none", overflow: "hidden" }}

@@ -708,7 +708,7 @@
         // Setup state variables
         let activeTemplate = 'template-1';
         let userEmail = '';
-        const CLOUDFLARE_WORKER_URL = 'https://sparkweb-api.sparkwebtemp.workers.dev';
+        const CLOUDFLARE_WORKER_URL = 'https://sparkweb-api.oxoredz.workers.dev';
         const GOOGLE_CLIENT_ID = '915707234297-n0c94s32q1gtje708bhckeapdg676adu.apps.googleusercontent.com';
 
         // Elements
@@ -905,20 +905,11 @@
             setTimeout(() => {
                 toast.style.display = 'none';
             }, 3000);
-        }  }, 3000);
         }
 
-        // OTP Authentication Logic
+        // Google Authentication Logic
         const authModal = document.getElementById('auth-modal');
         const authModalClose = document.getElementById('auth-modal-close');
-        const authStepEmail = document.getElementById('auth-step-email');
-        const authStepOtp = document.getElementById('auth-step-otp');
-        const authEmailForm = document.getElementById('auth-email-form');
-        const authOtpForm = document.getElementById('auth-otp-form');
-        const authEmailInput = document.getElementById('auth-email');
-        const authOtpInput = document.getElementById('auth-otp');
-        const authSentEmailSpan = document.getElementById('auth-sent-email');
-        const authOtpBackLink = document.getElementById('auth-otp-back');
         const authErrorMsg = document.getElementById('auth-error-msg');
         const userNavProfile = document.getElementById('user-nav-profile');
 
@@ -937,10 +928,6 @@
 
         function openAuthModal() {
             authErrorMsg.textContent = '';
-            authEmailInput.value = '';
-            authOtpInput.value = '';
-            authStepEmail.style.display = 'block';
-            authStepOtp.style.display = 'none';
             authModal.classList.add('active');
         }
 
@@ -953,13 +940,9 @@
             if (e.target === authModal) closeAuthModal();
         });
 
-        authEmailForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const email = authEmailInput.value.trim();
-            const submitBtn = document.getElementById('auth-email-submit');
-
-            submitBtn.classList.add('loading');
-            // Click handler for Custom/Simulated Google Auth
+        // Click handler for Custom/Simulated Google Auth
+        const customGoogleBtn = document.getElementById('custom-google-btn');
+        if (customGoogleBtn) {
             customGoogleBtn.addEventListener('click', () => {
                 const width = 480, height = 600;
                 const left = (window.innerWidth - width) / 2 + window.screenX;
@@ -973,6 +956,31 @@
 
                 if (window.focus && popup) popup.focus();
             });
+        }
+
+        // Click handler for Developer Bypass Login
+        const devBypassLoginBtn = document.getElementById('dev-bypass-login-btn');
+        if (devBypassLoginBtn) {
+            devBypassLoginBtn.addEventListener('click', () => {
+                const emailInput = document.getElementById('dev-bypass-email');
+                const email = emailInput ? emailInput.value.trim() : 'oxoredz@gmail.com';
+                const name = email.split('@')[0];
+                
+                localStorage.setItem('tf_user_email', email);
+                localStorage.setItem('tf_user_name', name);
+                localStorage.setItem('tf_user_picture', `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=c8ff00&color=0a0a0a`);
+                localStorage.setItem('tf_session_token', 'mock_dev_token_' + Date.now());
+
+                checkSession();
+                closeAuthModal();
+                showToast('Successfully authenticated!');
+                
+                // Rerun verification if customizer triggers it
+                if (typeof verifyPremiumAccess === 'function') {
+                    verifyPremiumAccess();
+                }
+            });
+        }
 
             // Listen for postMessage events from the Google chooser popup
             window.addEventListener('message', (event) => {
@@ -1112,6 +1120,15 @@
                     <span>Sign in with Google</span>
                 </button>
                 <div class="auth-error" id="auth-error-msg"></div>
+
+                <!-- Developer Bypass Login -->
+                <div style="border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 20px; margin-top: 20px; text-align: center;">
+                    <p style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: #64748b; margin-bottom: 12px; font-family: monospace;">Bypass / Dev Login</p>
+                    <div style="display: flex; gap: 8px;">
+                        <input id="dev-bypass-email" type="email" placeholder="e.g. oxoredz@gmail.com" style="flex: 1; padding: 10px 14px; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: var(--radius-md); background: #0f172a; color: white; font-size: 13px; outline: none;" value="oxoredz@gmail.com">
+                        <button id="dev-bypass-login-btn" class="nav-btn" style="background: #c8ff00; color: #0a0a0a; border: none; padding: 10px 18px; border-radius: var(--radius-md); font-size: 13px; font-weight: 600; cursor: pointer; transition: background 0.15s;">Sign In</button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
