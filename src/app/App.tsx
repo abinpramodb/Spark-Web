@@ -1551,6 +1551,7 @@ function Footer({ onAdminClick }: { onAdminClick: () => void }) {
               </div>
             </div>
           ))}
+        </div>
 
         {/* Adsterra Secure Banner Container */}
         <div className="my-8 flex justify-center w-full">
