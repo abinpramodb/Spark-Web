@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { ArrowRight, Menu, X, Check, Star, ChevronDown, Mail, Phone, MapPin, ExternalLink, Zap, Globe, Code2, Palette, BarChart3, Shield, ShoppingCart, Eye, Download, Tag, Layers, Filter, LogOut, Users, Package, TrendingUp, DollarSign, AlertCircle, Edit3, Trash2, Plus, Lock, LayoutDashboard, Settings, Bell, Search, ChevronUp, MoreVertical } from "lucide-react";
 
-const CLOUDFLARE_WORKER_URL = "https://sparkweb-api.oxoredz.workers.dev";
+const CLOUDFLARE_WORKER_URL = "https://sparkweb-api.sparkwebtemp.workers.dev";
 const GOOGLE_CLIENT_ID = "915707234297-n0c94s32q1gtje708bhckeapdg676adu.apps.googleusercontent.com";
 const ADMIN_EMAILS = ["oxoredz@gmail.com"];
 
