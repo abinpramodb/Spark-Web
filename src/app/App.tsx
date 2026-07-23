@@ -1559,7 +1559,7 @@ function Footer({ onAdminClick }: { onAdminClick: () => void }) {
             src="/ad-banner.html"
             sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
             width="100%"
-            height="250"
+            height="90"
             style={{ border: "none", overflow: "hidden" }}
             title="Advertisement"
           />
