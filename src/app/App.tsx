@@ -1553,17 +1553,7 @@ function Footer({ onAdminClick }: { onAdminClick: () => void }) {
           ))}
         </div>
 
-        {/* Adsterra Secure Banner Container */}
-        <div className="my-8 flex justify-center w-full">
-          <iframe
-            src="/ad-banner.html"
-            width="100%"
-            height="180"
-            style={{ border: "none", overflow: "hidden" }}
-            scrolling="no"
-            title="Advertisement"
-          />
-        </div>
+
 
         <div
           className="pt-8 border-t flex flex-col sm:flex-row items-center justify-between gap-4 text-xs"
