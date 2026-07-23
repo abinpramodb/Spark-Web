@@ -1558,7 +1558,7 @@ function Footer({ onAdminClick }: { onAdminClick: () => void }) {
           <iframe
             src="/ad-banner.html"
             width="100%"
-            height="90"
+            height="180"
             style={{ border: "none", overflow: "hidden" }}
             scrolling="no"
             title="Advertisement"
