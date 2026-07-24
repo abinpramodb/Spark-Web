@@ -937,8 +937,21 @@
             }
         });
 
+        // Custom HTML/CSS Code Editor Modal functions
+        window.closeCodeEditorModal = function() {
+            document.getElementById('code-editor-modal').style.display = 'none';
+        };
+
+        document.getElementById('save-code-btn').addEventListener('click', () => {
+            const htmlContent = document.getElementById('code-html-input').value;
+            const cssContent = document.getElementById('code-css-input').value;
+            editor.setComponents(htmlContent);
+            editor.setStyle(cssContent);
+            closeCodeEditorModal();
+            showToast('Changes applied successfully!');
+        });
+
         // Intercept code export commands to block source code exposure on unpurchased premium templates
-        const origExport = editor.Commands.get('export-template');
         editor.Commands.add('export-template', {
             run(editor, sender) {
                 if (sender && typeof sender.set === 'function') {
@@ -949,13 +962,14 @@
                     showToast('Purchase a license key to view or export this code.');
                     return;
                 }
-                if (origExport && typeof origExport.run === 'function') {
-                    origExport.run(editor, sender);
-                }
+                
+                // Populate and show custom editable Code Editor modal
+                document.getElementById('code-html-input').value = editor.getHtml();
+                document.getElementById('code-css-input').value = editor.getCss();
+                document.getElementById('code-editor-modal').style.display = 'flex';
             }
         });
 
-        const origOpenCode = editor.Commands.get('open-code');
         editor.Commands.add('open-code', {
             run(editor, sender) {
                 if (sender && typeof sender.set === 'function') {
@@ -966,9 +980,10 @@
                     showToast('Purchase a license key to view or export this code.');
                     return;
                 }
-                if (origOpenCode && typeof origOpenCode.run === 'function') {
-                    origOpenCode.run(editor, sender);
-                }
+                
+                document.getElementById('code-html-input').value = editor.getHtml();
+                document.getElementById('code-css-input').value = editor.getCss();
+                document.getElementById('code-editor-modal').style.display = 'flex';
             }
         });
 
@@ -1481,6 +1496,30 @@
                 <div class="auth-error" id="auth-error-msg"></div>
 
                 <!-- Developer Bypass Login Removed -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Code Modal -->
+    <div id="code-editor-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15,23,42,0.85); backdrop-filter: blur(8px); z-index: 99999; flex-direction: column; align-items: center; justify-content: center; padding: 24px;">
+        <div style="background: #1e1e1e; border: 1px solid #2c2c2c; border-radius: 12px; width: 90%; max-width: 800px; height: 80%; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.5); font-family: system-ui, sans-serif;">
+            <div style="padding: 16px 20px; border-bottom: 1px solid #2c2c2c; display: flex; justify-content: space-between; align-items: center; background-color: #1a1a1a;">
+                <span style="font-size: 13px; font-weight: 700; color: #fff; text-transform: uppercase; letter-spacing: 0.05em;">Edit Source Code</span>
+                <button onclick="closeCodeEditorModal()" style="background: transparent; border: none; color: #aaa; font-size: 20px; cursor: pointer; line-height: 1;">&times;</button>
+            </div>
+            <div style="flex: 1; display: flex; gap: 16px; padding: 20px; overflow: hidden; height: calc(100% - 120px);">
+                <div style="flex: 1; display: flex; flex-direction: column; gap: 8px; height: 100%;">
+                    <label style="font-size: 11px; font-weight: 600; color: #94a3b8; font-family: monospace;">HTML Content</label>
+                    <textarea id="code-html-input" style="flex: 1; background-color: #121212; border: 1px solid #2c2c2c; border-radius: var(--radius-sm); color: #fff; font-family: monospace; font-size: 12px; padding: 12px; outline: none; resize: none;"></textarea>
+                </div>
+                <div style="flex: 1; display: flex; flex-direction: column; gap: 8px; height: 100%;">
+                    <label style="font-size: 11px; font-weight: 600; color: #94a3b8; font-family: monospace;">CSS Styles</label>
+                    <textarea id="code-css-input" style="flex: 1; background-color: #121212; border: 1px solid #2c2c2c; border-radius: var(--radius-sm); color: #fff; font-family: monospace; font-size: 12px; padding: 12px; outline: none; resize: none;"></textarea>
+                </div>
+            </div>
+            <div style="padding: 16px 20px; border-top: 1px solid #2c2c2c; display: flex; justify-content: flex-end; gap: 12px; background-color: #1a1a1a;">
+                <button onclick="closeCodeEditorModal()" style="padding: 8px 16px; background-color: transparent; border: 1px solid #2c2c2c; border-radius: var(--radius-md); color: #fff; font-size: 12px; font-weight: 600; cursor: pointer; transition: background 0.15s;">Cancel</button>
+                <button id="save-code-btn" style="padding: 8px 16px; background-color: #c8ff00; border: none; border-radius: var(--radius-md); color: #0a0a0a; font-size: 12px; font-weight: 700; cursor: pointer; transition: opacity 0.15s;">Apply Changes</button>
             </div>
         </div>
     </div>
