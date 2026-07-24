@@ -755,6 +755,41 @@
             }
         });
 
+        // Intercept code export commands to block source code exposure on unpurchased premium templates
+        const origExport = editor.Commands.get('export-template');
+        editor.Commands.add('export-template', {
+            run(editor, sender) {
+                if (sender && typeof sender.set === 'function') {
+                    sender.set('active', false);
+                }
+                if (!isPurchased) {
+                    document.getElementById('premium-lock-screen').style.display = 'flex';
+                    showToast('Purchase a license key to view or export this code.');
+                    return;
+                }
+                if (origExport && typeof origExport.run === 'function') {
+                    origExport.run(editor, sender);
+                }
+            }
+        });
+
+        const origOpenCode = editor.Commands.get('open-code');
+        editor.Commands.add('open-code', {
+            run(editor, sender) {
+                if (sender && typeof sender.set === 'function') {
+                    sender.set('active', false);
+                }
+                if (!isPurchased) {
+                    document.getElementById('premium-lock-screen').style.display = 'flex';
+                    showToast('Purchase a license key to view or export this code.');
+                    return;
+                }
+                if (origOpenCode && typeof origOpenCode.run === 'function') {
+                    origOpenCode.run(editor, sender);
+                }
+            }
+        });
+
         // Fetch and load template assets dynamically
         async function loadTemplateInEditor() {
             try {
