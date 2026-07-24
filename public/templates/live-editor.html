@@ -1347,6 +1347,7 @@
 
             async function verifyPremiumAccess() {
                 isPurchased = true; // Unlocked by default for free templates
+                let activeTemplateInfo = null;
 
                 try {
                     const res = await fetch(CLOUDFLARE_WORKER_URL, {
@@ -1357,6 +1358,7 @@
                     if (data.result === 'success' && Array.isArray(data.templates)) {
                         const match = data.templates.find(t => String(t.id) === String(activeTemplate) || String(t.demoPath) === String(activeTemplate));
                         if (match) {
+                            activeTemplateInfo = match;
                             const priceText = String(match.price || 'Free').trim();
                             if (priceText.toLowerCase() !== 'free') {
                                 isPurchased = false;
@@ -1402,8 +1404,24 @@
                         }
                     }
 
-                    // Dynamically map purchase link to index.html with query parameter
-                    document.getElementById('unlock-btn-anchor').href = `../index.html?purchase=${activeTemplate}`;
+                    // Dynamically map purchase link directly to Payhip overlay if available
+                    let finalUrl = `../index.html?purchase=${activeTemplate}`;
+                    const unlockBtn = document.getElementById('unlock-btn-anchor');
+                    if (activeTemplateInfo && activeTemplateInfo.payhipUrl) {
+                        const email = savedEmail || '';
+                        finalUrl = activeTemplateInfo.payhipUrl + (activeTemplateInfo.payhipUrl.includes('?') ? '&' : '?') + 'email=' + encodeURIComponent(email);
+                        unlockBtn.href = finalUrl;
+                        unlockBtn.classList.add('payhip-buy-button');
+                        
+                        setTimeout(() => {
+                            if (window.Payhip && typeof window.Payhip.scan === 'function') {
+                                window.Payhip.scan();
+                            }
+                        }, 100);
+                    } else {
+                        unlockBtn.href = finalUrl;
+                        unlockBtn.classList.remove('payhip-buy-button');
+                    }
                 }
             }
 
