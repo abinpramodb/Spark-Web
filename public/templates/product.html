@@ -378,30 +378,43 @@
       const isPurchased = purchasedTemplates.includes(String(currentTemplate.id));
 
       if (!userEmail) {
-        statusText.innerText = "Please sign in to unlock or customize this template.";
+        statusText.innerText = "Please sign in to customize this template.";
         btnContainer.innerHTML = `
           <button onclick="toggleAuthModal(true)" class="w-full py-3.5 text-center text-sm font-semibold rounded-sm bg-[#c8ff00] text-[#0a0a0a] hover:opacity-90 transition-all">
-            Sign In to Unlock &amp; Customize
+            Sign In to Customize
           </button>
         `;
-      } else if (isPurchased) {
-        statusText.innerText = "You have unlocked this template license successfully!";
-        btnContainer.innerHTML = `
-          <a href="/templates/live-editor.html?template=${currentTemplate.demoPath}" class="w-full py-3.5 text-center text-sm font-semibold rounded-sm bg-[#c8ff00] text-[#0a0a0a] hover:opacity-90 block">
-            Launch Live Customizer
-          </a>
-          <a href="/previews/${currentTemplate.demoPath}/index.html" target="_blank" class="w-full py-3.5 text-center text-sm font-semibold rounded-sm border border-white/10 hover:bg-white/5 block text-[#888880]">
-            Open Fullscreen Preview
-          </a>
-        `;
       } else {
-        statusText.innerText = "Unlock instantly to customize, preview, and download full source code.";
-        if (currentTemplate.payhipUrl) {
-          const finalCheckoutUrl = currentTemplate.payhipUrl + (currentTemplate.payhipUrl.includes("?") ? "&" : "?") + "email=" + encodeURIComponent(userEmail);
+        if (isPurchased) {
+          statusText.innerText = "You have unlocked this template license successfully!";
+          btnContainer.innerHTML = `
+            <a href="/templates/live-editor.html?template=${currentTemplate.demoPath}" class="w-full py-3.5 text-center text-sm font-semibold rounded-sm bg-[#c8ff00] text-[#0a0a0a] hover:opacity-90 block text-center" style="text-decoration: none;">
+              Launch Live Customizer
+            </a>
+            <a href="/previews/${currentTemplate.demoPath}/index.html" target="_blank" class="w-full py-3.5 text-center text-sm font-semibold rounded-sm border border-white/10 hover:bg-white/5 block text-[#888880] text-center" style="text-decoration: none; margin-top: 10px;">
+              Open Fullscreen Preview
+            </a>
+          `;
+        } else {
+          statusText.innerText = "Anyone can edit and customize this template! Purchase to unlock code downloading.";
+          
+          let checkoutBtnHtml = "";
+          if (currentTemplate.payhipUrl) {
+            const finalCheckoutUrl = currentTemplate.payhipUrl + (currentTemplate.payhipUrl.includes("?") ? "&" : "?") + "email=" + encodeURIComponent(userEmail);
+            checkoutBtnHtml = `
+              <a href="${finalCheckoutUrl}" class="w-full py-3.5 text-center text-sm font-semibold rounded-sm border border-[#c8ff00] text-[#c8ff00] hover:bg-[#c8ff00]/10 payhip-buy-button block text-center" style="text-decoration: none; margin-top: 10px;">
+                Purchase License (Unlock Downloads)
+              </a>
+            `;
+          }
 
           btnContainer.innerHTML = `
-            <a href="${finalCheckoutUrl}" class="w-full py-3.5 text-center text-sm font-semibold rounded-sm bg-[#c8ff00] text-[#0a0a0a] hover:opacity-90 payhip-buy-button block">
-              Unlock &amp; Customize
+            <a href="/templates/live-editor.html?template=${currentTemplate.demoPath}" class="w-full py-3.5 text-center text-sm font-semibold rounded-sm bg-[#c8ff00] text-[#0a0a0a] hover:opacity-90 block text-center" style="text-decoration: none;">
+              Customize &amp; Edit First
+            </a>
+            ${checkoutBtnHtml}
+            <a href="/previews/${currentTemplate.demoPath}/index.html" target="_blank" class="w-full py-3.5 text-center text-sm font-semibold rounded-sm border border-white/10 hover:bg-white/5 block text-[#888880] text-center" style="text-decoration: none; margin-top: 10px;">
+              Open Fullscreen Preview
             </a>
           `;
 
@@ -411,12 +424,6 @@
               window.Payhip.scan();
             }
           }, 100);
-        } else {
-          btnContainer.innerHTML = `
-            <div class="py-3 px-4 rounded-sm border border-red-500/20 bg-red-500/5 text-xs text-[#ff6666] text-center">
-              This template currently does not have a checkout link configured.
-            </div>
-          `;
         }
       }
     }
