@@ -1148,9 +1148,9 @@ function Templates({ templatesList, purchasedTemplates, userEmail, onOpenCheckou
                 )}
                 <iframe
                   src={
-                    previewTemplate.htmlCode
+                    previewTemplate.htmlCode && previewTemplate.htmlCode.trim()
                       ? `${CLOUDFLARE_WORKER_URL}/api/preview?templateId=${previewTemplate.id}`
-                      : `/previews/${previewTemplate.demoPath}/index.html`
+                      : `data:text/html,<html><body style="background:%230a0a0a;color:%23666;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;font-family:monospace;text-align:center"><div><div style="font-size:40px;margin-bottom:16px">🖼️</div><div style="font-size:14px;color:%23888">No preview uploaded yet</div><div style="font-size:11px;margin-top:8px;color:%23444">Admin: upload HTML via dashboard</div></div></body></html>`
                   }
                   className="w-full h-full border-none"
                   title={`${previewTemplate.name} Live Sandbox`}
