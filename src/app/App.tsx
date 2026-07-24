@@ -1034,10 +1034,12 @@ function Templates({ templatesList, purchasedTemplates, userEmail, onOpenCheckou
                       </a>
                     )}
                     <a
-                      href={`/templates/live-editor.html?template=${tmpl.demoPath}`}
+                      href={`/previews/${tmpl.demoPath}/index.html`}
+                      target="_blank"
+                      rel="noopener noreferrer"
                       className="flex-1 py-2 text-center text-xs font-semibold rounded-sm border border-[#c8ff00]/40 bg-[rgba(200,255,0,0.05)] text-[#c8ff00] transition-colors hover:bg-[rgba(200,255,0,0.1)]"
                     >
-                      Customize &amp; Edit
+                      Live Demo 🖥️
                     </a>
                   </div>
                 </div>
@@ -1115,11 +1117,13 @@ function Templates({ templatesList, purchasedTemplates, userEmail, onOpenCheckou
                   {previewTemplate.price}
                 </span>
                 <a
-                  href={`/templates/live-editor.html?template=${previewTemplate.demoPath}`}
+                  href={`/previews/${previewTemplate.demoPath}/index.html`}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="px-4 py-2 text-xs font-semibold rounded-sm transition-all hover:opacity-90"
                   style={{ background: "#c8ff00", color: "#0a0a0a", fontFamily: "Outfit, sans-serif" }}
                 >
-                  Customize &amp; Edit
+                  Open Live Demo 🖥️
                 </a>
                 <button onClick={() => setPreviewId(null)} style={{ color: "#888880" }}>
                   <X size={18} />
@@ -2902,20 +2906,13 @@ function UserProfile({
                       <div className="flex flex-col gap-2">
                         <div className="flex gap-2">
                           <a
-                            href={`/templates/live-editor.html?template=${tmpl.demoPath}`}
-                            className="flex-1 py-2 text-center text-xs font-semibold rounded-sm text-[#0a0a0a]"
-                            style={{ background: "#c8ff00" }}
-                          >
-                            Customize &amp; Edit
-                          </a>
-                          <a
                             href={`/previews/${tmpl.demoPath}/index.html`}
                             target="_blank"
                             rel="noreferrer"
-                            className="flex-1 py-2 text-center text-xs font-semibold rounded-sm border hover:bg-white/5 transition-all"
+                            className="w-full py-2 text-center text-xs font-semibold rounded-sm border hover:bg-white/5 transition-all"
                             style={{ borderColor: "rgba(255,255,255,0.1)", color: "#888880" }}
                           >
-                            Preview
+                            Preview Demo
                           </a>
                         </div>
                         <button
@@ -3074,8 +3071,8 @@ export default function App() {
           });
           const data = await response.json();
           if (data.result === "success") {
-            alert("Payment verified successfully! Redirecting to customizer...");
-            window.location.href = `/templates/live-editor.html?template=${payhipTemplate}`;
+            alert("Payment verified successfully! You can now download your template source code on this page.");
+            window.location.href = `/templates/product.html?template=${payhipTemplate}`;
           }
         } catch (err) {
           console.error("Payhip redirect sync failed:", err);

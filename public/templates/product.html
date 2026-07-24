@@ -375,46 +375,50 @@
 
       if (!currentTemplate) return;
 
-      const isPurchased = purchasedTemplates.includes(String(currentTemplate.id));
+      const isFree = String(currentTemplate.price || 'Free').trim().toLowerCase() === 'free';
+      const isUnlocked = isFree || purchasedTemplates.includes(String(currentTemplate.id));
 
       if (!userEmail) {
-        statusText.innerText = "Please sign in to customize this template.";
+        statusText.innerText = "Please sign in to access or purchase this template.";
         btnContainer.innerHTML = `
           <button onclick="toggleAuthModal(true)" class="w-full py-3.5 text-center text-sm font-semibold rounded-sm bg-[#c8ff00] text-[#0a0a0a] hover:opacity-90 transition-all">
-            Sign In to Customize
+            Sign In to Access
           </button>
         `;
       } else {
-        if (isPurchased) {
-          statusText.innerText = "You have unlocked this template license successfully!";
+        if (isUnlocked) {
+          statusText.innerText = isFree ? "This is a free template layout!" : "You have unlocked this template successfully!";
           btnContainer.innerHTML = `
-            <a href="/templates/live-editor.html?template=${currentTemplate.demoPath}" class="w-full py-3.5 text-center text-sm font-semibold rounded-sm bg-[#c8ff00] text-[#0a0a0a] hover:opacity-90 block text-center" style="text-decoration: none;">
-              Launch Live Customizer
-            </a>
+            <button onclick="downloadTemplateCode('${currentTemplate.demoPath}')" class="w-full py-3.5 text-center text-sm font-semibold rounded-sm bg-[#c8ff00] text-[#0a0a0a] hover:opacity-90 block">
+              📥 Download Source Code (.html)
+            </button>
             <a href="/previews/${currentTemplate.demoPath}/index.html" target="_blank" class="w-full py-3.5 text-center text-sm font-semibold rounded-sm border border-white/10 hover:bg-white/5 block text-[#888880] text-center" style="text-decoration: none; margin-top: 10px;">
-              Open Fullscreen Preview
+              🖥️ Open Live Demo Preview
             </a>
           `;
         } else {
-          statusText.innerText = "Anyone can edit and customize this template! Purchase to unlock code downloading.";
+          statusText.innerText = "Unlock instantly to download full source code and receive lifetime updates.";
           
           let checkoutBtnHtml = "";
           if (currentTemplate.payhipUrl) {
             const finalCheckoutUrl = currentTemplate.payhipUrl + (currentTemplate.payhipUrl.includes("?") ? "&" : "?") + "email=" + encodeURIComponent(userEmail);
             checkoutBtnHtml = `
-              <a href="${finalCheckoutUrl}" class="w-full py-3.5 text-center text-sm font-semibold rounded-sm border border-[#c8ff00] text-[#c8ff00] hover:bg-[#c8ff00]/10 payhip-buy-button block text-center" style="text-decoration: none; margin-top: 10px;">
-                Purchase License (Unlock Downloads)
+              <a href="${finalCheckoutUrl}" class="w-full py-3.5 text-center text-sm font-semibold rounded-sm bg-[#c8ff00] text-[#0a0a0a] hover:opacity-90 payhip-buy-button block text-center" style="text-decoration: none;">
+                ⚡ Unlock &amp; Purchase
               </a>
+            `;
+          } else {
+            checkoutBtnHtml = `
+              <div class="py-3 px-4 rounded-sm border border-red-500/20 bg-red-500/5 text-xs text-[#ff6666] text-center">
+                This template currently does not have a checkout link configured.
+              </div>
             `;
           }
 
           btnContainer.innerHTML = `
-            <a href="/templates/live-editor.html?template=${currentTemplate.demoPath}" class="w-full py-3.5 text-center text-sm font-semibold rounded-sm bg-[#c8ff00] text-[#0a0a0a] hover:opacity-90 block text-center" style="text-decoration: none;">
-              Customize &amp; Edit First
-            </a>
             ${checkoutBtnHtml}
             <a href="/previews/${currentTemplate.demoPath}/index.html" target="_blank" class="w-full py-3.5 text-center text-sm font-semibold rounded-sm border border-white/10 hover:bg-white/5 block text-[#888880] text-center" style="text-decoration: none; margin-top: 10px;">
-              Open Fullscreen Preview
+              🖥️ Open Live Demo Preview
             </a>
           `;
 
@@ -425,6 +429,45 @@
             }
           }, 100);
         }
+      }
+    }
+
+    // Direct client-side template download
+    async function downloadTemplateCode(demoPath) {
+      try {
+        const htmlRes = await fetch(`/previews/${demoPath}/index.html`);
+        const htmlText = await htmlRes.text();
+        
+        let cssText = "";
+        try {
+          const cssRes = await fetch(`/previews/${demoPath}/style.css`);
+          if (cssRes.ok) {
+            cssText = await cssRes.text();
+          }
+        } catch (e) {
+          console.log("No style.css found for preview:", e);
+        }
+
+        let finalHtml = htmlText;
+        if (cssText) {
+          const headEnd = htmlText.indexOf("</head>");
+          if (headEnd !== -1) {
+            finalHtml = htmlText.substring(0, headEnd) + `\n  <style>\n${cssText}\n  </style>\n` + htmlText.substring(headEnd);
+          }
+        }
+        
+        const blob = new Blob([finalHtml], { type: 'text/html;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const anchor = document.createElement('a');
+        anchor.href = url;
+        anchor.download = `${demoPath}.html`;
+        document.body.appendChild(anchor);
+        anchor.click();
+        document.body.removeChild(anchor);
+        URL.revokeObjectURL(url);
+      } catch (err) {
+        console.error(err);
+        alert("Failed to download template. Please try again.");
       }
     }
 
