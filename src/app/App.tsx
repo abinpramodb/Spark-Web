@@ -1718,7 +1718,22 @@ function AdminDashboard({ user, onLogout, templatesList, onRefreshTemplates }: A
     price: "Free",
     payhipUrl: "",
     figmaUrl: "",
+    htmlCode: "",
+    cssCode: "",
   });
+
+  const [newTplHtmlFile, setNewTplHtmlFile] = useState<File | null>(null);
+  const [newTplCssFile, setNewTplCssFile] = useState<File | null>(null);
+  const [editTplHtmlFile, setEditTplHtmlFile] = useState<File | null>(null);
+  const [editTplCssFile, setEditTplCssFile] = useState<File | null>(null);
+
+  const readFileAsText = (file: File | null): Promise<string> =>
+    new Promise((resolve) => {
+      if (!file) { resolve(""); return; }
+      const reader = new FileReader();
+      reader.onload = (e) => resolve((e.target?.result as string) || "");
+      reader.readAsText(file);
+    });
 
   const [data, setData] = useState<{
     requests: any[];
@@ -1858,12 +1873,16 @@ function AdminDashboard({ user, onLogout, templatesList, onRefreshTemplates }: A
   const handleAddTemplateSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      const htmlCode = await readFileAsText(newTplHtmlFile);
+      const cssCode = await readFileAsText(newTplCssFile);
       const res = await fetch(CLOUDFLARE_WORKER_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           action: "add_template",
-          ...newTemplate
+          ...newTemplate,
+          htmlCode,
+          cssCode,
         })
       });
       const resData = await res.json();
@@ -1871,6 +1890,8 @@ function AdminDashboard({ user, onLogout, templatesList, onRefreshTemplates }: A
         alert("Template published successfully!");
         onRefreshTemplates();
         setAddModalOpen(false);
+        setNewTplHtmlFile(null);
+        setNewTplCssFile(null);
         setNewTemplate({
           name: "",
           category: "SaaS",
@@ -1880,6 +1901,8 @@ function AdminDashboard({ user, onLogout, templatesList, onRefreshTemplates }: A
           price: "Free",
           payhipUrl: "",
           figmaUrl: "",
+          htmlCode: "",
+          cssCode: "",
         });
       }
     } catch (e) {
@@ -1890,6 +1913,8 @@ function AdminDashboard({ user, onLogout, templatesList, onRefreshTemplates }: A
   const handleEditTemplateSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      const htmlCode = editTplHtmlFile ? await readFileAsText(editTplHtmlFile) : undefined;
+      const cssCode = editTplCssFile ? await readFileAsText(editTplCssFile) : undefined;
       const res = await fetch(CLOUDFLARE_WORKER_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -1904,12 +1929,16 @@ function AdminDashboard({ user, onLogout, templatesList, onRefreshTemplates }: A
           price: editingTemplate.price,
           payhipUrl: editingTemplate.payhipUrl,
           figmaUrl: editingTemplate.figmaUrl,
+          ...(htmlCode !== undefined && { htmlCode }),
+          ...(cssCode !== undefined && { cssCode }),
         })
       });
       const resData = await res.json();
       if (resData.result === "success") {
         alert("Template updated successfully!");
         onRefreshTemplates();
+        setEditTplHtmlFile(null);
+        setEditTplCssFile(null);
         setEditingTemplate(null);
       }
     } catch (e) {
@@ -2296,6 +2325,26 @@ function AdminDashboard({ user, onLogout, templatesList, onRefreshTemplates }: A
                         />
                       </div>
                       <div>
+                        <label className="block text-xs mb-1.5" style={{ color: "#888880", fontFamily: "JetBrains Mono, monospace" }}>Upload Preview HTML (.html)</label>
+                        <input
+                          type="file"
+                          accept=".html"
+                          onChange={(e) => setNewTplHtmlFile(e.target.files?.[0] || null)}
+                          className="w-full px-3 py-2 text-sm rounded-sm border outline-none bg-black"
+                          style={{ borderColor: "rgba(255,255,255,0.08)", color: "#888880" }}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs mb-1.5" style={{ color: "#888880", fontFamily: "JetBrains Mono, monospace" }}>Upload Preview CSS (.css)</label>
+                        <input
+                          type="file"
+                          accept=".css"
+                          onChange={(e) => setNewTplCssFile(e.target.files?.[0] || null)}
+                          className="w-full px-3 py-2 text-sm rounded-sm border outline-none bg-black"
+                          style={{ borderColor: "rgba(255,255,255,0.08)", color: "#888880" }}
+                        />
+                      </div>
+                      <div>
                         <label className="block text-xs mb-1.5" style={{ color: "#888880", fontFamily: "JetBrains Mono, monospace" }}>Figma Demo URL (Optional)</label>
                         <input
                           value={newTemplate.figmaUrl}
@@ -2404,6 +2453,28 @@ function AdminDashboard({ user, onLogout, templatesList, onRefreshTemplates }: A
                           className="w-full px-3 py-2 text-sm rounded-sm border outline-none bg-black"
                           style={{ borderColor: "rgba(255,255,255,0.08)", color: "#f0f0ee" }}
                         />
+                      </div>
+                      <div>
+                        <label className="block text-xs mb-1.5" style={{ color: "#888880", fontFamily: "JetBrains Mono, monospace" }}>Upload Preview HTML (.html) — Optional</label>
+                        <input
+                          type="file"
+                          accept=".html"
+                          onChange={(e) => setEditTplHtmlFile(e.target.files?.[0] || null)}
+                          className="w-full px-3 py-2 text-sm rounded-sm border outline-none bg-black"
+                          style={{ borderColor: "rgba(255,255,255,0.08)", color: "#888880" }}
+                        />
+                        <p className="text-xs mt-1" style={{ color: "#555" }}>Leave empty to keep existing code.</p>
+                      </div>
+                      <div>
+                        <label className="block text-xs mb-1.5" style={{ color: "#888880", fontFamily: "JetBrains Mono, monospace" }}>Upload Preview CSS (.css) — Optional</label>
+                        <input
+                          type="file"
+                          accept=".css"
+                          onChange={(e) => setEditTplCssFile(e.target.files?.[0] || null)}
+                          className="w-full px-3 py-2 text-sm rounded-sm border outline-none bg-black"
+                          style={{ borderColor: "rgba(255,255,255,0.08)", color: "#888880" }}
+                        />
+                        <p className="text-xs mt-1" style={{ color: "#555" }}>Leave empty to keep existing styles.</p>
                       </div>
                       <div>
                         <label className="block text-xs mb-1.5" style={{ color: "#888880", fontFamily: "JetBrains Mono, monospace" }}>Figma Demo URL (Optional)</label>
