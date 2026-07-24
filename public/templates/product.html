@@ -378,6 +378,10 @@
       const isFree = String(currentTemplate.price || 'Free').trim().toLowerCase() === 'free';
       const isUnlocked = isFree || purchasedTemplates.includes(String(currentTemplate.id));
 
+      const previewUrl = currentTemplate.htmlCode
+        ? `${CLOUDFLARE_WORKER_URL}/api/preview?templateId=${currentTemplate.id}`
+        : `/previews/${currentTemplate.demoPath}/index.html`;
+
       if (!userEmail) {
         statusText.innerText = "Please sign in to access or purchase this template.";
         btnContainer.innerHTML = `
@@ -392,7 +396,7 @@
             <button onclick="downloadTemplateCode('${currentTemplate.demoPath}')" class="w-full py-3.5 text-center text-sm font-semibold rounded-sm bg-[#c8ff00] text-[#0a0a0a] hover:opacity-90 block">
               📥 Download Source Code (.html)
             </button>
-            <a href="/previews/${currentTemplate.demoPath}/index.html" target="_blank" class="w-full py-3.5 text-center text-sm font-semibold rounded-sm border border-white/10 hover:bg-white/5 block text-[#888880] text-center" style="text-decoration: none; margin-top: 10px;">
+            <a href="${previewUrl}" target="_blank" class="w-full py-3.5 text-center text-sm font-semibold rounded-sm border border-white/10 hover:bg-white/5 block text-[#888880] text-center" style="text-decoration: none; margin-top: 10px;">
               🖥️ Open Live Demo Preview
             </a>
           `;
@@ -417,7 +421,7 @@
 
           btnContainer.innerHTML = `
             ${checkoutBtnHtml}
-            <a href="/previews/${currentTemplate.demoPath}/index.html" target="_blank" class="w-full py-3.5 text-center text-sm font-semibold rounded-sm border border-white/10 hover:bg-white/5 block text-[#888880] text-center" style="text-decoration: none; margin-top: 10px;">
+            <a href="${previewUrl}" target="_blank" class="w-full py-3.5 text-center text-sm font-semibold rounded-sm border border-white/10 hover:bg-white/5 block text-[#888880] text-center" style="text-decoration: none; margin-top: 10px;">
               🖥️ Open Live Demo Preview
             </a>
           `;
@@ -435,17 +439,24 @@
     // Direct client-side template download
     async function downloadTemplateCode(demoPath) {
       try {
-        const htmlRes = await fetch(`/previews/${demoPath}/index.html`);
-        const htmlText = await htmlRes.text();
-        
+        let htmlText = "";
         let cssText = "";
-        try {
-          const cssRes = await fetch(`/previews/${demoPath}/style.css`);
-          if (cssRes.ok) {
-            cssText = await cssRes.text();
+
+        if (currentTemplate && currentTemplate.htmlCode) {
+          htmlText = currentTemplate.htmlCode;
+          cssText = currentTemplate.cssCode || "";
+        } else {
+          const htmlRes = await fetch(`/previews/${demoPath}/index.html`);
+          htmlText = await htmlRes.text();
+          
+          try {
+            const cssRes = await fetch(`/previews/${demoPath}/style.css`);
+            if (cssRes.ok) {
+              cssText = await cssRes.text();
+            }
+          } catch (e) {
+            console.log("No style.css found for preview:", e);
           }
-        } catch (e) {
-          console.log("No style.css found for preview:", e);
         }
 
         let finalHtml = htmlText;

@@ -633,6 +633,14 @@
                     <input type="url" id="tpl-payhip" class="form-input" placeholder="e.g. https://payhip.com/b/XXXX">
                 </div>
                 <div class="form-group">
+                    <label for="tpl-html-file">Upload Preview HTML (.html)</label>
+                    <input type="file" id="tpl-html-file" class="form-input" accept=".html">
+                </div>
+                <div class="form-group">
+                    <label for="tpl-css-file">Upload Preview CSS (.css)</label>
+                    <input type="file" id="tpl-css-file" class="form-input" accept=".css">
+                </div>
+                <div class="form-group">
                     <label for="tpl-figma">Figma Design Demo URL (Optional)</label>
                     <input type="url" id="tpl-figma" class="form-input"
                         placeholder="e.g. https://www.figma.com/design/XXXX/My-Design?node-id=0-1&t=abc">
@@ -691,6 +699,16 @@
                     <label for="edit-tpl-payhip">Payhip Product URL (Optional)</label>
                     <input type="url" id="edit-tpl-payhip" class="form-input"
                         placeholder="e.g. https://payhip.com/b/XXXX">
+                </div>
+                <div class="form-group">
+                    <label for="edit-tpl-html-file">Upload Preview HTML (.html) (Optional)</label>
+                    <input type="file" id="edit-tpl-html-file" class="form-input" accept=".html">
+                    <small style="color: #64748b; font-size: 11px; margin-top: 4px; display: block;">Leave empty to keep existing HTML code.</small>
+                </div>
+                <div class="form-group">
+                    <label for="edit-tpl-css-file">Upload Preview CSS (.css) (Optional)</label>
+                    <input type="file" id="edit-tpl-css-file" class="form-input" accept=".css">
+                    <small style="color: #64748b; font-size: 11px; margin-top: 4px; display: block;">Leave empty to keep existing CSS styles.</small>
                 </div>
                 <div class="form-group">
                     <label for="edit-tpl-figma">Figma Design Demo URL (Optional)</label>
@@ -1051,6 +1069,19 @@
             });
         }
 
+        function readFileAsText(file) {
+            return new Promise((resolve, reject) => {
+                if (!file) {
+                    resolve("");
+                    return;
+                }
+                const reader = new FileReader();
+                reader.onload = (e) => resolve(e.target.result);
+                reader.onerror = (e) => reject(e);
+                reader.readAsText(file);
+            });
+        }
+
         async function submitNewTemplate(e) {
             e.preventDefault();
             const name = document.getElementById('tpl-name').value.trim();
@@ -1062,12 +1093,17 @@
             const payhipUrl = document.getElementById('tpl-payhip').value.trim();
             const figmaUrl = document.getElementById('tpl-figma').value.trim();
 
+            const htmlFile = document.getElementById('tpl-html-file').files[0];
+            const cssFile = document.getElementById('tpl-css-file').files[0];
+            const htmlCode = await readFileAsText(htmlFile);
+            const cssCode = await readFileAsText(cssFile);
+
             if (CLOUDFLARE_WORKER_URL.includes('YOUR_SUBDOMAIN')) {
                 const newTpl = {
                     id: 'template-' + Date.now(),
                     name, category, description,
                     thumbnail: thumbnail || "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=800&q=80",
-                    demoPath, price, payhipUrl, figmaUrl
+                    demoPath, price, payhipUrl, figmaUrl, htmlCode, cssCode
                 };
                 demoTemplates.push(newTpl);
                 localStorage.setItem('tf_mock_templates', JSON.stringify(demoTemplates));
@@ -1084,7 +1120,7 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         action: 'add_template',
-                        name, category, description, thumbnail, demoPath, price, payhipUrl, figmaUrl
+                        name, category, description, thumbnail, demoPath, price, payhipUrl, figmaUrl, htmlCode, cssCode
                     })
                 });
                 const data = await response.json();
@@ -1110,6 +1146,17 @@
             const payhipUrl = document.getElementById('edit-tpl-payhip').value.trim();
             const figmaUrl = document.getElementById('edit-tpl-figma').value.trim();
 
+            const htmlFile = document.getElementById('edit-tpl-html-file').files[0];
+            const cssFile = document.getElementById('edit-tpl-css-file').files[0];
+            let htmlCode = null;
+            let cssCode = null;
+            if (htmlFile) {
+                htmlCode = await readFileAsText(htmlFile);
+            }
+            if (cssFile) {
+                cssCode = await readFileAsText(cssFile);
+            }
+
             if (CLOUDFLARE_WORKER_URL.includes('YOUR_SUBDOMAIN')) {
                 const idx = demoTemplates.findIndex(t => t.id === id);
                 if (idx !== -1) {
@@ -1118,6 +1165,8 @@
                         thumbnail: thumbnail || "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=800&q=80",
                         demoPath, price, payhipUrl, figmaUrl
                     };
+                    if (htmlCode !== null) demoTemplates[idx].htmlCode = htmlCode;
+                    if (cssCode !== null) demoTemplates[idx].cssCode = cssCode;
                     localStorage.setItem('tf_mock_templates', JSON.stringify(demoTemplates));
                 }
                 alert('Updated successfully (Demo Mode)! Template updates are live.');
@@ -1132,7 +1181,7 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         action: 'edit_template',
-                        id, name, category, description, thumbnail, demoPath, price, payhipUrl, figmaUrl
+                        id, name, category, description, thumbnail, demoPath, price, payhipUrl, figmaUrl, htmlCode, cssCode
                     })
                 });
                 const data = await response.json();

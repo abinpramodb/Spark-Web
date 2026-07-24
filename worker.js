@@ -71,14 +71,14 @@ export default {
       // -------------------------------------------------------------
       else if (action === "add_template") {
         const id = "template-" + Date.now();
-        const { name, category, description, thumbnail, demoPath, price, payhipUrl, figmaUrl } = payload;
+        const { name, category, description, thumbnail, demoPath, price, payhipUrl, figmaUrl, htmlCode, cssCode } = payload;
 
         if (!name || !category || !description || !demoPath) {
           return returnJson({ result: "error", error: "Missing required parameters to publish template." }, 400);
         }
 
         await env.DB.prepare(
-          "INSERT INTO templates (id, name, category, description, thumbnail, demoPath, price, payhipUrl, figmaUrl) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
+          "INSERT INTO templates (id, name, category, description, thumbnail, demoPath, price, payhipUrl, figmaUrl, htmlCode, cssCode) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
         )
         .bind(
           id,
@@ -89,7 +89,9 @@ export default {
           demoPath,
           price || "Free",
           payhipUrl || "",
-          figmaUrl || ""
+          figmaUrl || "",
+          htmlCode || "",
+          cssCode || ""
         )
         .run();
 
@@ -113,15 +115,14 @@ export default {
       // ROUTE: edit_template
       // -------------------------------------------------------------
       else if (action === "edit_template") {
-        const { id, name, category, description, thumbnail, demoPath, price, payhipUrl, figmaUrl } = payload;
+        const { id, name, category, description, thumbnail, demoPath, price, payhipUrl, figmaUrl, htmlCode, cssCode } = payload;
         if (!id || !name || !category || !description || !demoPath) {
           return returnJson({ result: "error", error: "Missing required parameters to update template." }, 400);
         }
 
-        await env.DB.prepare(
-          "UPDATE templates SET name = ?, category = ?, description = ?, thumbnail = ?, demoPath = ?, price = ?, payhipUrl = ?, figmaUrl = ? WHERE id = ?"
-        )
-        .bind(
+        // Conditionally build UPDATE query based on whether code updates are sent
+        let query = "UPDATE templates SET name = ?, category = ?, description = ?, thumbnail = ?, demoPath = ?, price = ?, payhipUrl = ?, figmaUrl = ?";
+        let params = [
           name,
           category,
           description,
@@ -129,12 +130,60 @@ export default {
           demoPath,
           price || "Free",
           payhipUrl || "",
-          figmaUrl || "",
-          id
-        )
-        .run();
+          figmaUrl || ""
+        ];
 
+        if (htmlCode !== null && htmlCode !== undefined) {
+          query += ", htmlCode = ?";
+          params.push(htmlCode);
+        }
+        if (cssCode !== null && cssCode !== undefined) {
+          query += ", cssCode = ?";
+          params.push(cssCode);
+        }
+
+        query += " WHERE id = ?";
+        params.push(id);
+
+        await env.DB.prepare(query).bind(...params).run();
         return returnJson({ result: "success" });
+      }
+
+      // -------------------------------------------------------------
+      // ROUTE: preview (GET /api/preview?templateId=xxx)
+      // -------------------------------------------------------------
+      else if (action === "preview") {
+        const templateId = url.searchParams.get("templateId");
+        if (!templateId) {
+          return new Response("Missing templateId parameter", { status: 400 });
+        }
+
+        const template = await env.DB.prepare("SELECT htmlCode, cssCode FROM templates WHERE id = ?").bind(templateId).first();
+        if (!template) {
+          return new Response("Template not found", { status: 404 });
+        }
+
+        const html = template.htmlCode || "<h1>No HTML layout code uploaded yet.</h1>";
+        const css = template.cssCode || "";
+
+        let finalHtml = html;
+        if (css) {
+          const headEnd = html.indexOf("</head>");
+          if (headEnd !== -1) {
+            finalHtml = html.substring(0, headEnd) + `\n  <style>\n${css}\n  </style>\n` + html.substring(headEnd);
+          } else {
+            finalHtml = `<style>\n${css}\n</style>\n` + html;
+          }
+        }
+
+        return new Response(finalHtml, {
+          headers: {
+            "Content-Type": "text/html; charset=utf-8",
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type",
+          }
+        });
       }
 
       // -------------------------------------------------------------

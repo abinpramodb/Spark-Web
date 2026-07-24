@@ -1147,7 +1147,11 @@ function Templates({ templatesList, purchasedTemplates, userEmail, onOpenCheckou
                   <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-4 bg-[#1c1c1c] rounded-b-xl z-20"></div>
                 )}
                 <iframe
-                  src={`/previews/${previewTemplate.demoPath}/index.html`}
+                  src={
+                    previewTemplate.htmlCode
+                      ? `${CLOUDFLARE_WORKER_URL}/api/preview?templateId=${previewTemplate.id}`
+                      : `/previews/${previewTemplate.demoPath}/index.html`
+                  }
                   className="w-full h-full border-none"
                   title={`${previewTemplate.name} Live Sandbox`}
                 ></iframe>
