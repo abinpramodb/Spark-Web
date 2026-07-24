@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="https://unpkg.com/grapesjs/dist/css/grapes.min.css">
     <script src="https://unpkg.com/grapesjs"></script>
     <script src="https://unpkg.com/grapesjs-preset-webpage"></script>
+    <script src="https://payhip.com/payhip.js"></script>
     <style>
         /* GrapesJS Premium Dark Theme Overrides */
         .gjs-one-bg {
@@ -1150,13 +1151,7 @@
             }
         });
 
-        downloadBtn.addEventListener('click', () => {
-            if (!isPurchased) {
-                document.getElementById('premium-lock-screen').style.display = 'flex';
-                showToast('Purchase a license key to download this template.');
-                return;
-            }
-
+        function triggerLayoutDownload() {
             try {
                 const finalHtml = editor.getHtml();
                 const finalCss = editor.getCss();
@@ -1192,6 +1187,53 @@
                 console.error(e);
                 alert("Cannot compile HTML locally. Please retry.");
             }
+        }
+
+        downloadBtn.addEventListener('click', () => {
+            if (!isPurchased) {
+                document.getElementById('premium-lock-screen').style.display = 'flex';
+                showToast('Purchase a license key to download this template.');
+                return;
+            }
+            triggerLayoutDownload();
+        });
+
+        // Combined Payhip success handler: auto-unlocks and downloads
+        if (window.Payhip) {
+            try {
+                Payhip.Events.on('purchase', async function(data) {
+                    console.log("Payhip purchase completed inside editor:", data);
+                    const userEmail = data.email || localStorage.getItem('tf_user_email') || 'buyer@sparkweb.co';
+                    
+                    try {
+                        const response = await fetch(CLOUDFLARE_WORKER_URL, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                action: 'record_purchase',
+                                email: userEmail,
+                                templateId: activeTemplate
+                            })
+                        });
+                        const resData = await response.json();
+                        if (resData.result === 'success') {
+                            isPurchased = true;
+                            document.getElementById('premium-lock-screen').style.display = 'none';
+                            showToast('Thank you! Purchase verified. Triggering download...');
+                            triggerLayoutDownload();
+                        }
+                    } catch (err) {
+                        console.error("Worker purchase sync failed:", err);
+                        isPurchased = true;
+                        document.getElementById('premium-lock-screen').style.display = 'none';
+                        showToast('Purchase verified. Triggering download...');
+                        triggerLayoutDownload();
+                    }
+                });
+            } catch (e) {
+                console.error("Payhip success event binding error:", e);
+            }
+        }
         });
 
         // Trigger helper notice
