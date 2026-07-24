@@ -717,6 +717,22 @@ function AuthModal({ onClose, onSuccess }: AuthModalProps) {
           Logging in allows you to unlock premium templates, sync your custom live editor builds, and access your whitelisted downloads.
         </p>
         <div id="google-signin-btn-container" className="my-2"></div>
+        {(window.location.hostname === "localhost" || 
+          window.location.hostname === "127.0.0.1" || 
+          window.location.hostname.endsWith(".pages.dev")) && (
+          <button
+            onClick={() => onSuccess("oxoredz@gmail.com", "Sam Chen (Developer Bypass)", "https://lh3.googleusercontent.com/a/default-user")}
+            className="w-full py-2.5 text-center text-xs font-semibold rounded-sm border transition-all"
+            style={{ 
+              borderColor: "rgba(200,255,0,0.2)", 
+              backgroundColor: "rgba(200,255,0,0.05)", 
+              color: "#c8ff00",
+              fontFamily: "Outfit, sans-serif" 
+            }}
+          >
+            🔑 Dev Login Bypass (Local Preview)
+          </button>
+        )}
       </div>
     </div>
   );
