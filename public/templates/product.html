@@ -258,21 +258,6 @@
       }
     };
 
-    window.bypassLoginDev = async function () {
-      userEmail = "oxoredz@gmail.com";
-      userName = "Sam Chen (Developer Bypass)";
-      userPicture = "https://lh3.googleusercontent.com/a/default-user";
-
-      localStorage.setItem("tf_user_email", userEmail);
-      localStorage.setItem("tf_user_name", userName);
-      localStorage.setItem("tf_user_picture", userPicture);
-
-      toggleAuthModal(false);
-      await loadUserPurchases(userEmail);
-      renderUserProfile();
-      renderCTA();
-    };
-
     // Load templates and isolate current template
     async function loadTemplateDetails(id) {
       try {
@@ -548,32 +533,6 @@
             document.getElementById("google-signin-btn-container"),
             { theme: "filled_blue", size: "large", text: "continue_with", shape: "pill", width: 280 }
           );
-        }
-
-        // Add dynamic Dev Bypass button if running locally or in preview
-        const isLocalhost = window.location.hostname === "localhost" ||
-                            window.location.hostname === "127.0.0.1" ||
-                            window.location.hostname.endsWith(".pages.dev");
-
-        const bypassId = "dev-bypass-btn-product";
-        if (isLocalhost && !document.getElementById(bypassId)) {
-          const btn = document.createElement("button");
-          btn.id = bypassId;
-          btn.onclick = () => window.bypassLoginDev();
-          btn.style.width = "100%";
-          btn.style.padding = "10px 0";
-          btn.style.marginTop = "12px";
-          btn.style.textAlign = "center";
-          btn.style.fontSize = "12px";
-          btn.style.fontWeight = "600";
-          btn.style.borderRadius = "2px";
-          btn.style.border = "1px solid rgba(200,255,0,0.2)";
-          btn.style.backgroundColor = "rgba(200,255,0,0.05)";
-          btn.style.color = "#c8ff00";
-          btn.style.fontFamily = "Outfit, sans-serif";
-          btn.style.cursor = "pointer";
-          btn.innerText = "🔑 Dev Login Bypass (Local Preview)";
-          document.getElementById("google-signin-btn-container").after(btn);
         }
       } else {
         modal.classList.add("hidden");
