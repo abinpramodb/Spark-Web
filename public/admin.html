@@ -417,6 +417,9 @@
             </button>
             <div id="lock-error-msg"
                 style="color: var(--color-error); font-size: 13px; margin-top: 14px; font-weight: 600;"></div>
+            <button id="lock-dev-bypass-btn" onclick="adminDevBypass()" style="display:none; width: 100%; margin-top: 14px; padding: 12px 0; font-size: 12px; font-weight: 600; border-radius: 6px; border: 1px solid rgba(200,255,0,0.25); background: rgba(200,255,0,0.06); color: #c8ff00; cursor: pointer; font-family: inherit;">
+                🔑 Dev Login Bypass (Local Preview)
+            </button>
         </div>
     </div>
 
@@ -729,6 +732,27 @@
         const ADMIN_EMAILS = ['oxoredz@gmail.com', 'oxoredx@gmail.com'];
         const CLOUDFLARE_WORKER_URL = 'https://sparkweb-api.oxoredz.workers.dev';
         const GOOGLE_CLIENT_ID = '915707234297-n0c94s32q1gtje708bhckeapdg676adu.apps.googleusercontent.com';
+
+        // Show dev bypass button if running on localhost or pages.dev
+        (function() {
+            const h = window.location.hostname;
+            if (h === 'localhost' || h === '127.0.0.1' || h.endsWith('.pages.dev')) {
+                const btn = document.getElementById('lock-dev-bypass-btn');
+                if (btn) btn.style.display = 'block';
+            }
+        })();
+
+        function adminDevBypass() {
+            const email = 'oxoredz@gmail.com';
+            const name = 'Sam Chen (Developer Bypass)';
+            const picture = 'https://lh3.googleusercontent.com/a/default-user';
+            localStorage.setItem('tf_user_email', email);
+            localStorage.setItem('tf_user_name', name);
+            localStorage.setItem('tf_user_picture', picture);
+            localStorage.setItem('tf_session_token', 'dev_bypass_token_' + Date.now());
+            document.getElementById('lock-error-msg').textContent = '';
+            checkAdminSession();
+        }
 
         function checkAdminSession() {
             const savedEmail = localStorage.getItem('tf_user_email');
