@@ -3,6 +3,13 @@
 
 <head>
     <script>
+        // Auto-redirect preview hash URLs to stable production domain
+        (function() {
+          var h = window.location.hostname;
+          if (h.endsWith('.spark-web-3pr.pages.dev') && h !== 'spark-web-3pr.pages.dev') {
+            window.location.replace('https://spark-web-3pr.pages.dev' + window.location.pathname + window.location.search + window.location.hash);
+          }
+        })();
         window.location.href = "../?view=admin";
     </script>
     <meta charset="UTF-8">
