@@ -717,35 +717,6 @@ function AuthModal({ onClose, onSuccess }: AuthModalProps) {
           Logging in allows you to unlock premium templates, sync your custom live editor builds, and access your whitelisted downloads.
         </p>
         <div id="google-signin-btn-container" className="my-2"></div>
-
-        {/* Developer Bypass Login */}
-        <div className="w-full border-t pt-4 text-center" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
-          <p className="text-[10px] uppercase tracking-wider mb-2" style={{ color: "#666", fontFamily: "JetBrains Mono, monospace" }}>
-            Bypass / Dev Login
-          </p>
-          <div className="flex gap-2 w-full">
-            <input 
-              id="dev-login-email"
-              type="email" 
-              placeholder="e.g. oxoredz@gmail.com"
-              className="flex-1 text-xs px-3 py-2 rounded-sm border bg-[#0a0a0a]"
-              style={{ color: "#fff", borderColor: "rgba(255,255,255,0.1)", outline: "none" }}
-              defaultValue="oxoredz@gmail.com"
-            />
-            <button 
-              onClick={() => {
-                const el = document.getElementById("dev-login-email") as HTMLInputElement;
-                const email = el?.value || "oxoredz@gmail.com";
-                const name = email.split('@')[0];
-                onSuccess(email, name, `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=c8ff00&color=0a0a0a`);
-              }}
-              className="px-4 py-2 text-xs font-semibold rounded-sm transition-colors"
-              style={{ background: "#c8ff00", color: "#0a0a0a" }}
-            >
-              Sign In
-            </button>
-          </div>
-        </div>
       </div>
     </div>
   );
@@ -1585,25 +1556,6 @@ function Footer({ onAdminClick }: { onAdminClick: () => void }) {
 const ADMIN_USERS = [
   { email: "admin@webxstudio.co", password: "admin2026", name: "Alex Rivera", role: "Super Admin" },
   { email: "dev@webxstudio.co", password: "devpass", name: "Sam Chen", role: "Developer" },
-];
-
-const mockOrders = [
-  { id: "#ORD-1041", customer: "Tomas Bray", email: "tomas@bray.io", template: "Launchpad SaaS", amount: 79, status: "completed", date: "Jul 9, 2026" },
-  { id: "#ORD-1040", customer: "Nina Vasquez", email: "nina@nv.design", template: "Storefront Pro", amount: 99, status: "completed", date: "Jul 8, 2026" },
-  { id: "#ORD-1039", customer: "Chen Wei", email: "c.wei@product.co", template: "Nexus Dashboard", amount: 119, status: "pending", date: "Jul 8, 2026" },
-  { id: "#ORD-1038", customer: "Amara Okafor", email: "amara@okafor.ng", template: "Convert Land", amount: 29, status: "completed", date: "Jul 7, 2026" },
-  { id: "#ORD-1037", customer: "Louis Petit", email: "louis@atelier.fr", template: "Agency One", amount: 69, status: "refunded", date: "Jul 7, 2026" },
-  { id: "#ORD-1036", customer: "Sara Kim", email: "sara@kimdesign.kr", template: "Folio Dark", amount: 49, status: "completed", date: "Jul 6, 2026" },
-  { id: "#ORD-1035", customer: "Marco Rossi", email: "marco@studio.it", template: "Beacon Blog", amount: 39, status: "completed", date: "Jul 6, 2026" },
-  { id: "#ORD-1034", customer: "Priya Nair", email: "priya@nair.in", template: "Launchpad SaaS", amount: 79, status: "pending", date: "Jul 5, 2026" },
-];
-
-const mockUsers = [
-  { id: 1, name: "Tomas Bray", email: "tomas@bray.io", plan: "Pro", joined: "Mar 2026", purchases: 3, spent: 247, avatar: "photo-1570295999919-56ceb5ecca61" },
-  { id: 2, name: "Nina Vasquez", email: "nina@nv.design", plan: "Starter", joined: "Apr 2026", purchases: 1, spent: 99, avatar: "photo-1580489944761-15a19d654956" },
-  { id: 3, name: "Chen Wei", email: "c.wei@product.co", plan: "Pro", joined: "Jan 2026", purchases: 5, spent: 481, avatar: "photo-1507003211169-0a1dd7228f2d" },
-  { id: 4, name: "Amara Okafor", email: "amara@okafor.ng", plan: "Free", joined: "Jun 2026", purchases: 1, spent: 29, avatar: "photo-1494790108755-2616b612b786" },
-  { id: 5, name: "Sara Kim", email: "sara@kimdesign.kr", plan: "Pro", joined: "Feb 2026", purchases: 4, spent: 316, avatar: "photo-1438761681033-6461ffad8d80" },
 ];
 
 type AdminUser = typeof ADMIN_USERS[0];
@@ -3043,7 +2995,7 @@ export default function App() {
       thumbnail: t.thumbnail || t.THUMBNAIL || t.img || "",
       demoPath: t.demoPath || t.demopath || t.DEMOPATH || defaultDemoPath,
       price: t.price || t.PRICE || "Free",
-      payhipUrl: t.payhipUrl || t.payhipurl || t.PAYHIPURL || (t.price && t.price !== "Free" ? "https://payhip.com/b/mock-pro" : ""),
+      payhipUrl: t.payhipUrl || t.payhipurl || t.PAYHIPURL || "",
       figmaUrl: t.figmaUrl || t.figmaurl || t.FIGMAURL,
       rating: t.rating || t.RATING || 4.8,
       reviews: t.reviews || t.REVIEWS || 120,

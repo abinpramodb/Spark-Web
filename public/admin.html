@@ -839,22 +839,6 @@
         ];
 
         async function loadAdminDashboardData() {
-            if (CLOUDFLARE_WORKER_URL.includes('YOUR_SUBDOMAIN')) {
-                const cachedTemplates = localStorage.getItem('tf_mock_templates');
-                if (cachedTemplates) {
-                    demoTemplates = JSON.parse(cachedTemplates);
-                }
-                renderTemplates(demoTemplates);
-                renderRequests(demoRequests);
-                renderWhitelist(demoWhitelist);
-                renderUPIRequests(demoUpiRequests);
-                renderActivityLogs([
-                    { timestamp: new Date().toLocaleTimeString(), email: 'developer@example.com', templateId: 'Logged in as Admin' }
-                ]);
-                updateStats(demoTemplates.length, demoRequests.filter(r => r.status === 'Pending Approval').length, demoWhitelist.length);
-                return;
-            }
-
             try {
                 const tplResponse = await fetch(CLOUDFLARE_WORKER_URL, {
                     method: 'POST',
