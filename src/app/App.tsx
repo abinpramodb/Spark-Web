@@ -1332,6 +1332,102 @@ function Process() {
 }
 
 
+const clientReviewsList = [
+  {
+    name: "Sarah Jenkins",
+    role: "CEO, LaunchFlow",
+    text: "Spark Web delivered our landing page in record time. The code is exceptionally clean, load times are under 0.4 seconds, and our conversion rate jumped by 32% in the first week.",
+    avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop&auto=format",
+    rating: 5
+  },
+  {
+    name: "Marcus Vance",
+    role: "Lead Developer, EchoLabs",
+    text: "I purchased their SaaS Pro template and was blown away. The Tailwind configuration is highly modular, the bundle size is tiny, and it saved our team at least 80 hours of development.",
+    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&auto=format",
+    rating: 5
+  },
+  {
+    name: "Elena Rostova",
+    role: "Founder, Zenith Design",
+    text: "Their maintenance plan is a lifesaver. Uptime is flawless, updates are seamless, and any custom edits we request are done within hours. Budget-friendly and absolute top tier quality.",
+    avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop&auto=format",
+    rating: 5
+  }
+];
+
+function Testimonials() {
+  return (
+    <section id="testimonials" className="py-24 lg:py-32" style={{ background: "#0a0a0a" }}>
+      <div className="max-w-7xl mx-auto px-6 lg:px-8">
+        <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6 mb-16">
+          <div>
+            <div
+              className="text-xs font-medium mb-4 tracking-widest uppercase"
+              style={{ color: "#c8ff00", fontFamily: "JetBrains Mono, monospace" }}
+            >
+              Testimonials
+            </div>
+            <h2
+              className="text-4xl lg:text-6xl font-bold leading-tight"
+              style={{ fontFamily: "Fraunces, serif", color: "#f0f0ee" }}
+            >
+              What clients{" "}
+              <em className="not-italic" style={{ color: "#c8ff00" }}>
+                say
+              </em>
+            </h2>
+          </div>
+          <p
+            className="lg:max-w-sm text-base leading-relaxed"
+            style={{ color: "#888880", fontFamily: "Outfit, sans-serif" }}
+          >
+            Don't just take our word for it. Here is how we help teams launch, scale, and optimize their web products.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {clientReviewsList.map((t, idx) => (
+            <div
+              key={idx}
+              className="p-8 rounded-sm border flex flex-col gap-6 transition-all duration-300 hover:-translate-y-1 hover:border-white/10"
+              style={{ background: "#131313", borderColor: "rgba(255,255,255,0.06)" }}
+            >
+              <div className="flex items-center gap-1">
+                {Array.from({ length: t.rating }).map((_, i) => (
+                  <Star key={i} size={14} fill="#c8ff00" style={{ color: "#c8ff00" }} />
+                ))}
+              </div>
+              <p
+                className="text-sm leading-relaxed flex-1 text-[#888880]"
+                style={{ fontFamily: "Outfit, sans-serif" }}
+              >
+                "{t.text}"
+              </p>
+              <div className="flex items-center gap-3 pt-4 border-t" style={{ borderColor: "rgba(255,255,255,0.04)" }}>
+                <img
+                  src={t.avatar}
+                  alt={t.name}
+                  className="w-10 h-10 rounded-full object-cover shrink-0"
+                />
+                <div>
+                  <div className="text-sm font-semibold" style={{ color: "#f0f0ee", fontFamily: "Outfit, sans-serif" }}>
+                    {t.name}
+                  </div>
+                  <div className="text-xs" style={{ color: "#666660", fontFamily: "JetBrains Mono, monospace" }}>
+                    {t.role}
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+
 function Contact() {
   const [form, setForm] = useState({ name: "", email: "", budget: "", message: "" });
   const [submitted, setSubmitted] = useState(false);
@@ -3630,6 +3726,7 @@ export default function App() {
       <Services />
       <Work />
       <Process />
+      <Testimonials />
       <Contact />
       <Footer onAdminClick={() => setView("admin-login")} />
 

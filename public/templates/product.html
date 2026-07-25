@@ -87,9 +87,66 @@
 
       <!-- Left Column: Visuals & Spec Grid -->
       <div class="lg:col-span-7 flex flex-col gap-8">
-        <!-- Mockup Display -->
-        <div class="rounded-sm border overflow-hidden bg-black" style="border-color: rgba(255,255,255,0.06);">
-          <img id="product-thumbnail" src="" alt="Mockup" class="w-full object-cover aspect-[16/10]" />
+        <!-- Mockup / Live Customizer Tab Bar -->
+        <div class="flex items-center justify-between border-b pb-3 mb-4" style="border-color: rgba(255,255,255,0.06);">
+          <div class="flex gap-4">
+            <button id="tab-btn-mockup" onclick="switchPreviewTab('mockup')" class="text-xs font-bold font-mono px-3 py-1.5 rounded-sm border bg-white/5 text-white" style="border-color: rgba(255,255,255,0.08);">
+              🖼️ Static Mockup
+            </button>
+            <button id="tab-btn-sandbox" onclick="switchPreviewTab('sandbox')" class="text-xs font-bold font-mono px-3 py-1.5 rounded-sm border text-[#888880] hover:text-white transition-all style-border" style="border-color: transparent;">
+              🎨 Live Customizer
+            </button>
+          </div>
+          <span class="text-[10px] text-[#888880] font-mono">Interactive Theme Sandbox</span>
+        </div>
+
+        <!-- Preview Container -->
+        <div class="rounded-sm border overflow-hidden bg-[#0d0d0d] relative aspect-[16/10]" style="border-color: rgba(255,255,255,0.06);">
+          <!-- Mockup image -->
+          <img id="product-thumbnail" src="" alt="Mockup" class="w-full h-full object-cover" />
+          
+          <!-- Sandbox View (hidden by default) -->
+          <div id="sandbox-container" class="hidden absolute inset-0 flex flex-col bg-[#0a0a0a]">
+            <!-- Customizer controls header -->
+            <div class="p-3 border-b flex flex-wrap items-center gap-4 bg-[#131313]" style="border-color: rgba(255,255,255,0.06);">
+              <!-- Color Selector -->
+              <div class="flex items-center gap-1.5">
+                <span class="text-[9px] uppercase font-bold text-[#888880] font-mono">Accent</span>
+                <select id="customizer-accent" onchange="applyCustomizerSettings()" class="text-[10px] bg-black text-[#888880] border border-white/10 rounded-sm p-1 outline-none">
+                  <option value="#c8ff00">Neon Lime</option>
+                  <option value="#00e5ff">Electric Blue</option>
+                  <option value="#d500f9">Orchid Purple</option>
+                  <option value="#ffab00">Sunset Orange</option>
+                </select>
+              </div>
+
+              <!-- Corner Radius -->
+              <div class="flex items-center gap-1.5">
+                <span class="text-[9px] uppercase font-bold text-[#888880] font-mono">Corners</span>
+                <select id="customizer-radius" onchange="applyCustomizerSettings()" class="text-[10px] bg-black text-[#888880] border border-white/10 rounded-sm p-1 outline-none">
+                  <option value="0px">Sharp</option>
+                  <option value="8px">Rounded</option>
+                  <option value="20px">Pill</option>
+                </select>
+              </div>
+
+              <!-- Theme mode -->
+              <div class="flex items-center gap-1.5">
+                <span class="text-[9px] uppercase font-bold text-[#888880] font-mono">Theme</span>
+                <select id="customizer-theme" onchange="applyCustomizerSettings()" class="text-[10px] bg-black text-[#888880] border border-white/10 rounded-sm p-1 outline-none">
+                  <option value="dark">Dark Mode</option>
+                  <option value="light">Light Mode</option>
+                </select>
+              </div>
+
+              <button onclick="copyCustomizerCSS()" class="ml-auto text-[9px] uppercase font-bold bg-[#c8ff00] text-[#0a0a0a] px-2 py-1 rounded-sm hover:opacity-90 transition-all font-mono">
+                Copy CSS
+              </button>
+            </div>
+            
+            <!-- iframe container -->
+            <iframe id="sandbox-iframe" class="w-full flex-1 border-0 bg-[#0a0a0a]"></iframe>
+          </div>
         </div>
 
         <!-- Technical Specification Grid -->
@@ -563,6 +620,130 @@
       document.getElementById("error-state").classList.remove("hidden");
       document.getElementById("product-container").classList.add("hidden");
     }
+
+    // Switch between Static Mockup and Live Customizer Sandbox
+    window.switchPreviewTab = function (mode) {
+      const mockupBtn = document.getElementById("tab-btn-mockup");
+      const sandboxBtn = document.getElementById("tab-btn-sandbox");
+      const mockupImg = document.getElementById("product-thumbnail");
+      const sandboxContainer = document.getElementById("sandbox-container");
+
+      if (mode === 'mockup') {
+        mockupBtn.classList.add("bg-white/5", "text-white");
+        mockupBtn.classList.remove("text-[#888880]");
+        mockupBtn.style.borderColor = "rgba(255,255,255,0.08)";
+
+        sandboxBtn.classList.remove("bg-white/5", "text-white");
+        sandboxBtn.classList.add("text-[#888880]");
+        sandboxBtn.style.borderColor = "transparent";
+
+        mockupImg.classList.remove("hidden");
+        sandboxContainer.classList.add("hidden");
+      } else {
+        sandboxBtn.classList.add("bg-white/5", "text-white");
+        sandboxBtn.classList.remove("text-[#888880]");
+        sandboxBtn.style.borderColor = "rgba(255,255,255,0.08)";
+
+        mockupBtn.classList.remove("bg-white/5", "text-white");
+        mockupBtn.classList.add("text-[#888880]");
+        mockupBtn.style.borderColor = "transparent";
+
+        mockupImg.classList.add("hidden");
+        sandboxContainer.classList.remove("hidden");
+
+        // Apply settings when sandbox becomes active
+        applyCustomizerSettings();
+      }
+    };
+
+    // Apply Live Customizer Sandbox Settings
+    window.applyCustomizerSettings = function () {
+      if (!currentTemplate) return;
+
+      const accent = document.getElementById("customizer-accent").value;
+      const radius = document.getElementById("customizer-radius").value;
+      const theme = document.getElementById("customizer-theme").value;
+      const iframe = document.getElementById("sandbox-iframe");
+
+      if (!iframe) return;
+
+      // Theme CSS overrides
+      let customOverrideCss = `
+        :root {
+          --color-primary: ${accent} !important;
+          --primary-color: ${accent} !important;
+          --primary: ${accent} !important;
+          --border-radius: ${radius} !important;
+          --radius: ${radius} !important;
+        }
+      `;
+
+      if (theme === 'light') {
+        customOverrideCss += `
+          body {
+            background-color: #ffffff !important;
+            color: #0f172a !important;
+          }
+          /* Override common dark layout classes to simulate light mode */
+          .bg-black, .bg-[#0a0a0a], .bg-[#0d0d0d], .bg-[#131313], footer {
+            background-color: #f8fafc !important;
+            color: #0f172a !important;
+            border-color: rgba(0,0,0,0.06) !important;
+          }
+          p, span, h1, h2, h3, h4, a, li {
+            color: #0f172a !important;
+          }
+          .text-[#888880], .text-[#666660], .text-slate-400 {
+            color: #475569 !important;
+          }
+          .border-white\\/10, .border-white\\/5 {
+            border-color: rgba(0,0,0,0.08) !important;
+          }
+        `;
+      }
+
+      // Prepend Tailwind CDN and CSS overrides
+      const completeHtml = `
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <script src="https://cdn.tailwindcss.com"></script>
+          <style>
+            ${currentTemplate.cssCode || ''}
+            ${customOverrideCss}
+          </style>
+        </head>
+        <body style="margin: 0; padding: 24px; min-height: 100vh; overflow-x: hidden;">
+          ${currentTemplate.htmlCode || '<h3>No HTML template structure found.</h3>'}
+        </body>
+        </html>
+      `;
+
+      iframe.srcdoc = completeHtml;
+    };
+
+    // Copy CSS rules to clipboard
+    window.copyCustomizerCSS = function () {
+      const accent = document.getElementById("customizer-accent").value;
+      const radius = document.getElementById("customizer-radius").value;
+      const theme = document.getElementById("customizer-theme").value;
+
+      const cssOutput = `/* Spark Web - Custom Template Rules */
+:root {
+  --color-primary: ${accent};
+  --border-radius: ${radius};
+  --theme: ${theme};
+}`;
+
+      navigator.clipboard.writeText(cssOutput).then(() => {
+        alert("Custom CSS rules copied to your clipboard!");
+      }).catch((e) => {
+        console.error(e);
+        alert("Failed to copy. Here is the CSS:\n\n" + cssOutput);
+      });
+    };
 
     // Run
     init();
