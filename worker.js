@@ -95,6 +95,14 @@ export default {
       }
 
       // -------------------------------------------------------------
+      // ROUTE: clear_all_inquiries
+      // -------------------------------------------------------------
+      else if (action === "clear_all_inquiries") {
+        await env.DB.prepare("DELETE FROM contact_messages").run();
+        return returnJson({ result: "success" });
+      }
+
+      // -------------------------------------------------------------
       // ROUTE: get_templates
       // -------------------------------------------------------------
       else if (action === "get_templates") {

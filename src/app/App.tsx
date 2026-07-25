@@ -1880,6 +1880,26 @@ function AdminDashboard({ user, onLogout, templatesList, onRefreshTemplates }: A
     }
   };
 
+  const handleClearAllInquiries = async () => {
+    if (!confirm("Are you sure you want to delete ALL inquiries? This action is permanent and cannot be undone!")) return;
+    try {
+      const res = await fetch(CLOUDFLARE_WORKER_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "clear_all_inquiries" })
+      });
+      const resData = await res.json();
+      if (resData.result === "success") {
+        alert("All inquiries deleted successfully!");
+        loadAdminData();
+      } else {
+        alert("Error: " + (resData.error || "Failed to clear inquiries"));
+      }
+    } catch (e: any) {
+      alert("Error: " + (e?.message || String(e)));
+    }
+  };
+
   const handleApproveUPI = async (id: number, email: string, templateId: string) => {
     if (!confirm(`Approve UPI payment for ${email} on template ${templateId}?`)) return;
     try {
@@ -2848,9 +2868,20 @@ function AdminDashboard({ user, onLogout, templatesList, onRefreshTemplates }: A
                         )}
                       </div>
                     </div>
-                    <span className="px-2 py-0.5 rounded-sm text-[10px] font-semibold" style={{ background: "rgba(200,255,0,0.1)", color: "#c8ff00", fontFamily: "JetBrains Mono, monospace" }}>
-                      {filteredMessages.length} of {data.messages.length} inquiries
-                    </span>
+                    <div className="flex items-center gap-3">
+                      {data.messages.length > 0 && (
+                        <button
+                          onClick={handleClearAllInquiries}
+                          className="px-2.5 py-1 text-[10px] font-semibold rounded-sm border hover:bg-red-500/10 hover:border-red-500/20 text-[#ff6666] transition-all"
+                          style={{ borderColor: "rgba(255,255,255,0.06)", fontFamily: "JetBrains Mono, monospace" }}
+                        >
+                          Clear All Inquiries 🗑️
+                        </button>
+                      )}
+                      <span className="px-2 py-0.5 rounded-sm text-[10px] font-semibold" style={{ background: "rgba(200,255,0,0.1)", color: "#c8ff00", fontFamily: "JetBrains Mono, monospace" }}>
+                        {filteredMessages.length} of {data.messages.length} inquiries
+                      </span>
+                    </div>
                   </div>
 
                   <div className="divide-y" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
