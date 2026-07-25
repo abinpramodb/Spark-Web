@@ -283,7 +283,9 @@
               rating: match.rating || match.RATING || "4.8",
               downloads: match.downloads || match.DOWNLOADS || "1,200+",
               pages: match.pages || match.PAGES || "5 Pages",
-              tech: match.tech ? (typeof match.tech === "string" ? JSON.parse(match.tech) : match.tech) : ["React", "Tailwind"]
+              tech: match.tech ? (typeof match.tech === "string" ? JSON.parse(match.tech) : match.tech) : ["React", "Tailwind"],
+              htmlCode: match.htmlCode || match.htmlcode || match.HTMLCODE || "",
+              cssCode: match.cssCode || match.csscode || match.CSSCODE || "",
             };
             populateProductDOM();
           } else {

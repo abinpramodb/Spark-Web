@@ -3093,7 +3093,9 @@ export default function App() {
       reviews: t.reviews || t.REVIEWS || 120,
       downloads: t.downloads || t.DOWNLOADS || 1200,
       pages: t.pages || t.PAGES || 5,
-      tech: t.tech ? (typeof t.tech === "string" ? JSON.parse(t.tech) : t.tech) : ["React", "Tailwind"]
+      tech: t.tech ? (typeof t.tech === "string" ? JSON.parse(t.tech) : t.tech) : ["React", "Tailwind"],
+      htmlCode: t.htmlCode || t.htmlcode || t.HTMLCODE || "",
+      cssCode: t.cssCode || t.csscode || t.CSSCODE || "",
     };
   };
 
