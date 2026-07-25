@@ -2051,7 +2051,7 @@ function AdminDashboard({ user, onLogout, templatesList, onRefreshTemplates }: A
           name: editingTemplate.name,
           category: editingTemplate.category,
           description: editingTemplate.description || editingTemplate.desc,
-          thumbnail: thumbnailDataUrl !== undefined ? thumbnailDataUrl : (editingTemplate.thumbnail || editingTemplate.img),
+          thumbnail: thumbnailDataUrl !== undefined ? thumbnailDataUrl : (editingTemplate.thumbnail !== undefined && editingTemplate.thumbnail !== null ? editingTemplate.thumbnail : ""),
           demoPath: editingTemplate.demoPath,
           price: editingTemplate.price,
           payhipUrl: editingTemplate.payhipUrl,
