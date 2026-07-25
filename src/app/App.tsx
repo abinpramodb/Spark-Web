@@ -1388,7 +1388,7 @@ function Contact() {
 
             <div className="flex flex-col gap-5">
               {[
-                { icon: Mail, label: "Email", val: "hello@webxstudio.co" },
+                { icon: Mail, label: "Email", val: "sparkredx@gmail.com" },
               ].map((c) => (
                 <div key={c.label} className="flex items-start gap-4">
                   <div
