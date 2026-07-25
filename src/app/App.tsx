@@ -1744,6 +1744,7 @@ function AdminDashboard({ user, onLogout, templatesList, onRefreshTemplates }: A
   const [viewingMessage, setViewingMessage] = useState<any | null>(null);
   const [inquiryFilter, setInquiryFilter] = useState<"all" | "has-budget" | "no-budget">("all");
   const [inquirySort, setInquirySort] = useState<"newest" | "oldest">("newest");
+  const [inquiryDateFilter, setInquiryDateFilter] = useState("");
 
   const [newTemplate, setNewTemplate] = useState({
     name: "",
@@ -2747,15 +2748,34 @@ function AdminDashboard({ user, onLogout, templatesList, onRefreshTemplates }: A
                 
                 // 2. Budget filter dropdown
                 if (inquiryFilter === "has-budget") {
-                  return !!(msg.budget && msg.budget.trim());
+                  if (!(msg.budget && msg.budget.trim())) return false;
+                } else if (inquiryFilter === "no-budget") {
+                  if (msg.budget && msg.budget.trim()) return false;
                 }
-                if (inquiryFilter === "no-budget") {
-                  return !(msg.budget && msg.budget.trim());
+
+                // 3. Date filter picker (format check)
+                if (inquiryDateFilter) {
+                  const parts = msg.timestamp.split(",");
+                  if (parts.length > 0) {
+                    try {
+                      const msgDate = new Date(parts[0].trim());
+                      const filterDate = new Date(inquiryDateFilter);
+                      const isSameDay =
+                        msgDate.getFullYear() === filterDate.getFullYear() &&
+                        msgDate.getMonth() === filterDate.getMonth() &&
+                        msgDate.getDate() === filterDate.getDate();
+                      if (!isSameDay) return false;
+                    } catch (e) {
+                      return false;
+                    }
+                  } else {
+                    return false;
+                  }
                 }
                 return true;
               })
               .sort((a, b) => {
-                // 3. Sorting order
+                // 4. Sorting order
                 if (inquirySort === "oldest") {
                   return a.id - b.id;
                 }
@@ -2804,6 +2824,29 @@ function AdminDashboard({ user, onLogout, templatesList, onRefreshTemplates }: A
                         <option value="newest">Newest First</option>
                         <option value="oldest">Oldest First</option>
                       </select>
+                      {/* Date Filter */}
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px]" style={{ color: "#888880", fontFamily: "JetBrains Mono, monospace" }}>Date:</span>
+                        <input
+                          type="date"
+                          value={inquiryDateFilter}
+                          onChange={(e) => setInquiryDateFilter(e.target.value)}
+                          className="text-xs px-2 py-0.5 rounded-sm border outline-none cursor-pointer bg-black text-[#888880]"
+                          style={{
+                            borderColor: "rgba(255,255,255,0.08)",
+                            fontFamily: "JetBrains Mono, monospace",
+                          }}
+                        />
+                        {inquiryDateFilter && (
+                          <button
+                            onClick={() => setInquiryDateFilter("")}
+                            className="text-[10px] text-[#ff6666] hover:underline"
+                            style={{ fontFamily: "JetBrains Mono, monospace" }}
+                          >
+                            Clear
+                          </button>
+                        )}
+                      </div>
                     </div>
                     <span className="px-2 py-0.5 rounded-sm text-[10px] font-semibold" style={{ background: "rgba(200,255,0,0.1)", color: "#c8ff00", fontFamily: "JetBrains Mono, monospace" }}>
                       {filteredMessages.length} of {data.messages.length} inquiries
