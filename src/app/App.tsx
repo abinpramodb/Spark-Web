@@ -2729,72 +2729,85 @@ function AdminDashboard({ user, onLogout, templatesList, onRefreshTemplates }: A
           )}
 
           {/* ── Inquiries ── */}
-          {tab === "inquiries" && (
-            <div className="flex flex-col gap-6">
-              <div
-                className="rounded-sm border overflow-hidden"
-                style={{ background: "#131313", borderColor: "rgba(255,255,255,0.06)" }}
-              >
-                <div className="px-6 py-4 border-b flex items-center justify-between" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
-                  <h3 className="text-sm font-semibold" style={{ color: "#f0f0ee", fontFamily: "Fraunces, serif" }}>
-                    Customer Contact Inquiries
-                  </h3>
-                  <span className="px-2 py-0.5 rounded-sm text-[10px] font-semibold" style={{ background: "rgba(200,255,0,0.1)", color: "#c8ff00", fontFamily: "JetBrains Mono, monospace" }}>
-                    {data.messages.length} messages
-                  </span>
-                </div>
+          {tab === "inquiries" && (() => {
+            const filteredMessages = data.messages.filter((msg) => {
+              if (!search) return true;
+              const q = search.toLowerCase();
+              return (
+                msg.name.toLowerCase().includes(q) ||
+                msg.email.toLowerCase().includes(q) ||
+                (msg.budget && msg.budget.toLowerCase().includes(q)) ||
+                msg.message.toLowerCase().includes(q)
+              );
+            });
 
-                <div className="divide-y" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
-                  {data.messages.map((msg) => (
-                    <div
-                      key={msg.id}
-                      onClick={(e) => {
-                        const target = e.target as HTMLElement;
-                        if (target.closest("button") || target.closest("svg")) return;
-                        setViewingMessage(msg);
-                      }}
-                      className="p-6 flex flex-col md:flex-row md:items-start justify-between gap-4 transition-colors hover:bg-white/[0.02] cursor-pointer"
-                    >
-                      <div className="flex-1 flex flex-col gap-2">
-                        <div className="flex flex-wrap items-center gap-3">
-                          <span className="text-sm font-semibold text-[#f0f0ee]" style={{ fontFamily: "Outfit, sans-serif" }}>
-                            {msg.name}
-                          </span>
-                          <span className="text-xs" style={{ color: "#888880", fontFamily: "JetBrains Mono, monospace" }}>
-                            {msg.email}
-                          </span>
-                          {msg.budget && (
-                            <span className="px-2 py-0.5 rounded-sm text-[10px] font-semibold" style={{ background: "rgba(255,255,255,0.05)", color: "#c8ff00", fontFamily: "JetBrains Mono, monospace" }}>
-                              {msg.budget}
-                            </span>
-                          )}
-                          <span className="text-[10px] text-[#444440]" style={{ fontFamily: "JetBrains Mono, monospace" }}>
-                            {msg.timestamp}
-                          </span>
-                        </div>
-                        <p className="text-xs leading-relaxed text-[#888880]" style={{ fontFamily: "Outfit, sans-serif" }}>
-                          {msg.message}
-                        </p>
-                      </div>
-                      <button
-                        onClick={() => handleDeleteInquiry(msg.id)}
-                        className="shrink-0 flex items-center justify-center p-2 rounded-sm border hover:bg-red-500/10 hover:border-red-500/20 text-[#ff6666] transition-all self-end md:self-start"
-                        style={{ borderColor: "rgba(255,255,255,0.06)" }}
-                        title="Delete inquiry"
+            return (
+              <div className="flex flex-col gap-6">
+                <div
+                  className="rounded-sm border overflow-hidden"
+                  style={{ background: "#131313", borderColor: "rgba(255,255,255,0.06)" }}
+                >
+                  <div className="px-6 py-4 border-b flex items-center justify-between" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
+                    <h3 className="text-sm font-semibold" style={{ color: "#f0f0ee", fontFamily: "Fraunces, serif" }}>
+                      Customer Contact Inquiries
+                    </h3>
+                    <span className="px-2 py-0.5 rounded-sm text-[10px] font-semibold" style={{ background: "rgba(200,255,0,0.1)", color: "#c8ff00", fontFamily: "JetBrains Mono, monospace" }}>
+                      {filteredMessages.length} of {data.messages.length} inquiries
+                    </span>
+                  </div>
+
+                  <div className="divide-y" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
+                    {filteredMessages.map((msg) => (
+                      <div
+                        key={msg.id}
+                        onClick={(e) => {
+                          const target = e.target as HTMLElement;
+                          if (target.closest("button") || target.closest("svg")) return;
+                          setViewingMessage(msg);
+                        }}
+                        className="p-6 flex flex-col md:flex-row md:items-start justify-between gap-4 transition-colors hover:bg-white/[0.02] cursor-pointer"
                       >
-                        <Trash2 size={13} />
-                      </button>
-                    </div>
-                  ))}
-                  {data.messages.length === 0 && (
-                    <div className="p-8 text-center text-xs" style={{ color: "#888880", fontFamily: "Outfit, sans-serif" }}>
-                      No inquiries received yet.
-                    </div>
-                  )}
+                        <div className="flex-1 flex flex-col gap-2">
+                          <div className="flex flex-wrap items-center gap-3">
+                            <span className="text-sm font-semibold text-[#f0f0ee]" style={{ fontFamily: "Outfit, sans-serif" }}>
+                              {msg.name}
+                            </span>
+                            <span className="text-xs" style={{ color: "#888880", fontFamily: "JetBrains Mono, monospace" }}>
+                              {msg.email}
+                            </span>
+                            {msg.budget && (
+                              <span className="px-2 py-0.5 rounded-sm text-[10px] font-semibold" style={{ background: "rgba(255,255,255,0.05)", color: "#c8ff00", fontFamily: "JetBrains Mono, monospace" }}>
+                                {msg.budget}
+                              </span>
+                            )}
+                            <span className="text-[10px] text-[#444440]" style={{ fontFamily: "JetBrains Mono, monospace" }}>
+                              {msg.timestamp}
+                            </span>
+                          </div>
+                          <p className="text-xs leading-relaxed text-[#888880]" style={{ fontFamily: "Outfit, sans-serif" }}>
+                            {msg.message}
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => handleDeleteInquiry(msg.id)}
+                          className="shrink-0 flex items-center justify-center p-2 rounded-sm border hover:bg-red-500/10 hover:border-red-500/20 text-[#ff6666] transition-all self-end md:self-start"
+                          style={{ borderColor: "rgba(255,255,255,0.06)" }}
+                          title="Delete inquiry"
+                        >
+                          <Trash2 size={13} />
+                        </button>
+                      </div>
+                    ))}
+                    {filteredMessages.length === 0 && (
+                      <div className="p-8 text-center text-xs" style={{ color: "#888880", fontFamily: "Outfit, sans-serif" }}>
+                        {data.messages.length === 0 ? "No inquiries received yet." : "No matching inquiries found."}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
+            );
+          })()}
 
           {/* ── Settings ── */}
           {tab === "settings" && (
