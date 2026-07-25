@@ -919,7 +919,7 @@ function Templates({ templatesList, purchasedTemplates, userEmail, onOpenCheckou
               >
                 {/* Thumbnail */}
                 <div className="relative overflow-hidden" style={{ aspectRatio: "16/10", background: "#1a1a1a" }}>
-                  {!tmpl.thumbnail || tmpl.thumbnail.trim() === "" ? (
+                  {!tmpl.thumbnail || tmpl.thumbnail.trim() === "" || (!tmpl.thumbnail.startsWith("data:") && !tmpl.thumbnail.startsWith("http") && !tmpl.thumbnail.startsWith("/")) ? (
                     <div className="absolute inset-0 w-full h-full overflow-hidden pointer-events-none select-none">
                       <iframe
                         src={tmpl.htmlCode && tmpl.htmlCode.trim()
@@ -2326,7 +2326,7 @@ function AdminDashboard({ user, onLogout, templatesList, onRefreshTemplates }: A
                     }}
                   >
                     <div className="flex items-center gap-3 min-w-0">
-                      {!t.thumbnail || t.thumbnail.trim() === "" ? (
+                      {!t.thumbnail || t.thumbnail.trim() === "" || (!t.thumbnail.startsWith("data:") && !t.thumbnail.startsWith("http") && !t.thumbnail.startsWith("/")) ? (
                         <div className="w-14 h-9 rounded-sm overflow-hidden pointer-events-none select-none relative shrink-0" style={{ background: "#0a0a0a" }}>
                           <iframe
                             src={t.htmlCode && t.htmlCode.trim()
@@ -3428,7 +3428,7 @@ function UserProfile({
                     style={{ background: "#131313", borderColor: "rgba(255,255,255,0.06)" }}
                   >
                     <div style={{ aspectRatio: "16/10", overflow: "hidden", background: "#1a1a1a", position: "relative" }}>
-                      {!tmpl.thumbnail || tmpl.thumbnail.trim() === "" ? (
+                      {!tmpl.thumbnail || tmpl.thumbnail.trim() === "" || (!tmpl.thumbnail.startsWith("data:") && !tmpl.thumbnail.startsWith("http") && !tmpl.thumbnail.startsWith("/")) ? (
                         <div className="absolute inset-0 w-full h-full overflow-hidden pointer-events-none select-none">
                           <iframe
                             src={tmpl.htmlCode && tmpl.htmlCode.trim()
