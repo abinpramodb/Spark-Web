@@ -1919,9 +1919,11 @@ function AdminDashboard({ user, onLogout, templatesList, onRefreshTemplates }: A
           htmlCode: "",
           cssCode: "",
         });
+      } else {
+        alert("Error: " + (resData.error || "Unknown error from server"));
       }
-    } catch (e) {
-      alert("Failed to add template.");
+    } catch (e: any) {
+      alert("Failed to add template: " + (e?.message || String(e)));
     }
   };
 
@@ -1955,11 +1957,14 @@ function AdminDashboard({ user, onLogout, templatesList, onRefreshTemplates }: A
         setEditTplHtmlFile(null);
         setEditTplCssFile(null);
         setEditingTemplate(null);
+      } else {
+        alert("Error: " + (resData.error || "Unknown error from server"));
       }
-    } catch (e) {
-      alert("Failed to update template.");
+    } catch (e: any) {
+      alert("Failed to update template: " + (e?.message || String(e)));
     }
   };
+
 
   const getTmplThumbnail = (t: any) => {
     if (!t.thumbnail && !t.img) return "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=56&h=36&fit=crop&auto=format";
