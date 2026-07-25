@@ -1033,14 +1033,20 @@ function Templates({ templatesList, purchasedTemplates, userEmail, onOpenCheckou
                         </svg>
                       </a>
                     )}
-                    <a
-                      href={`/previews/${tmpl.demoPath}/index.html`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex-1 py-2 text-center text-xs font-semibold rounded-sm border border-[#c8ff00]/40 bg-[rgba(200,255,0,0.05)] text-[#c8ff00] transition-colors hover:bg-[rgba(200,255,0,0.1)]"
-                    >
-                      Live Demo 🖥️
-                    </a>
+                    {tmpl.htmlCode && tmpl.htmlCode.trim() ? (
+                      <a
+                        href={`${CLOUDFLARE_WORKER_URL}/api/preview?templateId=${tmpl.id}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex-1 py-2 text-center text-xs font-semibold rounded-sm border border-[#c8ff00]/40 bg-[rgba(200,255,0,0.05)] text-[#c8ff00] transition-colors hover:bg-[rgba(200,255,0,0.1)]"
+                      >
+                        Live Demo 🖥️
+                      </a>
+                    ) : (
+                      <span className="flex-1 py-2 text-center text-xs font-semibold rounded-sm border border-white/10 text-[#444] cursor-not-allowed">
+                        No Preview Yet
+                      </span>
+                    )}
                   </div>
                 </div>
               </div>
@@ -1116,15 +1122,24 @@ function Templates({ templatesList, purchasedTemplates, userEmail, onOpenCheckou
                 <span className="text-lg font-bold" style={{ color: "#c8ff00", fontFamily: "Fraunces, serif" }}>
                   {previewTemplate.price}
                 </span>
-                <a
-                  href={`/previews/${previewTemplate.demoPath}/index.html`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="px-4 py-2 text-xs font-semibold rounded-sm transition-all hover:opacity-90"
-                  style={{ background: "#c8ff00", color: "#0a0a0a", fontFamily: "Outfit, sans-serif" }}
-                >
-                  Open Live Demo 🖥️
-                </a>
+                {previewTemplate.htmlCode && previewTemplate.htmlCode.trim() ? (
+                  <a
+                    href={`${CLOUDFLARE_WORKER_URL}/api/preview?templateId=${previewTemplate.id}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-4 py-2 text-xs font-semibold rounded-sm transition-all hover:opacity-90"
+                    style={{ background: "#c8ff00", color: "#0a0a0a", fontFamily: "Outfit, sans-serif" }}
+                  >
+                    Open Live Demo 🖥️
+                  </a>
+                ) : (
+                  <span
+                    className="px-4 py-2 text-xs font-semibold rounded-sm"
+                    style={{ background: "#1a1a1a", color: "#444", fontFamily: "Outfit, sans-serif" }}
+                  >
+                    No Preview Uploaded
+                  </span>
+                )}
                 <button onClick={() => setPreviewId(null)} style={{ color: "#888880" }}>
                   <X size={18} />
                 </button>
