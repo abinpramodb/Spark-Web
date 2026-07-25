@@ -461,7 +461,7 @@ function Hero() {
             className="text-lg lg:text-xl leading-relaxed max-w-2xl mb-12"
             style={{ color: "#888880", fontFamily: "Outfit, sans-serif" }}
           >
-            WebxStudio builds custom websites and sells production-ready templates for founders and teams who know that design is revenue. Ship a custom site or launch in hours with a pro template.
+            Spark Web builds custom websites and sells production-ready templates for founders and teams who know that design is revenue. Ship a custom site or launch in hours with a pro template.
           </p>
 
           <div className="flex flex-wrap items-center gap-4">
@@ -1524,10 +1524,10 @@ function Footer({ onAdminClick }: { onAdminClick: () => void }) {
                 className="w-7 h-7 rounded-sm flex items-center justify-center text-xs font-bold"
                 style={{ background: "#c8ff00", color: "#0a0a0a", fontFamily: "JetBrains Mono, monospace" }}
               >
-                WX
+                SP
               </span>
               <span className="text-sm font-semibold" style={{ fontFamily: "Outfit, sans-serif", color: "#f0f0ee" }}>
-                WebxStudio
+                Spark Web
               </span>
             </div>
             <p
@@ -1581,7 +1581,7 @@ function Footer({ onAdminClick }: { onAdminClick: () => void }) {
           className="pt-8 border-t flex flex-col sm:flex-row items-center justify-between gap-4 text-xs"
           style={{ borderColor: "rgba(255,255,255,0.06)", color: "#666660", fontFamily: "Outfit, sans-serif" }}
         >
-          <span>© 2026 WebxStudio. All rights reserved.</span>
+          <span>© 2026 Spark Web. All rights reserved.</span>
           <div className="flex items-center gap-6">
             <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>
             <a href="#" className="hover:text-white transition-colors">Terms of Service</a>
@@ -1643,10 +1643,10 @@ function AdminLogin({ onLogin }: { onLogin: (user: AdminUser) => void; onBack: (
             className="w-8 h-8 rounded-sm flex items-center justify-center text-sm font-bold"
             style={{ background: "#c8ff00", color: "#0a0a0a", fontFamily: "JetBrains Mono, monospace" }}
           >
-            WX
+            SP
           </span>
           <span className="text-base font-semibold" style={{ fontFamily: "Outfit, sans-serif", color: "#f0f0ee" }}>
-            WebxStudio
+            Spark Web
           </span>
         </div>
 
