@@ -1735,12 +1735,15 @@ function AdminDashboard({ user, onLogout, templatesList, onRefreshTemplates }: A
     figmaUrl: "",
     htmlCode: "",
     cssCode: "",
+    jsCode: "",
   });
 
   const [newTplHtmlFile, setNewTplHtmlFile] = useState<File | null>(null);
   const [newTplCssFile, setNewTplCssFile] = useState<File | null>(null);
+  const [newTplJsFile, setNewTplJsFile] = useState<File | null>(null);
   const [editTplHtmlFile, setEditTplHtmlFile] = useState<File | null>(null);
   const [editTplCssFile, setEditTplCssFile] = useState<File | null>(null);
+  const [editTplJsFile, setEditTplJsFile] = useState<File | null>(null);
 
   const readFileAsText = (file: File | null): Promise<string> =>
     new Promise((resolve) => {
@@ -1890,6 +1893,7 @@ function AdminDashboard({ user, onLogout, templatesList, onRefreshTemplates }: A
     try {
       const htmlCode = await readFileAsText(newTplHtmlFile);
       const cssCode = await readFileAsText(newTplCssFile);
+      const jsCode = await readFileAsText(newTplJsFile);
       const res = await fetch(CLOUDFLARE_WORKER_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -1898,6 +1902,7 @@ function AdminDashboard({ user, onLogout, templatesList, onRefreshTemplates }: A
           ...newTemplate,
           htmlCode,
           cssCode,
+          jsCode,
         })
       });
       const resData = await res.json();
@@ -1907,6 +1912,7 @@ function AdminDashboard({ user, onLogout, templatesList, onRefreshTemplates }: A
         setAddModalOpen(false);
         setNewTplHtmlFile(null);
         setNewTplCssFile(null);
+        setNewTplJsFile(null);
         setNewTemplate({
           name: "",
           category: "SaaS",
@@ -1918,6 +1924,7 @@ function AdminDashboard({ user, onLogout, templatesList, onRefreshTemplates }: A
           figmaUrl: "",
           htmlCode: "",
           cssCode: "",
+          jsCode: "",
         });
       } else {
         alert("Error: " + (resData.error || "Unknown error from server"));
@@ -1932,6 +1939,7 @@ function AdminDashboard({ user, onLogout, templatesList, onRefreshTemplates }: A
     try {
       const htmlCode = editTplHtmlFile ? await readFileAsText(editTplHtmlFile) : undefined;
       const cssCode = editTplCssFile ? await readFileAsText(editTplCssFile) : undefined;
+      const jsCode = editTplJsFile ? await readFileAsText(editTplJsFile) : undefined;
       const res = await fetch(CLOUDFLARE_WORKER_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -1948,6 +1956,7 @@ function AdminDashboard({ user, onLogout, templatesList, onRefreshTemplates }: A
           figmaUrl: editingTemplate.figmaUrl,
           ...(htmlCode !== undefined && { htmlCode }),
           ...(cssCode !== undefined && { cssCode }),
+          ...(jsCode !== undefined && { jsCode }),
         })
       });
       const resData = await res.json();
@@ -1956,6 +1965,7 @@ function AdminDashboard({ user, onLogout, templatesList, onRefreshTemplates }: A
         onRefreshTemplates();
         setEditTplHtmlFile(null);
         setEditTplCssFile(null);
+        setEditTplJsFile(null);
         setEditingTemplate(null);
       } else {
         alert("Error: " + (resData.error || "Unknown error from server"));
@@ -2365,6 +2375,16 @@ function AdminDashboard({ user, onLogout, templatesList, onRefreshTemplates }: A
                         />
                       </div>
                       <div>
+                        <label className="block text-xs mb-1.5" style={{ color: "#888880", fontFamily: "JetBrains Mono, monospace" }}>Upload Preview JS (.js)</label>
+                        <input
+                          type="file"
+                          accept=".js"
+                          onChange={(e) => setNewTplJsFile(e.target.files?.[0] || null)}
+                          className="w-full px-3 py-2 text-sm rounded-sm border outline-none bg-black"
+                          style={{ borderColor: "rgba(255,255,255,0.08)", color: "#888880" }}
+                        />
+                      </div>
+                      <div>
                         <label className="block text-xs mb-1.5" style={{ color: "#888880", fontFamily: "JetBrains Mono, monospace" }}>Figma Demo URL (Optional)</label>
                         <input
                           value={newTemplate.figmaUrl}
@@ -2495,6 +2515,17 @@ function AdminDashboard({ user, onLogout, templatesList, onRefreshTemplates }: A
                           style={{ borderColor: "rgba(255,255,255,0.08)", color: "#888880" }}
                         />
                         <p className="text-xs mt-1" style={{ color: "#555" }}>Leave empty to keep existing styles.</p>
+                      </div>
+                      <div>
+                        <label className="block text-xs mb-1.5" style={{ color: "#888880", fontFamily: "JetBrains Mono, monospace" }}>Upload Preview JS (.js) — Optional</label>
+                        <input
+                          type="file"
+                          accept=".js"
+                          onChange={(e) => setEditTplJsFile(e.target.files?.[0] || null)}
+                          className="w-full px-3 py-2 text-sm rounded-sm border outline-none bg-black"
+                          style={{ borderColor: "rgba(255,255,255,0.08)", color: "#888880" }}
+                        />
+                        <p className="text-xs mt-1" style={{ color: "#555" }}>Leave empty to keep existing script.</p>
                       </div>
                       <div>
                         <label className="block text-xs mb-1.5" style={{ color: "#888880", fontFamily: "JetBrains Mono, monospace" }}>Figma Demo URL (Optional)</label>
@@ -3096,6 +3127,7 @@ export default function App() {
       tech: t.tech ? (typeof t.tech === "string" ? JSON.parse(t.tech) : t.tech) : ["React", "Tailwind"],
       htmlCode: t.htmlCode || t.htmlcode || t.HTMLCODE || "",
       cssCode: t.cssCode || t.csscode || t.CSSCODE || "",
+      jsCode: t.jsCode || t.jscode || t.JSCODE || "",
     };
   };
 

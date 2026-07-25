@@ -12,7 +12,8 @@ CREATE TABLE IF NOT EXISTS templates (
     payhipUrl TEXT,
     figmaUrl TEXT,
     htmlCode TEXT,
-    cssCode TEXT
+    cssCode TEXT,
+    jsCode TEXT
 );
 
 -- 2. Customizer Builds Table

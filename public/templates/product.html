@@ -439,10 +439,12 @@
       try {
         let htmlText = "";
         let cssText = "";
+        let jsText = "";
 
         if (currentTemplate && currentTemplate.htmlCode) {
           htmlText = currentTemplate.htmlCode;
           cssText = currentTemplate.cssCode || "";
+          jsText = currentTemplate.jsCode || "";
         } else {
           const htmlRes = await fetch(`/previews/${demoPath}/index.html`);
           htmlText = await htmlRes.text();
@@ -455,6 +457,15 @@
           } catch (e) {
             console.log("No style.css found for preview:", e);
           }
+
+          try {
+            const jsRes = await fetch(`/previews/${demoPath}/main.js`);
+            if (jsRes.ok) {
+              jsText = await jsRes.text();
+            }
+          } catch (e) {
+            console.log("No main.js found for preview:", e);
+          }
         }
 
         let finalHtml = htmlText;
@@ -462,6 +473,15 @@
           const headEnd = htmlText.indexOf("</head>");
           if (headEnd !== -1) {
             finalHtml = htmlText.substring(0, headEnd) + `\n  <style>\n${cssText}\n  </style>\n` + htmlText.substring(headEnd);
+          }
+        }
+
+        if (jsText) {
+          const bodyEnd = finalHtml.indexOf("</body>");
+          if (bodyEnd !== -1) {
+            finalHtml = finalHtml.substring(0, bodyEnd) + `\n  <script>\n${jsText}\n  </script>\n` + finalHtml.substring(bodyEnd);
+          } else {
+            finalHtml = finalHtml + `\n<script>\n${jsText}\n</script>\n`;
           }
         }
         
