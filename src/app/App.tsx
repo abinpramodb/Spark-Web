@@ -1332,102 +1332,6 @@ function Process() {
 }
 
 
-const clientReviewsList = [
-  {
-    name: "Sarah Jenkins",
-    role: "CEO, LaunchFlow",
-    text: "Spark Web delivered our landing page in record time. The code is exceptionally clean, load times are under 0.4 seconds, and our conversion rate jumped by 32% in the first week.",
-    avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop&auto=format",
-    rating: 5
-  },
-  {
-    name: "Marcus Vance",
-    role: "Lead Developer, EchoLabs",
-    text: "I purchased their SaaS Pro template and was blown away. The Tailwind configuration is highly modular, the bundle size is tiny, and it saved our team at least 80 hours of development.",
-    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&auto=format",
-    rating: 5
-  },
-  {
-    name: "Elena Rostova",
-    role: "Founder, Zenith Design",
-    text: "Their maintenance plan is a lifesaver. Uptime is flawless, updates are seamless, and any custom edits we request are done within hours. Budget-friendly and absolute top tier quality.",
-    avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop&auto=format",
-    rating: 5
-  }
-];
-
-function Testimonials() {
-  return (
-    <section id="testimonials" className="py-24 lg:py-32" style={{ background: "#0a0a0a" }}>
-      <div className="max-w-7xl mx-auto px-6 lg:px-8">
-        <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6 mb-16">
-          <div>
-            <div
-              className="text-xs font-medium mb-4 tracking-widest uppercase"
-              style={{ color: "#c8ff00", fontFamily: "JetBrains Mono, monospace" }}
-            >
-              Testimonials
-            </div>
-            <h2
-              className="text-4xl lg:text-6xl font-bold leading-tight"
-              style={{ fontFamily: "Fraunces, serif", color: "#f0f0ee" }}
-            >
-              What clients{" "}
-              <em className="not-italic" style={{ color: "#c8ff00" }}>
-                say
-              </em>
-            </h2>
-          </div>
-          <p
-            className="lg:max-w-sm text-base leading-relaxed"
-            style={{ color: "#888880", fontFamily: "Outfit, sans-serif" }}
-          >
-            Don't just take our word for it. Here is how we help teams launch, scale, and optimize their web products.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {clientReviewsList.map((t, idx) => (
-            <div
-              key={idx}
-              className="p-8 rounded-sm border flex flex-col gap-6 transition-all duration-300 hover:-translate-y-1 hover:border-white/10"
-              style={{ background: "#131313", borderColor: "rgba(255,255,255,0.06)" }}
-            >
-              <div className="flex items-center gap-1">
-                {Array.from({ length: t.rating }).map((_, i) => (
-                  <Star key={i} size={14} fill="#c8ff00" style={{ color: "#c8ff00" }} />
-                ))}
-              </div>
-              <p
-                className="text-sm leading-relaxed flex-1 text-[#888880]"
-                style={{ fontFamily: "Outfit, sans-serif" }}
-              >
-                "{t.text}"
-              </p>
-              <div className="flex items-center gap-3 pt-4 border-t" style={{ borderColor: "rgba(255,255,255,0.04)" }}>
-                <img
-                  src={t.avatar}
-                  alt={t.name}
-                  className="w-10 h-10 rounded-full object-cover shrink-0"
-                />
-                <div>
-                  <div className="text-sm font-semibold" style={{ color: "#f0f0ee", fontFamily: "Outfit, sans-serif" }}>
-                    {t.name}
-                  </div>
-                  <div className="text-xs" style={{ color: "#666660", fontFamily: "JetBrains Mono, monospace" }}>
-                    {t.role}
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-
 function Contact() {
   const [form, setForm] = useState({ name: "", email: "", budget: "", message: "" });
   const [submitted, setSubmitted] = useState(false);
@@ -1859,9 +1763,19 @@ function AdminDashboard({ user, onLogout, templatesList, onRefreshTemplates }: A
   const [newTplHtmlFile, setNewTplHtmlFile] = useState<File | null>(null);
   const [newTplCssFile, setNewTplCssFile] = useState<File | null>(null);
   const [newTplJsFile, setNewTplJsFile] = useState<File | null>(null);
+  const [newTplThumbnailFile, setNewTplThumbnailFile] = useState<File | null>(null);
   const [editTplHtmlFile, setEditTplHtmlFile] = useState<File | null>(null);
   const [editTplCssFile, setEditTplCssFile] = useState<File | null>(null);
   const [editTplJsFile, setEditTplJsFile] = useState<File | null>(null);
+  const [editTplThumbnailFile, setEditTplThumbnailFile] = useState<File | null>(null);
+
+  const readFileAsDataURL = (file: File | null): Promise<string> =>
+    new Promise((resolve) => {
+      if (!file) { resolve(""); return; }
+      const reader = new FileReader();
+      reader.onload = (e) => resolve((e.target?.result as string) || "");
+      reader.readAsDataURL(file);
+    });
 
   const readFileAsText = (file: File | null): Promise<string> =>
     new Promise((resolve) => {
@@ -2056,12 +1970,15 @@ function AdminDashboard({ user, onLogout, templatesList, onRefreshTemplates }: A
       const htmlCode = await readFileAsText(newTplHtmlFile);
       const cssCode = await readFileAsText(newTplCssFile);
       const jsCode = await readFileAsText(newTplJsFile);
+      const thumbnailDataUrl = await readFileAsDataURL(newTplThumbnailFile);
+
       const res = await fetch(CLOUDFLARE_WORKER_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           action: "add_template",
           ...newTemplate,
+          thumbnail: thumbnailDataUrl || newTemplate.thumbnail,
           htmlCode,
           cssCode,
           jsCode,
@@ -2075,6 +1992,7 @@ function AdminDashboard({ user, onLogout, templatesList, onRefreshTemplates }: A
         setNewTplHtmlFile(null);
         setNewTplCssFile(null);
         setNewTplJsFile(null);
+        setNewTplThumbnailFile(null);
         setNewTemplate({
           name: "",
           category: "SaaS",
@@ -2102,6 +2020,8 @@ function AdminDashboard({ user, onLogout, templatesList, onRefreshTemplates }: A
       const htmlCode = editTplHtmlFile ? await readFileAsText(editTplHtmlFile) : undefined;
       const cssCode = editTplCssFile ? await readFileAsText(editTplCssFile) : undefined;
       const jsCode = editTplJsFile ? await readFileAsText(editTplJsFile) : undefined;
+      const thumbnailDataUrl = editTplThumbnailFile ? await readFileAsDataURL(editTplThumbnailFile) : undefined;
+
       const res = await fetch(CLOUDFLARE_WORKER_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -2111,7 +2031,7 @@ function AdminDashboard({ user, onLogout, templatesList, onRefreshTemplates }: A
           name: editingTemplate.name,
           category: editingTemplate.category,
           description: editingTemplate.description || editingTemplate.desc,
-          thumbnail: editingTemplate.thumbnail || editingTemplate.img,
+          thumbnail: thumbnailDataUrl !== undefined ? thumbnailDataUrl : (editingTemplate.thumbnail || editingTemplate.img),
           demoPath: editingTemplate.demoPath,
           price: editingTemplate.price,
           payhipUrl: editingTemplate.payhipUrl,
@@ -2128,6 +2048,7 @@ function AdminDashboard({ user, onLogout, templatesList, onRefreshTemplates }: A
         setEditTplHtmlFile(null);
         setEditTplCssFile(null);
         setEditTplJsFile(null);
+        setEditTplThumbnailFile(null);
         setEditingTemplate(null);
       } else {
         alert("Error: " + (resData.error || "Unknown error from server"));
@@ -2480,10 +2401,27 @@ function AdminDashboard({ user, onLogout, templatesList, onRefreshTemplates }: A
                         <input
                           value={newTemplate.thumbnail}
                           onChange={(e) => setNewTemplate({ ...newTemplate, thumbnail: e.target.value })}
-                          className="w-full px-3 py-2 text-sm rounded-sm border outline-none bg-black"
+                          className="w-full px-3 py-2 text-sm rounded-sm border outline-none bg-black mb-2"
                           style={{ borderColor: "rgba(255,255,255,0.08)", color: "#f0f0ee" }}
                           placeholder="https://images.unsplash.com/... (optional)"
                         />
+                        <div className="flex flex-col gap-1.5 mt-2">
+                          <span className="text-[10px]" style={{ color: "#888880", fontFamily: "JetBrains Mono, monospace" }}>Or Upload Image File:</span>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0] || null;
+                              setNewTplThumbnailFile(file);
+                            }}
+                            className="text-xs text-[#888880] file:mr-3 file:py-1 file:px-2.5 file:rounded-sm file:border-0 file:text-[10px] file:font-semibold file:bg-[#c8ff00] file:text-[#0a0a0a] file:cursor-pointer"
+                          />
+                          {newTplThumbnailFile && (
+                            <span className="text-[10px] text-[#c8ff00]" style={{ fontFamily: "JetBrains Mono, monospace" }}>
+                              Selected: {newTplThumbnailFile.name}
+                            </span>
+                          )}
+                        </div>
                       </div>
                       <div>
                         <label className="block text-xs mb-1.5" style={{ color: "#888880", fontFamily: "JetBrains Mono, monospace" }}>Sandbox Base Path (e.g. template-1)</label>
@@ -2623,9 +2561,26 @@ function AdminDashboard({ user, onLogout, templatesList, onRefreshTemplates }: A
                         <input
                           value={editingTemplate.thumbnail || editingTemplate.img}
                           onChange={(e) => setEditingTemplate({ ...editingTemplate, thumbnail: e.target.value })}
-                          className="w-full px-3 py-2 text-sm rounded-sm border outline-none bg-black"
+                          className="w-full px-3 py-2 text-sm rounded-sm border outline-none bg-black mb-2"
                           style={{ borderColor: "rgba(255,255,255,0.08)", color: "#f0f0ee" }}
                         />
+                        <div className="flex flex-col gap-1.5 mt-2">
+                          <span className="text-[10px]" style={{ color: "#888880", fontFamily: "JetBrains Mono, monospace" }}>Or Upload Image File:</span>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0] || null;
+                              setEditTplThumbnailFile(file);
+                            }}
+                            className="text-xs text-[#888880] file:mr-3 file:py-1 file:px-2.5 file:rounded-sm file:border-0 file:text-[10px] file:font-semibold file:bg-[#c8ff00] file:text-[#0a0a0a] file:cursor-pointer"
+                          />
+                          {editTplThumbnailFile && (
+                            <span className="text-[10px] text-[#c8ff00]" style={{ fontFamily: "JetBrains Mono, monospace" }}>
+                              Selected: {editTplThumbnailFile.name}
+                            </span>
+                          )}
+                        </div>
                       </div>
                       <div>
                         <label className="block text-xs mb-1.5" style={{ color: "#888880", fontFamily: "JetBrains Mono, monospace" }}>Sandbox Base Path (e.g. template-1)</label>
@@ -3726,7 +3681,6 @@ export default function App() {
       <Services />
       <Work />
       <Process />
-      <Testimonials />
       <Contact />
       <Footer onAdminClick={() => setView("admin-login")} />
 
