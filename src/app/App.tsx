@@ -1742,6 +1742,8 @@ function AdminDashboard({ user, onLogout, templatesList, onRefreshTemplates }: A
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState<string | number | null>(null);
   const [viewingMessage, setViewingMessage] = useState<any | null>(null);
+  const [inquiryFilter, setInquiryFilter] = useState<"all" | "has-budget" | "no-budget">("all");
+  const [inquirySort, setInquirySort] = useState<"newest" | "oldest">("newest");
 
   const [newTemplate, setNewTemplate] = useState({
     name: "",
@@ -2730,16 +2732,35 @@ function AdminDashboard({ user, onLogout, templatesList, onRefreshTemplates }: A
 
           {/* ── Inquiries ── */}
           {tab === "inquiries" && (() => {
-            const filteredMessages = data.messages.filter((msg) => {
-              if (!search) return true;
-              const q = search.toLowerCase();
-              return (
-                msg.name.toLowerCase().includes(q) ||
-                msg.email.toLowerCase().includes(q) ||
-                (msg.budget && msg.budget.toLowerCase().includes(q)) ||
-                msg.message.toLowerCase().includes(q)
-              );
-            });
+            const filteredMessages = data.messages
+              .filter((msg) => {
+                // 1. Search query filter
+                if (search) {
+                  const q = search.toLowerCase();
+                  const matchesSearch =
+                    msg.name.toLowerCase().includes(q) ||
+                    msg.email.toLowerCase().includes(q) ||
+                    (msg.budget && msg.budget.toLowerCase().includes(q)) ||
+                    msg.message.toLowerCase().includes(q);
+                  if (!matchesSearch) return false;
+                }
+                
+                // 2. Budget filter dropdown
+                if (inquiryFilter === "has-budget") {
+                  return !!(msg.budget && msg.budget.trim());
+                }
+                if (inquiryFilter === "no-budget") {
+                  return !(msg.budget && msg.budget.trim());
+                }
+                return true;
+              })
+              .sort((a, b) => {
+                // 3. Sorting order
+                if (inquirySort === "oldest") {
+                  return a.id - b.id;
+                }
+                return b.id - a.id;
+              });
 
             return (
               <div className="flex flex-col gap-6">
@@ -2747,10 +2768,43 @@ function AdminDashboard({ user, onLogout, templatesList, onRefreshTemplates }: A
                   className="rounded-sm border overflow-hidden"
                   style={{ background: "#131313", borderColor: "rgba(255,255,255,0.06)" }}
                 >
-                  <div className="px-6 py-4 border-b flex items-center justify-between" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
-                    <h3 className="text-sm font-semibold" style={{ color: "#f0f0ee", fontFamily: "Fraunces, serif" }}>
-                      Customer Contact Inquiries
-                    </h3>
+                  <div className="px-6 py-4 border-b flex flex-wrap items-center justify-between gap-4" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
+                    <div className="flex items-center gap-4 flex-wrap">
+                      <h3 className="text-sm font-semibold" style={{ color: "#f0f0ee", fontFamily: "Fraunces, serif" }}>
+                        Customer Contact Inquiries
+                      </h3>
+                      {/* Budget Filter */}
+                      <select
+                        value={inquiryFilter}
+                        onChange={(e) => setInquiryFilter(e.target.value as any)}
+                        className="text-xs px-2.5 py-1 rounded-sm border outline-none cursor-pointer"
+                        style={{
+                          background: "#0a0a0a",
+                          borderColor: "rgba(255,255,255,0.08)",
+                          color: "#888880",
+                          fontFamily: "JetBrains Mono, monospace",
+                        }}
+                      >
+                        <option value="all">All Budgets</option>
+                        <option value="has-budget">Has Budget</option>
+                        <option value="no-budget">No Budget</option>
+                      </select>
+                      {/* Date Sort */}
+                      <select
+                        value={inquirySort}
+                        onChange={(e) => setInquirySort(e.target.value as any)}
+                        className="text-xs px-2.5 py-1 rounded-sm border outline-none cursor-pointer"
+                        style={{
+                          background: "#0a0a0a",
+                          borderColor: "rgba(255,255,255,0.08)",
+                          color: "#888880",
+                          fontFamily: "JetBrains Mono, monospace",
+                        }}
+                      >
+                        <option value="newest">Newest First</option>
+                        <option value="oldest">Oldest First</option>
+                      </select>
+                    </div>
                     <span className="px-2 py-0.5 rounded-sm text-[10px] font-semibold" style={{ background: "rgba(200,255,0,0.1)", color: "#c8ff00", fontFamily: "JetBrains Mono, monospace" }}>
                       {filteredMessages.length} of {data.messages.length} inquiries
                     </span>
