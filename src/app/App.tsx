@@ -1534,7 +1534,7 @@ function Footer({ onAdminClick }: { onAdminClick: () => void }) {
               className="text-sm leading-relaxed max-w-xs"
               style={{ color: "#888880", fontFamily: "Outfit, sans-serif" }}
             >
-              We build conversion-first websites and full-stack platforms for founders and teams who know that design is revenue.
+              We build full-stack websites & applications that are budget-friendly.
             </p>
           </div>
 
