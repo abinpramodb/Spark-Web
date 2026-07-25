@@ -10,12 +10,12 @@ const ADMIN_EMAILS = ["oxoredz@gmail.com"];
 const navLinks = ["Services", "Templates", "Work", "Pricing", "Contact"];
 
 const services = [
-  { icon: Globe, title: "Landing Pages", desc: "High-converting single-page sites built to turn visitors into buyers within seconds of arrival.", tag: "FROM $1,200" },
-  { icon: Code2, title: "Full-Stack Web Apps", desc: "Custom-built platforms with authentication, dashboards, databases, and API integrations.", tag: "FROM $4,800" },
-  { icon: Palette, title: "Brand & Design Systems", desc: "Visual identity, component libraries, and design tokens that scale across every touchpoint.", tag: "FROM $2,400" },
-  { icon: BarChart3, title: "E-Commerce Stores", desc: "Product-catalog, cart, checkout, and inventory systems — optimized for conversion.", tag: "FROM $3,600" },
-  { icon: Zap, title: "Performance Audits", desc: "We cut load times, fix Core Web Vitals, and make your existing site feel brand new.", tag: "FROM $800" },
-  { icon: Shield, title: "Maintenance Plans", desc: "Monthly retainers covering uptime monitoring, updates, security patches, and feature additions.", tag: "FROM $450 /MO" },
+  { icon: Globe, title: "Landing Pages", desc: "High-converting single-page sites built to turn visitors into buyers within seconds of arrival.", tag: "CONVERSION" },
+  { icon: Code2, title: "Full-Stack Web Apps", desc: "Custom-built platforms with authentication, dashboards, databases, and API integrations.", tag: "DEVELOPMENT" },
+  { icon: Palette, title: "Brand & Design Systems", desc: "Visual identity, component libraries, and design tokens that scale across every touchpoint.", tag: "UI/UX DESIGN" },
+  { icon: BarChart3, title: "E-Commerce Stores", desc: "Product-catalog, cart, checkout, and inventory systems — optimized for conversion.", tag: "E-COMMERCE" },
+  { icon: Zap, title: "Performance Audits", desc: "We cut load times, fix Core Web Vitals, and make your existing site feel brand new.", tag: "OPTIMIZATION" },
+  { icon: Shield, title: "Maintenance Plans", desc: "Monthly retainers covering uptime monitoring, updates, security patches, and feature additions.", tag: "SUPPORT" },
 ];
 
 const templateCategories = ["All", "SaaS", "Agency", "E-Commerce", "Portfolio", "Blog", "Landing"];
@@ -1372,8 +1372,6 @@ function Contact() {
             <div className="flex flex-col gap-5">
               {[
                 { icon: Mail, label: "Email", val: "hello@webxstudio.co" },
-                { icon: Phone, label: "Phone", val: "+1 (415) 882-3310" },
-                { icon: MapPin, label: "Location", val: "San Francisco, CA — Remote worldwide" },
               ].map((c) => (
                 <div key={c.label} className="flex items-start gap-4">
                   <div
