@@ -2652,7 +2652,14 @@ function AdminDashboard({ user, onLogout, templatesList, onRefreshTemplates }: A
                         />
                       </div>
                       <div>
-                        <label className="block text-xs mb-1.5" style={{ color: "#888880", fontFamily: "JetBrains Mono, monospace" }}>Upload Preview HTML (.html) — Optional</label>
+                        <div className="flex items-center justify-between mb-1.5">
+                          <label className="block text-xs" style={{ color: "#888880", fontFamily: "JetBrains Mono, monospace" }}>Upload Preview HTML (.html) — Optional</label>
+                          {editingTemplate.htmlCode && editingTemplate.htmlCode.trim() && (
+                            <span className="text-[10px] font-semibold text-[#c8ff00] bg-[#c8ff00]/10 px-1.5 py-0.5 rounded-sm">
+                              Saved Code: {(editingTemplate.htmlCode.length / 1024).toFixed(1)} KB ✅
+                            </span>
+                          )}
+                        </div>
                         <input
                           type="file"
                           accept=".html"
@@ -2660,10 +2667,17 @@ function AdminDashboard({ user, onLogout, templatesList, onRefreshTemplates }: A
                           className="w-full px-3 py-2 text-sm rounded-sm border outline-none bg-black"
                           style={{ borderColor: "rgba(255,255,255,0.08)", color: "#888880" }}
                         />
-                        <p className="text-xs mt-1" style={{ color: "#555" }}>Leave empty to keep existing code.</p>
+                        <p className="text-[10px] mt-1 text-[#444440]">Leave empty to keep existing code.</p>
                       </div>
                       <div>
-                        <label className="block text-xs mb-1.5" style={{ color: "#888880", fontFamily: "JetBrains Mono, monospace" }}>Upload Preview CSS (.css) — Optional</label>
+                        <div className="flex items-center justify-between mb-1.5">
+                          <label className="block text-xs" style={{ color: "#888880", fontFamily: "JetBrains Mono, monospace" }}>Upload Preview CSS (.css) — Optional</label>
+                          {editingTemplate.cssCode && editingTemplate.cssCode.trim() && (
+                            <span className="text-[10px] font-semibold text-[#c8ff00] bg-[#c8ff00]/10 px-1.5 py-0.5 rounded-sm">
+                              Saved Code: {(editingTemplate.cssCode.length / 1024).toFixed(1)} KB ✅
+                            </span>
+                          )}
+                        </div>
                         <input
                           type="file"
                           accept=".css"
@@ -2671,10 +2685,17 @@ function AdminDashboard({ user, onLogout, templatesList, onRefreshTemplates }: A
                           className="w-full px-3 py-2 text-sm rounded-sm border outline-none bg-black"
                           style={{ borderColor: "rgba(255,255,255,0.08)", color: "#888880" }}
                         />
-                        <p className="text-xs mt-1" style={{ color: "#555" }}>Leave empty to keep existing styles.</p>
+                        <p className="text-[10px] mt-1 text-[#444440]">Leave empty to keep existing styles.</p>
                       </div>
                       <div>
-                        <label className="block text-xs mb-1.5" style={{ color: "#888880", fontFamily: "JetBrains Mono, monospace" }}>Upload Preview JS (.js) — Optional</label>
+                        <div className="flex items-center justify-between mb-1.5">
+                          <label className="block text-xs" style={{ color: "#888880", fontFamily: "JetBrains Mono, monospace" }}>Upload Preview JS (.js) — Optional</label>
+                          {editingTemplate.jsCode && editingTemplate.jsCode.trim() && (
+                            <span className="text-[10px] font-semibold text-[#c8ff00] bg-[#c8ff00]/10 px-1.5 py-0.5 rounded-sm">
+                              Saved Code: {(editingTemplate.jsCode.length / 1024).toFixed(1)} KB ✅
+                            </span>
+                          )}
+                        </div>
                         <input
                           type="file"
                           accept=".js"
@@ -2682,7 +2703,7 @@ function AdminDashboard({ user, onLogout, templatesList, onRefreshTemplates }: A
                           className="w-full px-3 py-2 text-sm rounded-sm border outline-none bg-black"
                           style={{ borderColor: "rgba(255,255,255,0.08)", color: "#888880" }}
                         />
-                        <p className="text-xs mt-1" style={{ color: "#555" }}>Leave empty to keep existing script.</p>
+                        <p className="text-[10px] mt-1 text-[#444440]">Leave empty to keep existing script.</p>
                       </div>
                       <div>
                         <label className="block text-xs mb-1.5" style={{ color: "#888880", fontFamily: "JetBrains Mono, monospace" }}>Figma Demo URL (Optional)</label>
