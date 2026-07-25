@@ -1040,20 +1040,16 @@ function Templates({ templatesList, purchasedTemplates, userEmail, onOpenCheckou
                         </svg>
                       </a>
                     )}
-                    {tmpl.htmlCode && tmpl.htmlCode.trim() ? (
-                      <a
-                        href={`${CLOUDFLARE_WORKER_URL}/api/preview?templateId=${tmpl.id}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex-1 py-2 text-center text-xs font-semibold rounded-sm border border-[#c8ff00]/40 bg-[rgba(200,255,0,0.05)] text-[#c8ff00] transition-colors hover:bg-[rgba(200,255,0,0.1)]"
-                      >
-                        Live Demo 🖥️
-                      </a>
-                    ) : (
-                      <span className="flex-1 py-2 text-center text-xs font-semibold rounded-sm border border-white/10 text-[#444] cursor-not-allowed">
-                        No Preview Yet
-                      </span>
-                    )}
+                    <a
+                      href={`/templates/product.html?id=${tmpl.id}`}
+                      className="flex-1 py-2 text-center text-xs font-semibold rounded-sm transition-all text-[#0a0a0a]"
+                      style={{
+                        background: "#c8ff00",
+                        fontFamily: "Outfit, sans-serif",
+                      }}
+                    >
+                      {isUnlocked ? "Get Template 📥" : `Buy Template — ${tmpl.price} ⚡`}
+                    </a>
                   </div>
                 </div>
               </div>
