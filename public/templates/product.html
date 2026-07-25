@@ -479,9 +479,9 @@
         if (jsText) {
           const bodyEnd = finalHtml.indexOf("</body>");
           if (bodyEnd !== -1) {
-            finalHtml = finalHtml.substring(0, bodyEnd) + `\n  <script>\n${jsText}\n  </script>\n` + finalHtml.substring(bodyEnd);
+            finalHtml = finalHtml.substring(0, bodyEnd) + '\n  <script>\n' + jsText + '\n  </' + 'script>\n' + finalHtml.substring(bodyEnd);
           } else {
-            finalHtml = finalHtml + `\n<script>\n${jsText}\n</script>\n`;
+            finalHtml = finalHtml + '\n<script>\n' + jsText + '\n</' + 'script>\n';
           }
         }
         
