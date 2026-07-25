@@ -1741,6 +1741,7 @@ function AdminDashboard({ user, onLogout, templatesList, onRefreshTemplates }: A
   const [editingTemplate, setEditingTemplate] = useState<any | null>(null);
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState<string | number | null>(null);
+  const [viewingMessage, setViewingMessage] = useState<any | null>(null);
 
   const [newTemplate, setNewTemplate] = useState({
     name: "",
@@ -2745,7 +2746,15 @@ function AdminDashboard({ user, onLogout, templatesList, onRefreshTemplates }: A
 
                 <div className="divide-y" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
                   {data.messages.map((msg) => (
-                    <div key={msg.id} className="p-6 flex flex-col md:flex-row md:items-start justify-between gap-4 transition-colors hover:bg-white/[0.01]">
+                    <div
+                      key={msg.id}
+                      onClick={(e) => {
+                        const target = e.target as HTMLElement;
+                        if (target.closest("button") || target.closest("svg")) return;
+                        setViewingMessage(msg);
+                      }}
+                      className="p-6 flex flex-col md:flex-row md:items-start justify-between gap-4 transition-colors hover:bg-white/[0.02] cursor-pointer"
+                    >
                       <div className="flex-1 flex flex-col gap-2">
                         <div className="flex flex-wrap items-center gap-3">
                           <span className="text-sm font-semibold text-[#f0f0ee]" style={{ fontFamily: "Outfit, sans-serif" }}>
@@ -2826,6 +2835,80 @@ function AdminDashboard({ user, onLogout, templatesList, onRefreshTemplates }: A
                 >
                   <LogOut size={13} /> Sign Out
                 </button>
+              </div>
+            </div>
+          )}
+
+          {/* ── View Inquiry Modal ── */}
+          {viewingMessage && (
+            <div
+              className="fixed inset-0 z-50 flex items-center justify-center p-4"
+              style={{ background: "rgba(0,0,0,0.85)", backdropFilter: "blur(4px)" }}
+            >
+              <div
+                className="w-full max-w-lg rounded-sm border p-6 flex flex-col gap-5 text-left relative animate-in fade-in zoom-in-95 duration-200"
+                style={{ background: "#131313", borderColor: "rgba(255,255,255,0.08)" }}
+              >
+                <div className="flex items-center justify-between border-b pb-4" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
+                  <h3 className="text-lg font-bold" style={{ fontFamily: "Fraunces, serif", color: "#f0f0ee" }}>
+                    Inquiry Details
+                  </h3>
+                  <button
+                    onClick={() => setViewingMessage(null)}
+                    className="text-[#888880] hover:text-[#f0f0ee] transition-colors text-lg"
+                  >
+                    &times;
+                  </button>
+                </div>
+
+                <div className="flex flex-col gap-4 text-sm">
+                  <div className="grid grid-cols-3 gap-2 py-1.5 border-b" style={{ borderColor: "rgba(255,255,255,0.04)" }}>
+                    <span style={{ color: "#888880", fontFamily: "JetBrains Mono, monospace" }}>From</span>
+                    <span className="col-span-2 font-semibold text-[#f0f0ee]">{viewingMessage.name}</span>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2 py-1.5 border-b" style={{ borderColor: "rgba(255,255,255,0.04)" }}>
+                    <span style={{ color: "#888880", fontFamily: "JetBrains Mono, monospace" }}>Email</span>
+                    <a href={`mailto:${viewingMessage.email}`} className="col-span-2 text-[#c8ff00] hover:underline">{viewingMessage.email}</a>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2 py-1.5 border-b" style={{ borderColor: "rgba(255,255,255,0.04)" }}>
+                    <span style={{ color: "#888880", fontFamily: "JetBrains Mono, monospace" }}>Budget</span>
+                    <span className="col-span-2 text-[#c8ff00] font-semibold">{viewingMessage.budget || "Not Specified"}</span>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2 py-1.5 border-b" style={{ borderColor: "rgba(255,255,255,0.04)" }}>
+                    <span style={{ color: "#888880", fontFamily: "JetBrains Mono, monospace" }}>Received</span>
+                    <span className="col-span-2 text-[#888880]">{viewingMessage.timestamp}</span>
+                  </div>
+
+                  <div className="flex flex-col gap-2 pt-2">
+                    <span style={{ color: "#888880", fontFamily: "JetBrains Mono, monospace" }}>Message</span>
+                    <div
+                      className="p-4 rounded-sm border bg-[#0a0a0a] whitespace-pre-wrap leading-relaxed text-[#cbd5e1] max-h-60 overflow-y-auto"
+                      style={{ borderColor: "rgba(255,255,255,0.06)", fontFamily: "Outfit, sans-serif" }}
+                    >
+                      {viewingMessage.message}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-end gap-3 pt-4 border-t" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
+                  <button
+                    onClick={() => {
+                      handleDeleteInquiry(viewingMessage.id);
+                      setViewingMessage(null);
+                    }}
+                    className="px-4 py-2 text-xs font-semibold rounded-sm border hover:bg-red-500/10 hover:border-red-500/20 text-[#ff6666] transition-all mr-auto"
+                    style={{ borderColor: "rgba(255,255,255,0.06)" }}
+                  >
+                    Delete Message
+                  </button>
+                  <button
+                    onClick={() => setViewingMessage(null)}
+                    className="px-5 py-2 text-xs font-semibold rounded-sm text-[#0a0a0a]"
+                    style={{ background: "#c8ff00" }}
+                  >
+                    Close
+                  </button>
+                </div>
               </div>
             </div>
           )}
