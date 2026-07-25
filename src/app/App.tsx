@@ -1534,7 +1534,7 @@ function Footer({ onAdminClick }: { onAdminClick: () => void }) {
               className="text-sm leading-relaxed max-w-xs"
               style={{ color: "#888880", fontFamily: "Outfit, sans-serif" }}
             >
-              We build full-stack websites & applications that are budget-friendly.
+              We build premium full-stack websites & custom applications with high-converting designs, clean code, and rapid performance—perfectly tailored to your budget.
             </p>
           </div>
 
