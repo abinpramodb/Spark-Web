@@ -1336,9 +1336,26 @@ function Contact() {
   const [form, setForm] = useState({ name: "", email: "", budget: "", message: "" });
   const [submitted, setSubmitted] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
+    try {
+      const res = await fetch(CLOUDFLARE_WORKER_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "submit_contact",
+          ...form
+        })
+      });
+      const data = await res.json();
+      if (data.result === "success") {
+        setSubmitted(true);
+      } else {
+        alert("Failed to send message: " + (data.error || "Unknown server error"));
+      }
+    } catch (err: any) {
+      alert("Failed to connect to contact server: " + (err.message || String(err)));
+    }
   };
 
   return (
@@ -1709,7 +1726,7 @@ function AdminLogin({ onLogin }: { onLogin: (user: AdminUser) => void; onBack: (
   );
 }
 
-type AdminTab = "overview" | "templates" | "orders" | "users" | "settings";
+type AdminTab = "overview" | "templates" | "orders" | "users" | "inquiries" | "settings";
 
 interface AdminDashboardProps {
   user: AdminUser;
@@ -1758,11 +1775,13 @@ function AdminDashboard({ user, onLogout, templatesList, onRefreshTemplates }: A
     requests: any[];
     verified: any[];
     upiRequests: any[];
+    messages: any[];
     builds: any[];
   }>({
     requests: [],
     verified: [],
     upiRequests: [],
+    messages: [],
     builds: []
   });
 
@@ -1771,6 +1790,7 @@ function AdminDashboard({ user, onLogout, templatesList, onRefreshTemplates }: A
     { id: "templates", icon: Package, label: "Templates" },
     { id: "orders", icon: DollarSign, label: "Approvals" },
     { id: "users", icon: Users, label: "Whitelisted" },
+    { id: "inquiries", icon: Mail, label: "Inquiries" },
     { id: "settings", icon: Settings, label: "Settings" },
   ];
 
@@ -1787,6 +1807,7 @@ function AdminDashboard({ user, onLogout, templatesList, onRefreshTemplates }: A
           requests: resData.requests || [],
           verified: resData.verified || [],
           upiRequests: resData.upiRequests || [],
+          messages: resData.messages || [],
           builds: resData.builds || []
         });
       }
@@ -1832,6 +1853,26 @@ function AdminDashboard({ user, onLogout, templatesList, onRefreshTemplates }: A
       }
     } catch (e) {
       alert("Error denying request");
+    }
+  };
+
+  const handleDeleteInquiry = async (id: number) => {
+    if (!confirm("Are you sure you want to delete this inquiry?")) return;
+    try {
+      const res = await fetch(CLOUDFLARE_WORKER_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "delete_contact_message", id })
+      });
+      const resData = await res.json();
+      if (resData.result === "success") {
+        alert("Inquiry deleted successfully!");
+        loadAdminData();
+      } else {
+        alert("Error: " + (resData.error || "Failed to delete inquiry"));
+      }
+    } catch (e: any) {
+      alert("Error: " + (e?.message || String(e)));
     }
   };
 
@@ -2680,6 +2721,66 @@ function AdminDashboard({ user, onLogout, templatesList, onRefreshTemplates }: A
                   ))}
                   {data.verified.length === 0 && (
                     <div className="p-5 text-center text-xs" style={{ color: "#888880" }}>No whitelisted users yet.</div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ── Inquiries ── */}
+          {tab === "inquiries" && (
+            <div className="flex flex-col gap-6">
+              <div
+                className="rounded-sm border overflow-hidden"
+                style={{ background: "#131313", borderColor: "rgba(255,255,255,0.06)" }}
+              >
+                <div className="px-6 py-4 border-b flex items-center justify-between" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
+                  <h3 className="text-sm font-semibold" style={{ color: "#f0f0ee", fontFamily: "Fraunces, serif" }}>
+                    Customer Contact Inquiries
+                  </h3>
+                  <span className="px-2 py-0.5 rounded-sm text-[10px] font-semibold" style={{ background: "rgba(200,255,0,0.1)", color: "#c8ff00", fontFamily: "JetBrains Mono, monospace" }}>
+                    {data.messages.length} messages
+                  </span>
+                </div>
+
+                <div className="divide-y" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
+                  {data.messages.map((msg) => (
+                    <div key={msg.id} className="p-6 flex flex-col md:flex-row md:items-start justify-between gap-4 transition-colors hover:bg-white/[0.01]">
+                      <div className="flex-1 flex flex-col gap-2">
+                        <div className="flex flex-wrap items-center gap-3">
+                          <span className="text-sm font-semibold text-[#f0f0ee]" style={{ fontFamily: "Outfit, sans-serif" }}>
+                            {msg.name}
+                          </span>
+                          <span className="text-xs" style={{ color: "#888880", fontFamily: "JetBrains Mono, monospace" }}>
+                            {msg.email}
+                          </span>
+                          {msg.budget && (
+                            <span className="px-2 py-0.5 rounded-sm text-[10px] font-semibold" style={{ background: "rgba(255,255,255,0.05)", color: "#c8ff00", fontFamily: "JetBrains Mono, monospace" }}>
+                              {msg.budget}
+                            </span>
+                          )}
+                          <span className="text-[10px] text-[#444440]" style={{ fontFamily: "JetBrains Mono, monospace" }}>
+                            {msg.timestamp}
+                          </span>
+                        </div>
+                        <p className="text-xs leading-relaxed text-[#888880]" style={{ fontFamily: "Outfit, sans-serif" }}>
+                          {msg.message}
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => handleDeleteInquiry(msg.id)}
+                        className="shrink-0 flex items-center justify-center p-2 rounded-sm border hover:bg-red-500/10 hover:border-red-500/20 text-[#ff6666] transition-all self-end md:self-start"
+                        style={{ borderColor: "rgba(255,255,255,0.06)" }}
+                        title="Delete inquiry"
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                    </div>
+                  ))}
+                  {data.messages.length === 0 && (
+                    <div className="p-8 text-center text-xs" style={{ color: "#888880", fontFamily: "Outfit, sans-serif" }}>
+                      No inquiries received yet.
+                    </div>
                   )}
                 </div>
               </div>

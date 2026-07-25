@@ -59,9 +59,45 @@ export default {
       }
 
       // -------------------------------------------------------------
+      // ROUTE: submit_contact
+      // -------------------------------------------------------------
+      if (action === "submit_contact") {
+        const { name, email, budget, message } = payload;
+        if (!name || !email || !message) {
+          return returnJson({ result: "error", error: "Name, email, and message are required." }, 400);
+        }
+        await env.DB.prepare(
+          "INSERT INTO contact_messages (name, email, budget, message, timestamp) VALUES (?, ?, ?, ?, ?)"
+        )
+        .bind(name, email, budget || "", message, new Date().toLocaleString())
+        .run();
+        return returnJson({ result: "success" });
+      }
+
+      // -------------------------------------------------------------
+      // ROUTE: get_contact_messages
+      // -------------------------------------------------------------
+      else if (action === "get_contact_messages") {
+        const { results } = await env.DB.prepare("SELECT * FROM contact_messages ORDER BY id DESC").all();
+        return returnJson({ result: "success", messages: results });
+      }
+
+      // -------------------------------------------------------------
+      // ROUTE: delete_contact_message
+      // -------------------------------------------------------------
+      else if (action === "delete_contact_message") {
+        const id = payload.id;
+        if (!id) {
+          return returnJson({ result: "error", error: "Message ID is required." }, 400);
+        }
+        await env.DB.prepare("DELETE FROM contact_messages WHERE id = ?").bind(id).run();
+        return returnJson({ result: "success" });
+      }
+
+      // -------------------------------------------------------------
       // ROUTE: get_templates
       // -------------------------------------------------------------
-      if (action === "get_templates") {
+      else if (action === "get_templates") {
         const { results } = await env.DB.prepare("SELECT * FROM templates").all();
         return returnJson({ result: "success", templates: results });
       }
@@ -375,12 +411,14 @@ export default {
         const verifiedQuery = env.DB.prepare("SELECT * FROM verified_emails").all();
         const buildsQuery = env.DB.prepare("SELECT * FROM builds ORDER BY id DESC LIMIT 20").all();
         const upiQuery = env.DB.prepare("SELECT * FROM upi_requests ORDER BY id DESC").all();
+        const messagesQuery = env.DB.prepare("SELECT * FROM contact_messages ORDER BY id DESC").all();
 
-        const [requestsRes, verifiedRes, buildsRes, upiRes] = await Promise.all([
+        const [requestsRes, verifiedRes, buildsRes, upiRes, messagesRes] = await Promise.all([
           requestsQuery,
           verifiedQuery,
           buildsQuery,
-          upiQuery
+          upiQuery,
+          messagesQuery
         ]);
 
         return returnJson({
@@ -388,6 +426,7 @@ export default {
           requests: requestsRes.results || [],
           verified: verifiedRes.results || [],
           upiRequests: upiRes.results || [],
+          messages: messagesRes.results || [],
           builds: (buildsRes.results || []).map(b => ({
             timestamp: b.timestamp,
             email: b.email,

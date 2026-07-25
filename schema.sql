@@ -62,3 +62,13 @@ CREATE TABLE IF NOT EXISTS upi_requests (
     timestamp TEXT NOT NULL,
     status TEXT NOT NULL DEFAULT 'Pending Verification'
 );
+
+-- 8. Contact Messages Table
+CREATE TABLE IF NOT EXISTS contact_messages (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    email TEXT NOT NULL,
+    budget TEXT,
+    message TEXT NOT NULL,
+    timestamp TEXT NOT NULL
+);
