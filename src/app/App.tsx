@@ -907,7 +907,14 @@ function Templates({ templatesList, purchasedTemplates, userEmail, onOpenCheckou
             return (
               <div
                 key={tmpl.id}
-                className="group rounded-sm border overflow-hidden flex flex-col transition-all duration-300 hover:-translate-y-1 hover:border-white/10"
+                onClick={(e) => {
+                  const target = e.target as HTMLElement;
+                  if (target.closest("a") || target.closest("button")) {
+                    return;
+                  }
+                  window.location.href = `/templates/product.html?id=${tmpl.id}`;
+                }}
+                className="group rounded-sm border overflow-hidden flex flex-col transition-all duration-300 hover:-translate-y-1 hover:border-white/10 cursor-pointer"
                 style={{ background: "#131313", borderColor: "rgba(255,255,255,0.06)" }}
               >
                 {/* Thumbnail */}
