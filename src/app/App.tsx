@@ -919,11 +919,31 @@ function Templates({ templatesList, purchasedTemplates, userEmail, onOpenCheckou
               >
                 {/* Thumbnail */}
                 <div className="relative overflow-hidden" style={{ aspectRatio: "16/10", background: "#1a1a1a" }}>
-                  <img
-                    src={getTmplThumbnail(tmpl)}
-                    alt={`${tmpl.name} template preview`}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
+                  {!tmpl.thumbnail || tmpl.thumbnail.trim() === "" ? (
+                    <div className="absolute inset-0 w-full h-full overflow-hidden pointer-events-none select-none">
+                      <iframe
+                        src={tmpl.htmlCode && tmpl.htmlCode.trim()
+                          ? `${CLOUDFLARE_WORKER_URL}/api/preview?templateId=${tmpl.id}`
+                          : `/previews/${tmpl.demoPath}/index.html`}
+                        title={`${tmpl.name} thumbnail preview`}
+                        className="absolute"
+                        style={{
+                          width: "400%",
+                          height: "400%",
+                          transform: "scale(0.25)",
+                          transformOrigin: "top left",
+                          border: "none",
+                          background: "#0a0a0a"
+                        }}
+                      />
+                    </div>
+                  ) : (
+                    <img
+                      src={tmpl.thumbnail}
+                      alt={`${tmpl.name} template preview`}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                  )}
                   {/* Overlay on hover */}
                   <div className="absolute inset-0 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                     style={{ background: "rgba(10,10,10,0.7)" }}
@@ -2306,11 +2326,31 @@ function AdminDashboard({ user, onLogout, templatesList, onRefreshTemplates }: A
                     }}
                   >
                     <div className="flex items-center gap-3 min-w-0">
-                      <img
-                        src={getTmplThumbnail(t)}
-                        alt={t.name}
-                        className="w-14 h-9 rounded-sm object-cover shrink-0"
-                      />
+                      {!t.thumbnail || t.thumbnail.trim() === "" ? (
+                        <div className="w-14 h-9 rounded-sm overflow-hidden pointer-events-none select-none relative shrink-0" style={{ background: "#0a0a0a" }}>
+                          <iframe
+                            src={t.htmlCode && t.htmlCode.trim()
+                              ? `${CLOUDFLARE_WORKER_URL}/api/preview?templateId=${t.id}`
+                              : `/previews/${t.demoPath}/index.html`}
+                            title={`${t.name} admin preview`}
+                            className="absolute"
+                            style={{
+                              width: "1400px",
+                              height: "900px",
+                              transform: "scale(0.04)",
+                              transformOrigin: "top left",
+                              border: "none",
+                              background: "#0a0a0a"
+                            }}
+                          />
+                        </div>
+                      ) : (
+                        <img
+                          src={t.thumbnail}
+                          alt={t.name}
+                          className="w-14 h-9 rounded-sm object-cover shrink-0"
+                        />
+                      )}
                       <div className="min-w-0">
                         <div className="text-sm font-medium truncate" style={{ color: "#f0f0ee" }}>{t.name}</div>
                         <div className="text-xs truncate text-[#888880] font-mono">{t.id}</div>
@@ -3387,12 +3427,32 @@ function UserProfile({
                     className="rounded-sm border overflow-hidden flex flex-col"
                     style={{ background: "#131313", borderColor: "rgba(255,255,255,0.06)" }}
                   >
-                    <div style={{ aspectRatio: "16/10", overflow: "hidden", background: "#1a1a1a" }}>
-                      <img
-                        src={getTmplThumbnail(tmpl)}
-                        alt={tmpl.name}
-                        className="w-full h-full object-cover"
-                      />
+                    <div style={{ aspectRatio: "16/10", overflow: "hidden", background: "#1a1a1a", position: "relative" }}>
+                      {!tmpl.thumbnail || tmpl.thumbnail.trim() === "" ? (
+                        <div className="absolute inset-0 w-full h-full overflow-hidden pointer-events-none select-none">
+                          <iframe
+                            src={tmpl.htmlCode && tmpl.htmlCode.trim()
+                              ? `${CLOUDFLARE_WORKER_URL}/api/preview?templateId=${tmpl.id}`
+                              : `/previews/${tmpl.demoPath}/index.html`}
+                            title={`${tmpl.name} library preview`}
+                            className="absolute"
+                            style={{
+                              width: "400%",
+                              height: "400%",
+                              transform: "scale(0.25)",
+                              transformOrigin: "top left",
+                              border: "none",
+                              background: "#0a0a0a"
+                            }}
+                          />
+                        </div>
+                      ) : (
+                        <img
+                          src={tmpl.thumbnail}
+                          alt={tmpl.name}
+                          className="w-full h-full object-cover"
+                        />
+                      )}
                     </div>
                     <div className="p-5 flex flex-col gap-4 flex-1">
                       <div>

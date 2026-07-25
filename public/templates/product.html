@@ -88,8 +88,11 @@
       <!-- Left Column: Visuals & Spec Grid -->
       <div class="lg:col-span-7 flex flex-col gap-8">
         <!-- Mockup Display -->
-        <div class="rounded-sm border overflow-hidden bg-black" style="border-color: rgba(255,255,255,0.06);">
-          <img id="product-thumbnail" src="" alt="Mockup" class="w-full object-cover aspect-[16/10]" />
+        <div class="rounded-sm border overflow-hidden bg-black relative aspect-[16/10]" style="border-color: rgba(255,255,255,0.06);">
+          <img id="product-thumbnail" src="" alt="Mockup" class="w-full h-full object-cover" />
+          <div id="product-thumbnail-iframe-container" class="absolute inset-0 hidden pointer-events-none select-none">
+            <iframe id="product-thumbnail-iframe" src="" class="absolute w-[400%] h-[400%] origin-top-left scale-[0.25] border-0 bg-[#0a0a0a]"></iframe>
+          </div>
         </div>
 
         <!-- Technical Specification Grid -->
@@ -326,8 +329,19 @@
       document.getElementById("product-description").innerText = currentTemplate.description;
 
       const thumb = currentTemplate.thumbnail;
-      const fullThumb = thumb.startsWith("http") || thumb.includes("/") ? thumb : `https://images.unsplash.com/${thumb}?w=800&h=500&fit=crop&auto=format`;
-      document.getElementById("product-thumbnail").src = fullThumb;
+      if (!thumb || thumb.trim() === "") {
+        document.getElementById("product-thumbnail").classList.add("hidden");
+        const previewUrl = currentTemplate.htmlCode && currentTemplate.htmlCode.trim()
+          ? `${CLOUDFLARE_WORKER_URL}/api/preview?templateId=${currentTemplate.id}`
+          : `/previews/${currentTemplate.demoPath}/index.html`;
+        document.getElementById("product-thumbnail-iframe").src = previewUrl;
+        document.getElementById("product-thumbnail-iframe-container").classList.remove("hidden");
+      } else {
+        document.getElementById("product-thumbnail").classList.remove("hidden");
+        document.getElementById("product-thumbnail-iframe-container").classList.add("hidden");
+        const fullThumb = thumb.startsWith("http") || thumb.startsWith("data:") || thumb.includes("/") ? thumb : `https://images.unsplash.com/${thumb}?w=800&h=500&fit=crop&auto=format`;
+        document.getElementById("product-thumbnail").src = fullThumb;
+      }
 
       document.getElementById("product-rating").innerText = currentTemplate.rating;
       document.getElementById("product-downloads").innerText = currentTemplate.downloads;
