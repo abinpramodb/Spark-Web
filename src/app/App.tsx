@@ -1,2041 +1,1014 @@
-import { useState, useEffect } from "react";
-import { ArrowRight, Menu, X, Check, Star, ChevronDown, Mail, Phone, MapPin, ExternalLink, Zap, Globe, Code2, Palette, BarChart3, Shield, ShoppingCart, Eye, Download, Tag, Layers, Filter, LogOut, Users, Package, TrendingUp, DollarSign, AlertCircle, Edit3, Trash2, Plus, Lock, LayoutDashboard, Settings, Bell, Search, ChevronUp, MoreVertical } from "lucide-react";
+import { useState, useEffect, useRef } from 'react'
 
+// ─── Constants ──────────────────────────────────────────────────────────────
 const CLOUDFLARE_WORKER_URL = "https://sparkweb-api.sparkwebtemp.workers.dev";
 const GOOGLE_CLIENT_ID = "915707234297-n0c94s32q1gtje708bhckeapdg676adu.apps.googleusercontent.com";
 const ADMIN_EMAILS = ["oxoredz@gmail.com"];
 
-// ─── Data ────────────────────────────────────────────────────────────────────
+// ─── Types ──────────────────────────────────────────────────────────────────
+type NavPage = 'home' | 'templates' | 'sandbox' | 'dashboard' | 'contact'
+type AdminTab = 'overview' | 'templates' | 'inquiries' | 'access'
+type Viewport = 'desktop' | 'tablet' | 'mobile'
 
-const navLinks = ["Services", "Templates", "Work", "Pricing", "Contact"];
-
-const services = [
-  { icon: Globe, title: "Landing Pages", desc: "High-converting single-page sites built to turn visitors into buyers within seconds of arrival.", tag: "CONVERSION" },
-  { icon: Code2, title: "Full-Stack Web Apps", desc: "Custom-built platforms with authentication, dashboards, databases, and API integrations.", tag: "DEVELOPMENT" },
-  { icon: Palette, title: "Brand & Design Systems", desc: "Visual identity, component libraries, and design tokens that scale across every touchpoint.", tag: "UI/UX DESIGN" },
-  { icon: BarChart3, title: "E-Commerce Stores", desc: "Product-catalog, cart, checkout, and inventory systems — optimized for conversion.", tag: "E-COMMERCE" },
-  { icon: Zap, title: "Performance Audits", desc: "We cut load times, fix Core Web Vitals, and make your existing site feel brand new.", tag: "OPTIMIZATION" },
-  { icon: Shield, title: "Maintenance Plans", desc: "Monthly retainers covering uptime monitoring, updates, security patches, and feature additions.", tag: "SUPPORT" },
-];
-
-const templateCategories = ["All", "SaaS", "Agency", "E-Commerce", "Portfolio", "Blog", "Landing"];
-
-const templates = [
-  {
-    id: 1,
-    name: "Launchpad SaaS",
-    category: "SaaS",
-    price: 79,
-    originalPrice: 129,
-    img: "photo-1551650975-87deedd944c3",
-    badge: "Bestseller",
-    badgeColor: "#c8ff00",
-    rating: 4.9,
-    reviews: 214,
-    tech: ["Next.js", "Tailwind", "Supabase"],
-    desc: "Full SaaS starter with auth, billing, onboarding flows, and dashboard.",
-    pages: 12,
-    downloads: 1840,
-  },
-  {
-    id: 2,
-    name: "Folio Dark",
-    category: "Portfolio",
-    price: 49,
-    originalPrice: null,
-    img: "photo-1507003211169-0a1dd7228f2d",
-    badge: "New",
-    badgeColor: "#00d4ff",
-    rating: 4.8,
-    reviews: 87,
-    tech: ["React", "Framer Motion", "Tailwind"],
-    desc: "Minimal dark portfolio for designers and developers who mean business.",
-    pages: 6,
-    downloads: 620,
-  },
-  {
-    id: 3,
-    name: "Storefront Pro",
-    category: "E-Commerce",
-    price: 99,
-    originalPrice: 149,
-    img: "photo-1555421689-d68471e189f2",
-    badge: "Popular",
-    badgeColor: "#ff6b35",
-    rating: 4.7,
-    reviews: 163,
-    tech: ["Next.js", "Stripe", "Sanity"],
-    desc: "Full-featured e-commerce with cart, checkout, and a Sanity-backed catalog.",
-    pages: 18,
-    downloads: 2210,
-  },
-  {
-    id: 4,
-    name: "Agency One",
-    category: "Agency",
-    price: 69,
-    originalPrice: null,
-    img: "photo-1542744094-24638eff58bb",
-    badge: null,
-    badgeColor: null,
-    rating: 4.6,
-    reviews: 52,
-    tech: ["Next.js", "Tailwind", "GSAP"],
-    desc: "Bold agency site with animated hero, case studies, and team section.",
-    pages: 9,
-    downloads: 390,
-  },
-  {
-    id: 5,
-    name: "Beacon Blog",
-    category: "Blog",
-    price: 39,
-    originalPrice: null,
-    img: "photo-1499750310107-5fef28a66643",
-    badge: null,
-    badgeColor: null,
-    rating: 4.5,
-    reviews: 44,
-    tech: ["Next.js", "MDX", "Tailwind"],
-    desc: "Clean editorial blog with dark/light mode, tags, and newsletter capture.",
-    pages: 7,
-    downloads: 510,
-  },
-  {
-    id: 6,
-    name: "Convert Land",
-    category: "Landing",
-    price: 29,
-    originalPrice: 49,
-    img: "photo-1460925895917-afdab827c52f",
-    badge: "Sale",
-    badgeColor: "#ff4444",
-    rating: 4.8,
-    reviews: 198,
-    tech: ["React", "Tailwind"],
-    desc: "Single-page high-conversion landing with A/B-friendly sections.",
-    pages: 1,
-    downloads: 3100,
-  },
-  {
-    id: 7,
-    name: "Nexus Dashboard",
-    category: "SaaS",
-    price: 119,
-    originalPrice: 169,
-    img: "photo-1551288049-bebda4e38f71",
-    badge: "Premium",
-    badgeColor: "#a78bfa",
-    rating: 4.9,
-    reviews: 311,
-    tech: ["React", "Recharts", "Tailwind"],
-    desc: "Data-rich admin dashboard with 30+ chart types, tables, and user flows.",
-    pages: 22,
-    downloads: 2750,
-  },
-  {
-    id: 8,
-    name: "Craft Portfolio",
-    category: "Portfolio",
-    price: 45,
-    originalPrice: null,
-    img: "photo-1558655146-9f40138edfeb",
-    badge: null,
-    badgeColor: null,
-    rating: 4.7,
-    reviews: 76,
-    tech: ["Astro", "Tailwind"],
-    desc: "Lightweight, ultra-fast portfolio built on Astro for near-zero JS.",
-    pages: 5,
-    downloads: 480,
-  },
-];
-
-const projects = [
-  { title: "Meridian Finance", category: "Web App", img: "photo-1460925895917-afdab827c52f", color: "#1a1a2e" },
-  { title: "Oaken Studio", category: "E-Commerce", img: "photo-1555421689-d68471e189f2", color: "#1a2a1a" },
-  { title: "Pulse Health", category: "Dashboard", img: "photo-1576091160550-2173dba999ef", color: "#2a1a1a" },
-  { title: "Vanta Logistics", category: "Full-Stack", img: "photo-1586528116311-ad8dd3c8310d", color: "#1a1a1a" },
-  { title: "Nova Agency", category: "Landing Page", img: "photo-1542744094-24638eff58bb", color: "#1a1a2a" },
-  { title: "Verdant Foods", category: "E-Commerce", img: "photo-1542838132-92c53300491e", color: "#1a2a1a" },
-];
-
-const steps = [
-  { num: "01", title: "Discovery Call", desc: "We map your goals, audience, and technical requirements in a focused 60-minute session." },
-  { num: "02", title: "Strategy & Scope", desc: "A detailed proposal covers architecture, timeline, deliverables, and fixed pricing. No surprises." },
-  { num: "03", title: "Design Sprint", desc: "High-fidelity mockups in Figma — full review rounds until every pixel earns its place." },
-  { num: "04", title: "Build & QA", desc: "We code in two-week sprints with weekly demos. You see real progress, not just updates." },
-  { num: "05", title: "Launch", desc: "Deployment, DNS, performance checks, and a live walkthrough before you announce anything." },
-  { num: "06", title: "Growth Support", desc: "Post-launch retainer, analytics review, and iterative improvements as your business scales." },
-];
-
-const plans = [
-  {
-    name: "Starter",
-    price: "$1,200",
-    period: "one-time",
-    desc: "Perfect for solo founders who need a polished web presence fast.",
-    features: ["5-page responsive site", "Custom design", "Mobile-first build", "Contact form", "Google Analytics", "2 revision rounds", "30-day support"],
-    cta: "Get Started",
-    highlight: false,
-  },
-  {
-    name: "Growth",
-    price: "$4,800",
-    period: "one-time",
-    desc: "For growing businesses ready to invest in a full digital foundation.",
-    features: ["Up to 20 pages", "Full-stack web app", "CMS integration", "User authentication", "Custom dashboard", "SEO optimization", "Unlimited revisions", "90-day support"],
-    cta: "Most Popular",
-    highlight: true,
-  },
-  {
-    name: "Enterprise",
-    price: "Custom",
-    period: "project",
-    desc: "Complex platforms, integrations, and ongoing engineering partnerships.",
-    features: ["Unlimited scope", "Dedicated team", "Custom integrations", "White-label option", "SLA guarantee", "Priority support", "Monthly strategy calls", "Full source transfer"],
-    cta: "Let's Talk",
-    highlight: false,
-  },
-];
-
-const testimonials = [
-  {
-    name: "Sophia Andretti",
-    role: "CEO, Meridian Finance",
-    avatar: "photo-1494790108755-2616b612b786",
-    rating: 5,
-    text: "They delivered a full banking dashboard in 8 weeks. Our users called it the smoothest interface in fintech. That's not marketing — that's what our NPS data says.",
-  },
-  {
-    name: "Marcus Chen",
-    role: "Founder, Oaken Studio",
-    avatar: "photo-1507003211169-0a1dd7228f2d",
-    rating: 5,
-    text: "We were paying $3k/month for a Shopify theme that barely worked. One custom build later and our conversion rate jumped 34%. The site paid for itself in 6 weeks.",
-  },
-  {
-    name: "Laila Osei",
-    role: "CTO, Pulse Health",
-    avatar: "photo-1580489944761-15a19d654956",
-    rating: 5,
-    text: "The team understood HIPAA constraints immediately and built with compliance baked in, not bolted on. Rare to find developers who think like that.",
-  },
-];
-
-const faqs = [
-  { q: "How long does a typical project take?", a: "Landing pages: 2–3 weeks. Full web apps: 6–12 weeks depending on scope. We give you a hard timeline in the proposal and hold to it." },
-  { q: "Do you work with clients outside the US?", a: "Yes — about 40% of our clients are in Europe and Southeast Asia. We run async with weekly video calls aligned to your timezone." },
-  { q: "Who owns the code at the end?", a: "You do. Full source code, repo access, all assets. No vendor lock-in, no licensing fees." },
-  { q: "Can I update the site myself after launch?", a: "For CMS-backed sites, yes — no technical knowledge needed. For custom apps, we document the codebase thoroughly and offer training sessions." },
-  { q: "What tech stack do you use?", a: "React / Next.js on the frontend, Node.js or Python on the backend, PostgreSQL or Supabase for data. We choose what fits your project, not what's trending." },
-];
-
-// ─── Components ───────────────────────────────────────────────────────────────
-
-interface NavbarProps {
-  userEmail: string | null;
-  userName: string | null;
-  userPicture: string | null;
-  onSignOut: () => void;
-  onOpenAuth: () => void;
-  onAdminDashboard: () => void;
-  onProfileView: () => void;
+interface Template {
+  id: string
+  name: string
+  category: string
+  description: string
+  price: string
+  thumbnail: string
+  demoPath: string
+  payhipUrl?: string
+  figmaUrl?: string
+  htmlCode?: string
+  cssCode?: string
+  jsCode?: string
+  rating?: number
+  reviews?: number
+  downloads?: number
+  pages?: number
+  tech?: string[]
 }
 
-function Navbar({ userEmail, userName, userPicture, onSignOut, onOpenAuth, onAdminDashboard, onProfileView }: NavbarProps) {
-  const [open, setOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
-  const [showDropdown, setShowDropdown] = useState(false);
+interface Inquiry {
+  id: number
+  name: string
+  email: string
+  budget: string
+  message: string
+  timestamp: string
+}
+
+interface AccessRequest {
+  email: string
+  timestamp: string
+  status: string
+}
+
+interface UPIRequest {
+  id: number
+  email: string
+  templateId: string
+  utr: string
+  timestamp: string
+  status: string
+}
+
+interface VerifiedEmail {
+  email: string
+  verifiedDate: string
+}
+
+interface AdminUser {
+  email: string
+  name: string
+  role: string
+}
+
+// ─── Mock Fallbacks ─────────────────────────────────────────────────────────
+const SEED_TEMPLATES: Template[] = [
+  {
+    id: 'template-1',
+    name: 'Nexus SaaS Landing Page',
+    category: 'SaaS',
+    description: 'Clean semantic HTML structure with responsive design, pricing matrices, and modern dark-mode gradient elements.',
+    price: 'Free',
+    thumbnail: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=800&q=80',
+    demoPath: 'template-1',
+    rating: 4.9,
+    reviews: 214,
+    downloads: 1840,
+    pages: 12,
+    tech: ['HTML', 'CSS', 'JavaScript'],
+  },
+  {
+    id: 'template-2',
+    name: 'Zenith Personal Portfolio',
+    category: 'Portfolio',
+    description: 'Stunning developer-focused minimal dark-mode layout. Tailored for showcasing projects, skills, and work histories.',
+    price: 'Free',
+    thumbnail: 'https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?auto=format&fit=crop&w=800&q=80',
+    demoPath: 'template-2',
+    rating: 4.8,
+    reviews: 87,
+    downloads: 620,
+    pages: 6,
+    tech: ['React', 'Framer', 'Tailwind'],
+  },
+  {
+    id: 'template-3',
+    name: 'Echo Creator Blog',
+    category: 'Blog',
+    description: 'Minimalist, typography-focused blog template designed for creators, writers, and newsletters. Includes newsletter signup styles.',
+    price: 'Free',
+    thumbnail: 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?auto=format&fit=crop&w=800&q=80',
+    demoPath: 'template-3',
+    rating: 4.7,
+    reviews: 163,
+    downloads: 2210,
+    pages: 18,
+    tech: ['MDX', 'Blog', 'SEO'],
+  },
+  {
+    id: 'template-4',
+    name: 'Nova SaaS Landing Page Pro',
+    category: 'SaaS',
+    description: 'High-performance SaaS landing page with dark glassmorphism layout, modular grids, pricing calculator, and clean flex layouts.',
+    price: '$14.99',
+    thumbnail: 'https://images.unsplash.com/photo-1551434678-e076c223a692?auto=format&fit=crop&w=800&q=80',
+    demoPath: 'template-1',
+    payhipUrl: 'https://payhip.com/b/mock-pro',
+    rating: 4.8,
+    reviews: 198,
+    downloads: 3100,
+    pages: 1,
+    tech: ['Full Stack', 'Charts', 'Glass'],
+  },
+]
+
+const SANDBOX_DEFAULT = {
+  html: `<div class="hero">\n  <h1>Spark Web Visual Sandbox</h1>\n  <p>Modify layout parameters, colors, and code and hit Run to preview instantly.</p>\n  <a href="#" class="btn">Get Started</a>\n</div>`,
+  css: `.hero {\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  justify-content: center;\n  min-height: 100vh;\n  background: linear-gradient(135deg, #070b12, #0d1a2e);\n  color: #e2e8f0;\n  font-family: sans-serif;\n  text-align: center;\n  gap: 1rem;\n}\nh1 {\n  font-size: 3rem;\n  background: linear-gradient(135deg, #00e5ff, #8b5cf6);\n  -webkit-background-clip: text;\n  -webkit-text-fill-color: transparent;\n}\n.btn {\n  padding: 0.75rem 2rem;\n  background: #00e5ff;\n  color: #070b12;\n  border-radius: 6px;\n  font-weight: 700;\n  text-decoration: none;\n  margin-top: 1rem;\n}`,
+  js: `// Interactive Console Trigger\nconsole.log('Spark Web sandbox initialized.');`,
+}
+
+// Helper to convert files to text
+const readFileAsText = (file: File): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = () => reject(reader.error);
+    reader.readAsText(file);
+  });
+};
+
+// Helper to convert files to base64 DataURL
+const readFileAsDataURL = (file: File): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(file);
+  });
+};
+
+// ─── Sub-components ──────────────────────────────────────────────────────────
+
+function NavBar({ page, setPage, userEmail, handleSignOut }: { page: NavPage; setPage: (p: NavPage) => void; userEmail: string | null; handleSignOut: () => void }) {
+  const [scrolled, setScrolled] = useState(false)
 
   useEffect(() => {
-    const handler = () => setScrolled(window.scrollY > 40);
-    window.addEventListener("scroll", handler);
-    return () => window.removeEventListener("scroll", handler);
-  }, []);
+    const handler = () => setScrolled(window.scrollY > 20)
+    window.addEventListener('scroll', handler)
+    return () => window.removeEventListener('scroll', handler)
+  }, [])
+
+  const navLinks: { label: string; id: NavPage }[] = [
+    { label: 'Home', id: 'home' },
+    { label: 'Templates', id: 'templates' },
+    { label: 'Sandbox', id: 'sandbox' },
+    { label: 'Contact', id: 'contact' },
+  ]
 
   const isAdmin = userEmail && ADMIN_EMAILS.includes(userEmail.toLowerCase().trim());
 
   return (
     <nav
-      className="fixed top-0 left-0 right-0 z-50 transition-all duration-300"
       style={{
-        background: scrolled ? "rgba(10,10,10,0.92)" : "transparent",
-        backdropFilter: scrolled ? "blur(12px)" : "none",
-        borderBottom: scrolled ? "1px solid rgba(255,255,255,0.06)" : "none",
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        zIndex: 100,
+        transition: 'all 0.3s ease',
+        background: scrolled ? 'rgba(7,11,18,0.92)' : 'transparent',
+        backdropFilter: scrolled ? 'blur(16px)' : 'none',
+        borderBottom: scrolled ? '1px solid rgba(255,255,255,0.06)' : 'none',
       }}
     >
-      <div className="max-w-7xl mx-auto px-6 lg:px-8 flex items-center justify-between h-16 lg:h-20">
-        <a href="#" className="flex items-center gap-2 group">
-          <span
-            className="w-7 h-7 rounded-sm flex items-center justify-center text-xs font-bold"
-            style={{ background: "#c8ff00", color: "#0a0a0a", fontFamily: "JetBrains Mono, monospace" }}
-          >
-            SP
-          </span>
-          <span className="text-sm font-semibold tracking-tight" style={{ fontFamily: "Outfit, sans-serif", color: "#f0f0ee" }}>
-            Spark Web
-          </span>
-        </a>
-
-        <div className="hidden md:flex items-center gap-8">
-          {navLinks.map((link) => (
-            <a
-              key={link}
-              href={`#${link.toLowerCase()}`}
-              className="text-sm transition-colors duration-200 hover:text-white"
-              style={{ color: "#888880", fontFamily: "Outfit, sans-serif" }}
-            >
-              {link}
-            </a>
-          ))}
-        </div>
-
-        <div className="hidden md:flex items-center gap-4">
-          {userEmail ? (
-            <div className="relative">
-              <button
-                onClick={() => setShowDropdown(!showDropdown)}
-                className="flex items-center gap-2 focus:outline-none"
-              >
-                {userPicture ? (
-                  <img src={userPicture} alt={userName || ""} className="w-8 h-8 rounded-full border border-[#c8ff00]/40" />
-                ) : (
-                  <div className="w-8 h-8 rounded-full bg-[#1c1c1c] text-[#c8ff00] flex items-center justify-center font-bold text-xs">
-                    {(userName || userEmail).substring(0, 2).toUpperCase()}
-                  </div>
-                )}
-                <ChevronDown size={14} style={{ color: "#888880" }} />
-              </button>
-              {showDropdown && (
-                <div
-                  className="absolute right-0 mt-2 w-48 rounded-sm border py-2 shadow-xl"
-                  style={{ background: "#131313", borderColor: "rgba(255,255,255,0.08)" }}
-                >
-                  <div className="px-4 py-2 border-b text-xs font-semibold" style={{ color: "#f0f0ee", borderColor: "rgba(255,255,255,0.06)" }}>
-                    {userName || userEmail}
-                  </div>
-                  <button
-                    onClick={() => { onProfileView(); setShowDropdown(false); }}
-                    className="w-full text-left px-4 py-2.5 text-xs text-[#f0f0ee] hover:bg-white/[0.03] transition-colors"
-                  >
-                    My Purchases
-                  </button>
-                  {isAdmin && (
-                    <button
-                      onClick={() => { onAdminDashboard(); setShowDropdown(false); }}
-                      className="w-full text-left px-4 py-2.5 text-xs text-[#c8ff00] hover:bg-white/[0.03] transition-colors"
-                    >
-                      Admin Panel
-                    </button>
-                  )}
-                  <button
-                    onClick={() => { onSignOut(); setShowDropdown(false); }}
-                    className="w-full text-left px-4 py-2.5 text-xs text-[#ff6666] hover:bg-white/[0.03] transition-colors"
-                  >
-                    Sign Out
-                  </button>
-                </div>
-              )}
-            </div>
-          ) : (
-            <button
-              onClick={onOpenAuth}
-              className="inline-flex items-center gap-2 px-5 py-2 text-sm font-semibold rounded-sm transition-all duration-200 hover:opacity-90 active:scale-95"
-              style={{ background: "#c8ff00", color: "#0a0a0a", fontFamily: "Outfit, sans-serif" }}
-            >
-              Sign In
-            </button>
-          )}
-        </div>
-
+      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 24px', height: 64, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        {/* Logo */}
         <button
-          onClick={() => setOpen(!open)}
-          className="md:hidden p-2 rounded-sm transition-colors"
-          style={{ color: "#f0f0ee" }}
+          onClick={() => setPage('home')}
+          style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'none', border: 'none', cursor: 'pointer' }}
         >
-          {open ? <X size={20} /> : <Menu size={20} />}
+          <div style={{
+            width: 32, height: 32, borderRadius: 8,
+            background: 'linear-gradient(135deg, #00e5ff, #8b5cf6)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: 14, fontWeight: 800, color: '#070b12', fontFamily: 'var(--font-display)',
+          }}>S</div>
+          <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.1rem', color: '#f1f5f9', letterSpacing: '-0.02em' }}>
+            Spark<span style={{ color: '#00e5ff' }}>Web</span>
+          </span>
         </button>
-      </div>
 
-      {open && (
-        <div
-          className="md:hidden px-6 pb-6 pt-2 flex flex-col gap-4"
-          style={{ background: "rgba(10,10,10,0.97)", borderTop: "1px solid rgba(255,255,255,0.06)" }}
-        >
-          {navLinks.map((link) => (
-            <a
-              key={link}
-              href={`#${link.toLowerCase()}`}
-              onClick={() => setOpen(false)}
-              className="text-base py-1 transition-colors hover:text-white"
-              style={{ color: "#888880", fontFamily: "Outfit, sans-serif" }}
-            >
-              {link}
-            </a>
-          ))}
-          {userEmail ? (
-            <>
-              <button
-                onClick={() => { onProfileView(); setOpen(false); }}
-                className="text-left text-base py-1 text-[#f0f0ee]"
-              >
-                My Purchases
-              </button>
-              <button
-                onClick={() => { onSignOut(); setOpen(false); }}
-                className="mt-2 text-left text-base py-1 text-[#ff6666]"
-              >
-                Sign Out
-              </button>
-            </>
-          ) : (
+        {/* Desktop Nav */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+          {navLinks.map(l => (
             <button
-              onClick={() => { onOpenAuth(); setOpen(false); }}
-              className="mt-2 inline-flex items-center justify-center gap-2 px-5 py-3 text-sm font-semibold rounded-sm"
-              style={{ background: "#c8ff00", color: "#0a0a0a", fontFamily: "Outfit, sans-serif" }}
-            >
-              Sign In
-            </button>
-          )}
-        </div>
-      )}
-    </nav>
-  );
-}
-
-function Hero() {
-  return (
-    <section className="relative min-h-screen flex flex-col justify-center overflow-hidden pt-20" style={{ background: "#0a0a0a" }}>
-      {/* Grid texture */}
-      <div
-        className="absolute inset-0 opacity-[0.03]"
-        style={{
-          backgroundImage: "linear-gradient(rgba(200,255,0,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(200,255,0,0.5) 1px, transparent 1px)",
-          backgroundSize: "80px 80px",
-        }}
-      />
-
-      {/* Glow */}
-      <div
-        className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full opacity-10 pointer-events-none"
-        style={{ background: "radial-gradient(circle, #c8ff00 0%, transparent 70%)" }}
-      />
-
-      <div className="relative max-w-7xl mx-auto px-6 lg:px-8 py-24 lg:py-32">
-        <div className="max-w-5xl">
-          <div
-            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium mb-8 border"
-            style={{ borderColor: "rgba(200,255,0,0.3)", color: "#c8ff00", background: "rgba(200,255,0,0.06)", fontFamily: "JetBrains Mono, monospace" }}
-          >
-            <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse" />
-            Available for new projects — Q3 2026
-          </div>
-
-          <h1
-            className="text-5xl sm:text-6xl lg:text-8xl font-bold leading-[0.95] tracking-tight mb-8"
-            style={{ fontFamily: "Fraunces, serif", color: "#f0f0ee" }}
-          >
-            We build{" "}
-            <em
-              className="not-italic"
-              style={{ color: "#c8ff00" }}
-            >
-              websites
-            </em>
-            <br />
-            that close{" "}
-            <span
-              className="relative inline-block"
-              style={{ color: "#f0f0ee" }}
-            >
-              deals.
-              <span
-                className="absolute -bottom-2 left-0 right-0 h-0.5"
-                style={{ background: "linear-gradient(90deg, #c8ff00, transparent)" }}
-              />
-            </span>
-          </h1>
-
-          <p
-            className="text-lg lg:text-xl leading-relaxed max-w-2xl mb-12"
-            style={{ color: "#888880", fontFamily: "Outfit, sans-serif" }}
-          >
-            Spark Web builds custom websites and sells production-ready templates for founders and teams who know that design is revenue. Ship a custom site or launch in hours with a pro template.
-          </p>
-
-          <div className="flex flex-wrap items-center gap-4">
-            <a
-              href="#contact"
-              className="inline-flex items-center gap-2.5 px-7 py-4 text-base font-semibold rounded-sm transition-all duration-200 hover:opacity-90 active:scale-95 group"
-              style={{ background: "#c8ff00", color: "#0a0a0a", fontFamily: "Outfit, sans-serif" }}
-            >
-              Start a Project
-              <ArrowRight size={16} className="group-hover:translate-x-0.5 transition-transform" />
-            </a>
-            <a
-              href="#templates"
-              className="inline-flex items-center gap-2 px-7 py-4 text-base font-medium rounded-sm border transition-all duration-200 hover:border-white/20 hover:text-white"
-              style={{ borderColor: "rgba(255,255,255,0.1)", color: "#888880", fontFamily: "Outfit, sans-serif" }}
-            >
-              Browse Templates
-            </a>
-          </div>
-        </div>
-
-        {/* Stats row */}
-        <div
-          className="mt-24 pt-10 grid grid-cols-2 lg:grid-cols-4 gap-8 border-t"
-          style={{ borderColor: "rgba(255,255,255,0.06)" }}
-        >
-          {[
-            { val: "140+", label: "Projects shipped" },
-            { val: "98%", label: "Client retention" },
-            { val: "4.2×", label: "Avg conversion lift" },
-            { val: "8 yrs", label: "In the industry" },
-          ].map((s) => (
-            <div key={s.label}>
-              <div
-                className="text-4xl font-bold mb-1"
-                style={{ fontFamily: "Fraunces, serif", color: "#c8ff00" }}
-              >
-                {s.val}
-              </div>
-              <div className="text-sm" style={{ color: "#888880", fontFamily: "Outfit, sans-serif" }}>
-                {s.label}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function Services() {
-  return (
-    <section id="services" className="py-24 lg:py-32" style={{ background: "#0a0a0a" }}>
-      <div className="max-w-7xl mx-auto px-6 lg:px-8">
-        <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6 mb-16">
-          <div>
-            <div
-              className="text-xs font-medium mb-4 tracking-widest uppercase"
-              style={{ color: "#c8ff00", fontFamily: "JetBrains Mono, monospace" }}
-            >
-              Services
-            </div>
-            <h2
-              className="text-4xl lg:text-6xl font-bold leading-tight"
-              style={{ fontFamily: "Fraunces, serif", color: "#f0f0ee" }}
-            >
-              What we{" "}
-              <em className="not-italic" style={{ color: "#c8ff00" }}>
-                build
-              </em>
-            </h2>
-          </div>
-          <p
-            className="lg:max-w-sm text-base leading-relaxed"
-            style={{ color: "#888880", fontFamily: "Outfit, sans-serif" }}
-          >
-            Every engagement starts with a problem worth solving. We match the right technology to the outcome, not the other way around.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-px" style={{ background: "rgba(255,255,255,0.06)" }}>
-          {services.map((s) => (
-            <div
-              key={s.title}
-              className="p-8 group cursor-pointer transition-all duration-300 hover:-translate-y-1"
-              style={{ background: "#0a0a0a" }}
-            >
-              <div
-                className="w-10 h-10 rounded-sm flex items-center justify-center mb-6 transition-colors duration-300 group-hover:bg-[#c8ff00]"
-                style={{ background: "rgba(200,255,0,0.1)" }}
-              >
-                <s.icon
-                  size={18}
-                  className="transition-colors duration-300 group-hover:text-black"
-                  style={{ color: "#c8ff00" }}
-                />
-              </div>
-              <div
-                className="text-xs font-medium mb-3 tracking-widest"
-                style={{ color: "#c8ff00", fontFamily: "JetBrains Mono, monospace" }}
-              >
-                {s.tag}
-              </div>
-              <h3
-                className="text-xl font-semibold mb-3"
-                style={{ fontFamily: "Outfit, sans-serif", color: "#f0f0ee" }}
-              >
-                {s.title}
-              </h3>
-              <p className="text-sm leading-relaxed" style={{ color: "#888880", fontFamily: "Outfit, sans-serif" }}>
-                {s.desc}
-              </p>
-              <div
-                className="mt-6 flex items-center gap-1.5 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                style={{ color: "#c8ff00", fontFamily: "Outfit, sans-serif" }}
-              >
-                Learn more <ArrowRight size={12} />
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-interface PaymentCheckoutModalProps {
-  template: any;
-  userEmail: string;
-  onClose: () => void;
-}
-
-function PaymentCheckoutModal({ template, userEmail, onClose }: PaymentCheckoutModalProps) {
-  const payhipUrl = template.payhipUrl || "";
-
-  useEffect(() => {
-    // Dynamically bind Payhip overlay script when the modal mounts
-    if (payhipUrl && (window as any).Payhip && typeof (window as any).Payhip.scan === "function") {
-      try {
-        (window as any).Payhip.scan();
-      } catch (e) {
-        console.error("Payhip scan error:", e);
-      }
-    }
-  }, [payhipUrl]);
-
-  const finalCheckoutUrl = payhipUrl
-    ? payhipUrl + (payhipUrl.includes("?") ? "&" : "?") + "email=" + encodeURIComponent(userEmail)
-    : "";
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.85)" }}>
-      <div
-        className="w-full max-w-md rounded-sm border overflow-hidden flex flex-col"
-        style={{ background: "#131313", borderColor: "rgba(255,255,255,0.1)" }}
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
-          <div>
-            <h3 className="text-sm font-semibold" style={{ color: "#f0f0ee", fontFamily: "Outfit, sans-serif" }}>
-              Unlock {template.name}
-            </h3>
-            <p className="text-xs" style={{ color: "#888880", fontFamily: "JetBrains Mono, monospace" }}>
-              Logged in: {userEmail}
-            </p>
-          </div>
-          <button onClick={onClose} style={{ color: "#888880" }}><X size={18} /></button>
-        </div>
-
-        {/* Content */}
-        <div className="p-6 flex flex-col gap-4 text-center">
-          <p className="text-sm" style={{ color: "#888880" }}>
-            Unlock instantly using PayPal, Credit Card, or Debit Card.
-          </p>
-          <div className="text-2xl font-bold" style={{ color: "#c8ff00", fontFamily: "Fraunces, serif" }}>
-            {template.price}
-          </div>
-          {finalCheckoutUrl ? (
-            <a
-              href={finalCheckoutUrl}
-              className="w-full py-3.5 text-center text-sm font-semibold rounded-sm text-[#0a0a0a] transition-all hover:opacity-90 payhip-buy-button"
-              style={{ background: "#c8ff00", display: "block" }}
-              onClick={() => {
-                onClose();
+              key={l.id}
+              onClick={() => setPage(l.id)}
+              style={{
+                padding: '6px 14px',
+                borderRadius: 6,
+                border: 'none',
+                cursor: 'pointer',
+                fontSize: '0.85rem',
+                fontWeight: 500,
+                fontFamily: 'var(--font-body)',
+                transition: 'all 0.2s',
+                background: page === l.id ? 'rgba(0,229,255,0.1)' : 'transparent',
+                color: page === l.id ? '#00e5ff' : '#9ca3af',
               }}
             >
-              Proceed to Checkout
-            </a>
-          ) : (
-            <div
-              className="py-3 px-4 rounded-sm border text-xs"
-              style={{ borderColor: "rgba(255,68,68,0.2)", background: "rgba(255,68,68,0.02)", color: "#ff6666" }}
+              {l.label}
+            </button>
+          ))}
+        </div>
+
+        {/* CTA */}
+        <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+          {isAdmin && (
+            <button
+              onClick={() => setPage('dashboard')}
+              style={{
+                padding: '7px 16px', borderRadius: 6, border: '1px solid rgba(0,229,255,0.25)',
+                background: 'rgba(0,229,255,0.06)', color: '#00e5ff', cursor: 'pointer',
+                fontSize: '0.82rem', fontWeight: 600, fontFamily: 'var(--font-body)',
+                transition: 'all 0.2s',
+              }}
             >
-              This template currently does not have a checkout link configured. Please set one up in the Admin Dashboard.
+              Admin
+            </button>
+          )}
+          {userEmail ? (
+            <button
+              onClick={handleSignOut}
+              style={{
+                padding: '7px 16px', borderRadius: 6, border: '1px solid rgba(239,68,68,0.2)',
+                background: 'rgba(239,68,68,0.06)', color: '#ef4444', cursor: 'pointer',
+                fontSize: '0.82rem', fontWeight: 500, fontFamily: 'var(--font-body)',
+                transition: 'all 0.2s',
+              }}
+            >
+              Sign Out
+            </button>
+          ) : (
+            <button
+              onClick={() => setPage('templates')}
+              className="btn-primary"
+              style={{ padding: '7px 18px', borderRadius: 6, border: 'none', cursor: 'pointer', fontSize: '0.82rem' }}
+            >
+              Google Sign In
+            </button>
+          )}
+        </div>
+      </div>
+    </nav>
+  )
+}
+
+function HeroSection({ setPage }: { setPage: (p: NavPage) => void }) {
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect()
+    setMousePos({ x: (e.clientX - rect.left) / rect.width, y: (e.clientY - rect.top) / rect.height })
+  }
+
+  return (
+    <div
+      onMouseMove={handleMouseMove}
+      style={{
+        position: 'relative',
+        minHeight: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        overflow: 'hidden',
+        paddingTop: 64,
+      }}
+    >
+      {/* Background */}
+      <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse 80% 60% at 50% 0%, rgba(0,229,255,0.07) 0%, transparent 70%)' }} />
+      <div className="grid-bg" style={{ position: 'absolute', inset: 0, opacity: 0.6 }} />
+      <div style={{
+        position: 'absolute',
+        top: '20%', left: '10%',
+        width: 400, height: 400,
+        borderRadius: '50%',
+        background: 'radial-gradient(circle, rgba(139,92,246,0.08) 0%, transparent 70%)',
+        transform: `translate(${mousePos.x * 20}px, ${mousePos.y * 20}px)`,
+        transition: 'transform 0.3s ease',
+        pointerEvents: 'none',
+      }} />
+      <div style={{
+        position: 'absolute',
+        bottom: '15%', right: '8%',
+        width: 300, height: 300,
+        borderRadius: '50%',
+        background: 'radial-gradient(circle, rgba(0,229,255,0.06) 0%, transparent 70%)',
+        transform: `translate(${-mousePos.x * 15}px, ${-mousePos.y * 15}px)`,
+        transition: 'transform 0.3s ease',
+        pointerEvents: 'none',
+      }} />
+
+      {/* Content */}
+      <div style={{ position: 'relative', zIndex: 1, textAlign: 'center', maxWidth: 860, padding: '0 24px' }}>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '6px 14px', borderRadius: 100, border: '1px solid rgba(0,229,255,0.2)', background: 'rgba(0,229,255,0.06)', marginBottom: 32 }}>
+          <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#00e5ff', display: 'inline-block' }} className="animate-pulse-glow" />
+          <span className="section-label" style={{ fontSize: '0.65rem' }}>Edge-Native Marketplace</span>
+        </div>
+
+        <h1 style={{
+          fontFamily: 'var(--font-display)',
+          fontSize: 'clamp(2.8rem, 7vw, 5.5rem)',
+          fontWeight: 800,
+          lineHeight: 1.05,
+          letterSpacing: '-0.03em',
+          color: '#f1f5f9',
+          marginBottom: 24,
+        }}>
+          Ship Stunning Sites<br />
+          <span className="gradient-text">at the Speed of Edge</span>
+        </h1>
+
+        <p style={{ fontSize: '1.1rem', color: '#94a3b8', lineHeight: 1.7, maxWidth: 580, margin: '0 auto 40px', fontWeight: 400 }}>
+          Premium responsive templates with live browser preview viewports, interactive sandbox variables,
+          and serverless backends powered by Cloudflare Workers and D1 Database.
+        </p>
+
+        <div style={{ display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap' }}>
+          <button
+            onClick={() => setPage('templates')}
+            className="btn-primary"
+            style={{ padding: '14px 32px', borderRadius: 8, border: 'none', cursor: 'pointer', fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: 8 }}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+            </svg>
+            Browse Templates
+          </button>
+          <button
+            onClick={() => setPage('sandbox')}
+            className="btn-ghost"
+            style={{ padding: '14px 32px', borderRadius: 8, cursor: 'pointer', fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: 8, background: 'transparent' }}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <polygon points="5 3 19 12 5 21 5 3" />
+            </svg>
+            Interactive Sandbox
+          </button>
+        </div>
+
+        {/* Stats */}
+        <div style={{ display: 'flex', gap: 40, justifyContent: 'center', marginTop: 64, flexWrap: 'wrap' }}>
+          {[
+            { val: '24+', label: 'Premium Templates' },
+            { val: '3ms', label: 'Edge Latency' },
+            { val: '99.9%', label: 'Uptime SLA' },
+            { val: '1.2k+', label: 'Active Licenses' },
+          ].map(s => (
+            <div key={s.label} style={{ textAlign: 'center' }}>
+              <div style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '2rem', color: '#00e5ff' }}>{s.val}</div>
+              <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: '#4b5563', marginTop: 4 }}>{s.label}</div>
             </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Scroll indicator */}
+      <div style={{ position: 'absolute', bottom: 32, left: '50%', transform: 'translateX(-50%)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+        <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', letterSpacing: '0.15em', color: '#374151', textTransform: 'uppercase' }}>scroll</div>
+        <div style={{ width: 1, height: 40, background: 'linear-gradient(to bottom, rgba(0,229,255,0.3), transparent)' }} />
+      </div>
+    </div>
+  )
+}
+
+function FeaturesSection() {
+  const features = [
+    {
+      icon: '⬡',
+      title: 'Sandboxed Live Preview',
+      desc: 'Every template runs in an isolated <iframe> sandbox via /api/preview — toggle between Desktop, Tablet, and Mobile viewports in real time.',
+      accent: '#00e5ff',
+    },
+    {
+      icon: '⬢',
+      title: 'Edge-Native Backend',
+      desc: 'Cloudflare Workers handle all API routes at the network edge. Cloudflare D1 provides a globally replicated SQLite database with zero cold starts.',
+      accent: '#8b5cf6',
+    },
+    {
+      icon: '◈',
+      title: 'Google OAuth Whitelist',
+      desc: 'Secure sign-in via Google OAuth. Whitelisted users get instant download access; others submit Access Requests reviewed in the admin panel.',
+      accent: '#22c55e',
+    },
+    {
+      icon: '◉',
+      title: 'Multi-Channel Licensing',
+      desc: 'Automated unlocks via Payhip integration or manual UPI payment triggers — buyers submit UTR codes, admins approve from the dashboard.',
+      accent: '#f59e0b',
+    },
+    {
+      icon: '◫',
+      title: 'Real-Time Customizer',
+      desc: 'Modify colors, layouts, and typography through an interactive visual editor. Changes re-render the live preview instantly without page reloads.',
+      accent: '#06b6d4',
+    },
+    {
+      icon: '◐',
+      title: 'Super Admin Console',
+      desc: 'Full control over templates, purchases, access requests, and the inquiries inbox — with stats, search, date filters, and a purge command.',
+      accent: '#ec4899',
+    },
+  ]
+
+  return (
+    <section style={{ padding: '120px 24px', position: 'relative' }}>
+      <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+        <div style={{ textAlign: 'center', marginBottom: 80 }}>
+          <div className="section-label" style={{ marginBottom: 16 }}>Platform Architecture</div>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(2rem, 4vw, 3rem)', fontWeight: 700, color: '#f1f5f9', letterSpacing: '-0.02em', marginBottom: 16 }}>
+            Everything you need to ship
+          </h2>
+          <p style={{ color: '#6b7280', fontSize: '1rem', maxWidth: 500, margin: '0 auto' }}>
+            A complete stack — from edge database to visual customizer — so you can focus on building, not infrastructure.
+          </p>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: 1, background: 'rgba(255,255,255,0.04)', borderRadius: 16, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.06)' }}>
+          {features.map((f) => (
+            <div
+              key={f.title}
+              className="card-hover"
+              style={{
+                padding: '40px 36px',
+                background: '#0d1422',
+                border: '1px solid transparent',
+                position: 'relative',
+                overflow: 'hidden',
+              }}
+            >
+              <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 1, background: `linear-gradient(90deg, transparent, ${f.accent}33, transparent)` }} />
+              <div style={{ fontSize: '1.6rem', marginBottom: 16 }}>{f.icon}</div>
+              <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.05rem', fontWeight: 700, color: '#f1f5f9', marginBottom: 10 }}>{f.title}</h3>
+              <p style={{ color: '#6b7280', fontSize: '0.88rem', lineHeight: 1.7 }}>{f.desc}</p>
+              <div style={{ position: 'absolute', bottom: 0, right: 0, width: 60, height: 60, background: `radial-gradient(circle, ${f.accent}15, transparent)`, borderRadius: '50%' }} />
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function TemplateCard({ t, onPreview, isUnlocked, onDownload, onPurchase }: { t: Template; onPreview: (t: Template) => void; isUnlocked: boolean; onDownload: (t: Template) => void; onPurchase: (t: Template) => void }) {
+  const isFree = t.price === 'Free'
+  
+  // Clean fallback checks for thumbnails
+  const isDefaultThumbnail = !t.thumbnail || t.thumbnail.trim() === "" || (!t.thumbnail.startsWith("data:") && !t.thumbnail.startsWith("http") && !t.thumbnail.startsWith("/"));
+
+  return (
+    <div className="card-hover" style={{ borderRadius: 12, border: '1px solid rgba(255,255,255,0.07)', overflow: 'hidden', background: '#0d1422', display: 'flex', flexDirection: 'column' }}>
+      {/* Thumbnail or iframe preview */}
+      <div style={{ position: 'relative', height: 180, background: "#0a0a0a", display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+        {isDefaultThumbnail ? (
+          <div className="absolute inset-0 w-full h-full overflow-hidden pointer-events-none select-none">
+            <iframe
+              src={t.htmlCode && t.htmlCode.trim()
+                ? `${CLOUDFLARE_WORKER_URL}/api/preview?templateId=${t.id}`
+                : `/previews/${t.demoPath}/index.html`}
+              title={`${t.name} card preview`}
+              className="absolute"
+              style={{
+                width: "400%",
+                height: "400%",
+                transform: "scale(0.25)",
+                transformOrigin: "top left",
+                border: "none",
+                background: "#0a0a0a"
+              }}
+            />
+          </div>
+        ) : (
+          <img src={t.thumbnail} alt={t.name} style={{ width: '100%', height: '100%', objectCover: 'cover' }} />
+        )}
+        <div style={{ position: 'absolute', top: 12, right: 12, padding: '3px 10px', borderRadius: 100, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', color: isFree ? '#22c55e' : '#00e5ff', fontSize: '0.68rem', fontWeight: 700, fontFamily: 'var(--font-mono)' }}>
+          {t.price}
+        </div>
+      </div>
+
+      {/* Info */}
+      <div style={{ padding: '20px 20px 16px', flex: 1, display: 'flex', flexDirection: 'column' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 12 }}>
+          {(t.tech || ['HTML', 'CSS', 'JS']).map(tag => (
+            <span key={tag} style={{ padding: '2px 8px', borderRadius: 4, background: 'rgba(255,255,255,0.05)', color: '#6b7280', fontSize: '0.7rem', fontFamily: 'var(--font-mono)' }}>{tag}</span>
+          ))}
+        </div>
+        <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem', fontWeight: 700, color: '#f1f5f9', marginBottom: 8 }}>{t.name}</h3>
+        <p style={{ color: '#6b7280', fontSize: '0.82rem', lineHeight: 1.6, flex: 1, marginBottom: 16 }}>{t.description}</p>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+          <button
+            onClick={() => onPreview(t)}
+            style={{ padding: '7px 14px', borderRadius: 6, border: '1px solid rgba(255,255,255,0.1)', background: 'transparent', color: '#9ca3af', cursor: 'pointer', fontSize: '0.78rem', fontFamily: 'var(--font-body)', transition: 'all 0.2s' }}
+          >
+            Live Demo
+          </button>
+          {isUnlocked ? (
+            <button
+              onClick={() => onDownload(t)}
+              className="btn-primary"
+              style={{ padding: '7px 16px', borderRadius: 6, border: 'none', cursor: 'pointer', fontSize: '0.78rem', flex: 1 }}
+            >
+              Download 📥
+            </button>
+          ) : (
+            <button
+              onClick={() => onPurchase(t)}
+              className="btn-primary"
+              style={{ padding: '7px 16px', borderRadius: 6, border: 'none', cursor: 'pointer', fontSize: '0.78rem', flex: 1 }}
+            >
+              Unlock License ⚡
+            </button>
           )}
         </div>
       </div>
     </div>
-  );
+  )
 }
 
-interface AuthModalProps {
-  onClose: () => void;
-  onSuccess: (email: string, name: string, picture: string) => void;
-}
-
-function AuthModal({ onClose, onSuccess }: AuthModalProps) {
-  useEffect(() => {
-    const handleCredentialResponse = (response: any) => {
-      try {
-        const payload = JSON.parse(
-          decodeURIComponent(
-            window
-              .atob(response.credential.split(".")[1].replace(/-/g, "+").replace(/_/g, "/"))
-              .split("")
-              .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
-              .join("")
-          )
-        );
-        const { email, name, picture } = payload;
-        onSuccess(email, name, picture);
-      } catch (err) {
-        console.error("Failed to decode login token", err);
-      }
-    };
-
-    if ((window as any).google) {
-      (window as any).google.accounts.id.initialize({
-        client_id: GOOGLE_CLIENT_ID,
-        callback: handleCredentialResponse
-      });
-      (window as any).google.accounts.id.renderButton(
-        document.getElementById("google-signin-btn-container"),
-        { theme: "filled_blue", size: "large", text: "continue_with", shape: "pill", width: 280 }
-      );
-    }
-  }, [onSuccess]);
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.85)" }}>
-      <div
-        className="w-full max-w-sm rounded-sm border p-8 flex flex-col items-center gap-6"
-        style={{ background: "#131313", borderColor: "rgba(255,255,255,0.1)" }}
-      >
-        <div className="w-full flex justify-between items-center border-b pb-4" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
-          <h3 className="text-sm font-semibold" style={{ color: "#f0f0ee", fontFamily: "Outfit, sans-serif" }}>
-            Sign In with Google
-          </h3>
-          <button onClick={onClose} style={{ color: "#888880" }}><X size={18} /></button>
-        </div>
-        <p className="text-xs text-center leading-relaxed" style={{ color: "#888880" }}>
-          Logging in allows you to unlock premium templates, sync your custom live editor builds, and access your whitelisted downloads.
-        </p>
-        <div id="google-signin-btn-container" className="my-2"></div>
-      </div>
-    </div>
-  );
-}
-
-interface TemplatesProps {
-  templatesList: any[];
+function TemplatesPage({
+  templatesList,
+  purchasedTemplates,
+  userEmail,
+  isWhitelisted,
+  onPreview,
+  onDownload,
+  onPurchase,
+  openUPIModal
+}: {
+  templatesList: Template[];
   purchasedTemplates: string[];
   userEmail: string | null;
-  onOpenCheckout: (tmpl: any) => void;
-  onOpenAuth: () => void;
-}
-
-function Templates({ templatesList, purchasedTemplates, userEmail, onOpenCheckout, onOpenAuth }: TemplatesProps) {
-  const [activeCategory, setActiveCategory] = useState("All");
-  const [sortBy, setSortBy] = useState("popular");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [previewId, setPreviewId] = useState<string | number | null>(null);
-  const [previewDeviceMode, setPreviewDeviceMode] = useState<"desktop" | "tablet" | "mobile">("desktop");
-
-  const getPriceNum = (p: any) => {
-    if (typeof p === "number") return p;
-    if (!p || p.toLowerCase() === "free") return 0;
-    const num = parseFloat(p.replace(/[^0-9.]/g, ""));
-    return isNaN(num) ? 0 : num;
-  };
-
-  const getTmplThumbnail = (t: any) => {
-    if (!t.thumbnail) return "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=640&h=400&fit=crop&auto=format";
-    if (t.thumbnail.startsWith("http")) return t.thumbnail;
-    if (t.thumbnail.includes("/")) return t.thumbnail;
-    return `https://images.unsplash.com/${t.thumbnail}?w=640&h=400&fit=crop&auto=format`;
-  };
-
-  const categories = ["All", ...Array.from(new Set(templatesList.map((t: any) => {
-    const cat = t.category || "Other";
-    if (cat.toLowerCase() === "saas") return "SaaS";
-    if (cat.toLowerCase() === "e-commerce") return "E-Commerce";
-    return cat.charAt(0).toUpperCase() + cat.slice(1);
-  })))];
-
-  const filtered = templatesList
-    .filter((t) => {
-      const matchesCategory = activeCategory === "All" || t.category.toLowerCase() === activeCategory.toLowerCase();
-      const matchesSearch = !searchQuery.trim() ||
-        t.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (t.description || t.desc || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
-        t.category.toLowerCase().includes(searchQuery.toLowerCase());
-      return matchesCategory && matchesSearch;
-    })
-    .sort((a, b) => {
-      const priceA = getPriceNum(a.price);
-      const priceB = getPriceNum(b.price);
-      if (sortBy === "price-low") return priceA - priceB;
-      if (sortBy === "price-high") return priceB - priceA;
-      const ratingA = a.rating || 4.8;
-      const ratingB = b.rating || 4.8;
-      if (sortBy === "rating") return ratingB - ratingA;
-      const dlA = a.downloads || 1200;
-      const dlB = b.downloads || 1200;
-      return dlB - dlA;
-    });
-
-  const previewTemplate = previewId !== null ? templatesList.find((t) => t.id === previewId) : null;
+  isWhitelisted: boolean;
+  onPreview: (t: Template) => void;
+  onDownload: (t: Template) => void;
+  onPurchase: (t: Template) => void;
+  openUPIModal: () => void;
+}) {
+  const [filter, setFilter] = useState('All')
+  const categories = ['All', 'SaaS', 'Portfolio', 'eCommerce', 'Blog']
+  const filtered = filter === 'All' ? templatesList : templatesList.filter(t => t.category.toLowerCase() === filter.toLowerCase())
 
   return (
-    <section id="templates" className="py-24 lg:py-32" style={{ background: "#0d0d0d" }}>
-      <div className="max-w-7xl mx-auto px-6 lg:px-8">
-
-        {/* Header */}
-        <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6 mb-12">
-          <div>
-            <div
-              className="text-xs font-medium mb-4 tracking-widest uppercase"
-              style={{ color: "#c8ff00", fontFamily: "JetBrains Mono, monospace" }}
-            >
-              Template Marketplace
-            </div>
-            <h2
-              className="text-4xl lg:text-6xl font-bold leading-tight"
-              style={{ fontFamily: "Fraunces, serif", color: "#f0f0ee" }}
-            >
-              Launch faster with{" "}
-              <em className="not-italic" style={{ color: "#c8ff00" }}>
-                pro templates
-              </em>
-            </h2>
-          </div>
-          <p
-            className="lg:max-w-xs text-base leading-relaxed"
-            style={{ color: "#888880", fontFamily: "Outfit, sans-serif" }}
-          >
-            Production-ready templates built on the same stack we use for custom clients. Buy once, own forever.
+    <div style={{ minHeight: '100vh', paddingTop: 100, padding: '100px 24px 80px' }}>
+      <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+        <div style={{ marginBottom: 48, textAlign: 'center' }}>
+          <div className="section-label" style={{ marginBottom: 12 }}>Template Catalog</div>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(2rem, 4vw, 3rem)', fontWeight: 700, color: '#f1f5f9', letterSpacing: '-0.02em', marginBottom: 16 }}>
+            Premium Edge-Native Templates
+          </h2>
+          <p style={{ color: '#6b7280', maxWidth: 480, margin: '0 auto' }}>
+            Production-ready layouts with visual preview boxes, design files, and source code unlocks.
           </p>
         </div>
 
-        {/* Trust bar */}
-        <div
-          className="flex flex-wrap items-center gap-6 mb-10 pb-10 border-b"
-          style={{ borderColor: "rgba(255,255,255,0.06)" }}
-        >
-          {[
-            { icon: Download, label: "12,000+ downloads" },
-            { icon: Tag, label: "One-time purchase" },
-            { icon: Layers, label: "Full source code" },
-            { icon: Shield, label: "6-month updates" },
-          ].map((item) => (
-            <div key={item.label} className="flex items-center gap-2">
-              <item.icon size={14} style={{ color: "#c8ff00" }} />
-              <span className="text-xs" style={{ color: "#888880", fontFamily: "JetBrains Mono, monospace" }}>
-                {item.label}
-              </span>
-            </div>
+        {/* Filter tabs */}
+        <div style={{ display: 'flex', gap: 8, justifyContent: 'center', marginBottom: 48, flexWrap: 'wrap' }}>
+          {categories.map(c => (
+            <button
+              key={c}
+              onClick={() => setFilter(c)}
+              style={{
+                padding: '7px 18px', borderRadius: 100,
+                border: `1px solid ${filter === c ? 'rgba(0,229,255,0.3)' : 'rgba(255,255,255,0.08)'}`,
+                background: filter === c ? 'rgba(0,229,255,0.1)' : 'transparent',
+                color: filter === c ? '#00e5ff' : '#6b7280',
+                cursor: 'pointer', fontSize: '0.82rem', fontFamily: 'var(--font-body)',
+                fontWeight: filter === c ? 600 : 400, transition: 'all 0.2s',
+              }}
+            >
+              {c}
+            </button>
           ))}
         </div>
 
-        {/* Filters & Search */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-          <div className="flex flex-wrap gap-2 order-2 md:order-1">
-            {categories.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => { setActiveCategory(cat); setSearchQuery(""); }}
-                className="px-4 py-1.5 text-xs font-medium rounded-sm border transition-all duration-200"
-                style={{
-                  background: activeCategory === cat ? "#c8ff00" : "transparent",
-                  color: activeCategory === cat ? "#0a0a0a" : "#888880",
-                  borderColor: activeCategory === cat ? "#c8ff00" : "rgba(255,255,255,0.08)",
-                  fontFamily: "Outfit, sans-serif",
-                }}
-              >
-                {cat}
-              </button>
-            ))}
-          </div>
-
-          <div className="flex items-center gap-3 order-1 md:order-2 w-full md:w-auto">
-            {/* Search Input */}
-            <div
-              className="flex items-center gap-2 px-3 py-1.5 rounded-sm border flex-1 md:flex-initial md:w-64"
-              style={{ background: "#1c1c1c", borderColor: "rgba(255,255,255,0.08)" }}
-            >
-              <Search size={12} style={{ color: "#888880" }} />
-              <input
-                type="text"
-                placeholder="Search templates..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="text-xs outline-none bg-transparent w-full"
-                style={{ color: "#f0f0ee", fontFamily: "Outfit, sans-serif" }}
-              />
-              {searchQuery && (
-                <button onClick={() => setSearchQuery("")} style={{ color: "#888880" }}>
-                  <X size={12} />
-                </button>
-              )}
-            </div>
-
-            {/* Sort Select */}
-            <div className="flex items-center gap-2 shrink-0">
-              <Filter size={12} style={{ color: "#888880" }} />
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="text-xs px-3 py-2 rounded-sm border outline-none appearance-none cursor-pointer"
-                style={{
-                  background: "#1c1c1c",
-                  borderColor: "rgba(255,255,255,0.08)",
-                  color: "#888880",
-                  fontFamily: "JetBrains Mono, monospace",
-                }}
-              >
-                <option value="popular">Most Popular</option>
-                <option value="rating">Top Rated</option>
-                <option value="price-low">Price: Low to High</option>
-                <option value="price-high">Price: High to Low</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        {/* Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          {filtered.map((tmpl) => {
-            const isFree = getPriceNum(tmpl.price) === 0;
-            const isUnlocked = isFree || purchasedTemplates.includes(tmpl.id);
-
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: 20 }}>
+          {filtered.map(t => {
+            const isUnlocked = t.price === 'Free' || purchasedTemplates.includes(t.id);
             return (
-              <div
-                key={tmpl.id}
-                onClick={(e) => {
-                  const target = e.target as HTMLElement;
-                  if (target.closest("a") || target.closest("button")) {
-                    return;
-                  }
-                  window.location.href = `/templates/product.html?id=${tmpl.id}`;
-                }}
-                className="group rounded-sm border overflow-hidden flex flex-col transition-all duration-300 hover:-translate-y-1 hover:border-white/10 cursor-pointer"
-                style={{ background: "#131313", borderColor: "rgba(255,255,255,0.06)" }}
-              >
-                {/* Thumbnail */}
-                <div className="relative overflow-hidden" style={{ aspectRatio: "16/10", background: "#1a1a1a" }}>
-                  {!tmpl.thumbnail || tmpl.thumbnail.trim() === "" || (!tmpl.thumbnail.startsWith("data:") && !tmpl.thumbnail.startsWith("http") && !tmpl.thumbnail.startsWith("/")) ? (
-                    <div className="absolute inset-0 w-full h-full overflow-hidden pointer-events-none select-none">
-                      <iframe
-                        src={tmpl.htmlCode && tmpl.htmlCode.trim()
-                          ? `${CLOUDFLARE_WORKER_URL}/api/preview?templateId=${tmpl.id}`
-                          : `/previews/${tmpl.demoPath}/index.html`}
-                        title={`${tmpl.name} thumbnail preview`}
-                        className="absolute"
-                        style={{
-                          width: "400%",
-                          height: "400%",
-                          transform: "scale(0.25)",
-                          transformOrigin: "top left",
-                          border: "none",
-                          background: "#0a0a0a"
-                        }}
-                      />
-                    </div>
-                  ) : (
-                    <img
-                      src={tmpl.thumbnail}
-                      alt={`${tmpl.name} template preview`}
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                    />
-                  )}
-                  {/* Overlay on hover */}
-                  <div className="absolute inset-0 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                    style={{ background: "rgba(10,10,10,0.7)" }}
-                  >
-                    <button
-                      onClick={() => setPreviewId(tmpl.id)}
-                      className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-sm text-xs font-semibold transition-colors hover:bg-white/10"
-                      style={{ background: "rgba(255,255,255,0.08)", color: "#f0f0ee", fontFamily: "Outfit, sans-serif" }}
-                    >
-                      <Eye size={12} /> Preview
-                    </button>
-                    <a
-                      href={`/templates/product.html?id=${tmpl.id}`}
-                      className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-sm text-xs font-semibold transition-all hover:bg-[#c8ff00] hover:text-[#0a0a0a]"
-                      style={{ background: "rgba(255,255,255,0.08)", color: "#f0f0ee", fontFamily: "Outfit, sans-serif" }}
-                    >
-                      <ExternalLink size={12} /> Details
-                    </a>
-                    {tmpl.figmaUrl && (
-                      <a
-                        href={tmpl.figmaUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-sm text-xs font-semibold transition-colors hover:bg-white/10"
-                        style={{ background: "rgba(255,255,255,0.08)", color: "#f0f0ee", fontFamily: "Outfit, sans-serif" }}
-                      >
-                        Figma
-                      </a>
-                    )}
-                  </div>
-                  {/* Figma Badge */}
-                  {tmpl.figmaUrl && (
-                    <div
-                      className="absolute top-3 right-3 px-2 py-0.5 rounded-sm text-[10px] font-semibold flex items-center gap-1"
-                      style={{ background: "linear-gradient(135deg, #1e1e2e 0%, #a259ff 100%)", color: "white", fontFamily: "JetBrains Mono, monospace" }}
-                    >
-                      Figma Design
-                    </div>
-                  )}
-                </div>
-
-                {/* Body */}
-                <div className="p-4 flex flex-col gap-3 flex-1">
-                  <div className="flex items-start justify-between gap-2">
-                    <div>
-                      <a
-                        href={`/templates/product.html?id=${tmpl.id}`}
-                        className="text-sm font-semibold mb-0.5 hover:text-[#c8ff00] hover:underline block"
-                        style={{ color: "#f0f0ee", fontFamily: "Outfit, sans-serif" }}
-                      >
-                        {tmpl.name}
-                      </a>
-                      <div className="text-xs" style={{ color: "#888880", fontFamily: "Outfit, sans-serif" }}>
-                        {tmpl.category}
-                      </div>
-                    </div>
-                    <div className="text-right shrink-0">
-                      <div className="text-base font-bold" style={{ color: "#c8ff00", fontFamily: "Fraunces, serif" }}>
-                        {tmpl.price}
-                      </div>
-                    </div>
-                  </div>
-
-                  <p className="text-xs leading-relaxed flex-1" style={{ color: "#888880", fontFamily: "Outfit, sans-serif" }}>
-                    {tmpl.description || tmpl.desc}
-                  </p>
-
-                  {/* Tech stack */}
-                  <div className="flex flex-wrap gap-1.5">
-                    {(tmpl.tech || ["React", "Tailwind"]).map((t: string) => (
-                      <span
-                        key={t}
-                        className="px-2 py-0.5 rounded-sm text-xs"
-                        style={{ background: "rgba(255,255,255,0.05)", color: "#666660", fontFamily: "JetBrains Mono, monospace" }}
-                      >
-                        {t}
-                      </span>
-                    ))}
-                  </div>
-
-                  {/* Meta row */}
-                  <div
-                    className="flex items-center justify-between pt-3 border-t text-xs"
-                    style={{ borderColor: "rgba(255,255,255,0.06)", color: "#666660", fontFamily: "JetBrains Mono, monospace" }}
-                  >
-                    <div className="flex items-center gap-1">
-                      <Star size={10} fill="#c8ff00" style={{ color: "#c8ff00" }} />
-                      {tmpl.rating || 4.8} ({tmpl.reviews || 84})
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Download size={10} />
-                      {(tmpl.downloads || 1200).toLocaleString()}
-                    </div>
-                    <div>{tmpl.pages || 5}pg</div>
-                  </div>
-
-                  {/* CTA */}
-                  <div className="flex gap-2">
-                    {tmpl.figmaUrl && (
-                      <a
-                        href={tmpl.figmaUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center justify-center p-2 rounded-sm border hover:bg-white/5 transition-colors shrink-0"
-                        style={{ borderColor: "rgba(162, 89, 255, 0.4)", color: "#a259ff" }}
-                        title="View Figma Design"
-                      >
-                        <svg width="12" height="12" viewBox="0 0 38 57" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M19 28.5C19 25.9804 20.0009 23.5641 21.7825 21.7825C23.5641 20.0009 25.9804 19 28.5 19C31.0196 19 33.4359 20.0009 35.2175 21.7825C36.9991 23.5641 38 25.9804 38 28.5C38 31.0196 36.9991 33.4359 35.2175 35.2175C33.4359 36.9991 31.0196 38 28.5 38C25.9804 38 23.5641 36.9991 21.7825 35.2175C20.0009 33.4359 19 28.5 19 28.5Z" fill="#a259ff" />
-                          <path d="M0 47.5C0 44.9804 1.00089 42.5641 2.78249 40.7825C4.56408 39.0009 6.98044 38 9.5 38H19V47.5C19 50.0196 17.9991 52.4359 16.2175 54.2175C14.4359 55.9991 12.0196 57 9.5 57C6.98044 57 4.56408 55.9991 2.78249 54.2175C1.00089 52.4359 0 50.0196 0 47.5Z" fill="#a259ff" />
-                          <path d="M19 0V19H28.5C31.0196 19 33.4359 17.9991 35.2175 16.2175C36.9991 14.4359 38 12.0196 38 9.5C38 6.98044 36.9991 4.56408 35.2175 2.78249C33.4359 1.00089 31.0196 0 28.5 0H19Z" fill="#a259ff" />
-                          <path d="M0 9.5C0 12.0196 1.00089 14.4359 2.78249 16.2175C4.56408 17.9991 6.98044 19 9.5 19H19V0H9.5C6.98044 0 4.56408 1.00089 2.78249 2.78249C1.00089 4.56408 0 6.98044 0 9.5Z" fill="#a259ff" />
-                          <path d="M0 28.5C0 31.0196 1.00089 33.4359 2.78249 35.2175C4.56408 36.9991 6.98044 38 9.5 38H19V19H9.5C6.98044 19 4.56408 20.0009 2.78249 21.7825C1.00089 23.5641 0 25.9804 0 28.5Z" fill="#a259ff" />
-                        </svg>
-                      </a>
-                    )}
-                    <a
-                      href={`/templates/product.html?id=${tmpl.id}`}
-                      className="flex-1 py-2 text-center text-xs font-semibold rounded-sm transition-all text-[#0a0a0a]"
-                      style={{
-                        background: "#c8ff00",
-                        fontFamily: "Outfit, sans-serif",
-                      }}
-                    >
-                      {isUnlocked ? "Get Template 📥" : `Buy Template — ${tmpl.price} ⚡`}
-                    </a>
-                  </div>
-                </div>
-              </div>
+              <TemplateCard
+                key={t.id}
+                t={t}
+                onPreview={onPreview}
+                isUnlocked={isUnlocked}
+                onDownload={onDownload}
+                onPurchase={onPurchase}
+              />
             );
           })}
         </div>
 
-        {/* View all CTA */}
-        <div className="mt-12 text-center">
-          <a
-            href="#"
-            className="inline-flex items-center gap-2 px-8 py-4 text-sm font-semibold rounded-sm border transition-all duration-200 hover:border-white/20 hover:text-white group"
-            style={{ borderColor: "rgba(255,255,255,0.1)", color: "#888880", fontFamily: "Outfit, sans-serif" }}
-          >
-            Browse all 80+ templates
-            <ArrowRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
-          </a>
-        </div>
-      </div>
-
-      {/* Preview Modal */}
-      {previewTemplate && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 lg:p-8"
-          style={{ background: "rgba(0,0,0,0.85)" }}
-          onClick={() => setPreviewId(null)}
-        >
-          <div
-            className="relative w-full max-w-5xl rounded-sm border overflow-hidden flex flex-col"
-            style={{ background: "#131313", borderColor: "rgba(255,255,255,0.1)" }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Modal header */}
-            <div
-              className="flex items-center justify-between px-6 py-4 border-b flex-wrap gap-4"
-              style={{ borderColor: "rgba(255,255,255,0.06)" }}
-            >
-              <div>
-                <span className="text-base font-semibold" style={{ color: "#f0f0ee", fontFamily: "Outfit, sans-serif" }}>
-                  {previewTemplate.name}
-                </span>
-                <span className="ml-3 text-xs" style={{ color: "#888880", fontFamily: "JetBrains Mono, monospace" }}>
-                  {previewTemplate.category}
-                </span>
-              </div>
-
-              {/* Device switcher tabs (Option 2) */}
-              <div className="flex items-center gap-1 rounded-sm border p-0.5" style={{ background: "#0a0a0a", borderColor: "rgba(255,255,255,0.06)" }}>
-                <button
-                  onClick={() => setPreviewDeviceMode("desktop")}
-                  className={`px-3 py-1.5 text-xs font-semibold rounded-sm transition-all ${previewDeviceMode === "desktop" ? "bg-[#c8ff00] text-[#0a0a0a]" : "text-[#888880] hover:text-white"
-                    }`}
-                >
-                  🖥️ Desktop
-                </button>
-                <button
-                  onClick={() => setPreviewDeviceMode("tablet")}
-                  className={`px-3 py-1.5 text-xs font-semibold rounded-sm transition-all ${previewDeviceMode === "tablet" ? "bg-[#c8ff00] text-[#0a0a0a]" : "text-[#888880] hover:text-white"
-                    }`}
-                >
-                  📟 Tablet
-                </button>
-                <button
-                  onClick={() => setPreviewDeviceMode("mobile")}
-                  className={`px-3 py-1.5 text-xs font-semibold rounded-sm transition-all ${previewDeviceMode === "mobile" ? "bg-[#c8ff00] text-[#0a0a0a]" : "text-[#888880] hover:text-white"
-                    }`}
-                >
-                  📱 Mobile
-                </button>
-              </div>
-
-              <div className="flex items-center gap-3">
-                <span className="text-lg font-bold" style={{ color: "#c8ff00", fontFamily: "Fraunces, serif" }}>
-                  {previewTemplate.price}
-                </span>
-                {previewTemplate.htmlCode && previewTemplate.htmlCode.trim() ? (
-                  <a
-                    href={`${CLOUDFLARE_WORKER_URL}/api/preview?templateId=${previewTemplate.id}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="px-4 py-2 text-xs font-semibold rounded-sm transition-all hover:opacity-90"
-                    style={{ background: "#c8ff00", color: "#0a0a0a", fontFamily: "Outfit, sans-serif" }}
-                  >
-                    Open Live Demo 🖥️
-                  </a>
-                ) : (
-                  <span
-                    className="px-4 py-2 text-xs font-semibold rounded-sm"
-                    style={{ background: "#1a1a1a", color: "#444", fontFamily: "Outfit, sans-serif" }}
-                  >
-                    No Preview Uploaded
-                  </span>
-                )}
-                <button onClick={() => setPreviewId(null)} style={{ color: "#888880" }}>
-                  <X size={18} />
-                </button>
-              </div>
-            </div>
-
-            {/* Interactive Preview Iframe Viewport wrapper */}
-            <div className="bg-[#0e0e0e] flex items-center justify-center p-6 h-[60vh] overflow-auto">
-              <div
-                className="transition-all duration-300 shadow-2xl relative bg-white"
-                style={{
-                  width: previewDeviceMode === "desktop" ? "100%" : previewDeviceMode === "tablet" ? "768px" : "375px",
-                  height: previewDeviceMode === "desktop" ? "100%" : previewDeviceMode === "tablet" ? "95%" : "550px",
-                  border: previewDeviceMode === "desktop" ? "none" : previewDeviceMode === "tablet" ? "8px solid #1c1c1c" : "12px solid #1c1c1c",
-                  borderRadius: previewDeviceMode === "desktop" ? "0px" : previewDeviceMode === "tablet" ? "12px" : "32px",
-                  overflow: "hidden"
-                }}
-              >
-                {previewDeviceMode === "mobile" && (
-                  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-4 bg-[#1c1c1c] rounded-b-xl z-20"></div>
-                )}
-                <iframe
-                  src={
-                    previewTemplate.htmlCode && previewTemplate.htmlCode.trim()
-                      ? `${CLOUDFLARE_WORKER_URL}/api/preview?templateId=${previewTemplate.id}`
-                      : `data:text/html,<html><body style="background:%230a0a0a;color:%23666;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;font-family:monospace;text-align:center"><div><div style="font-size:40px;margin-bottom:16px">🖼️</div><div style="font-size:14px;color:%23888">No preview uploaded yet</div><div style="font-size:11px;margin-top:8px;color:%23444">Admin: upload HTML via dashboard</div></div></body></html>`
-                  }
-                  className="w-full h-full border-none"
-                  title={`${previewTemplate.name} Live Sandbox`}
-                ></iframe>
-              </div>
-            </div>
-
-            {/* Modal footer */}
-            <div
-              className="flex flex-wrap items-center justify-between gap-4 px-6 py-4 border-t"
-              style={{ borderColor: "rgba(255,255,255,0.06)" }}
-            >
-              <p className="text-sm" style={{ color: "#888880", fontFamily: "Outfit, sans-serif" }}>
-                {previewTemplate.description || previewTemplate.desc}
-              </p>
-              <div className="flex flex-wrap gap-1.5">
-                {(previewTemplate.tech || ["React", "Tailwind"]).map((t: string) => (
-                  <span
-                    key={t}
-                    className="px-2 py-0.5 rounded-sm text-xs"
-                    style={{ background: "rgba(255,255,255,0.05)", color: "#888880", fontFamily: "JetBrains Mono, monospace" }}
-                  >
-                    {t}
-                  </span>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-    </section>
-  );
-}
-
-function Work() {
-  return (
-    <section id="work" className="py-24 lg:py-32" style={{ background: "#0d0d0d" }}>
-      <div className="max-w-7xl mx-auto px-6 lg:px-8">
-        <div className="mb-16">
-          <div
-            className="text-xs font-medium mb-4 tracking-widest uppercase"
-            style={{ color: "#c8ff00", fontFamily: "JetBrains Mono, monospace" }}
-          >
-            Selected Work
-          </div>
-          <h2
-            className="text-4xl lg:text-6xl font-bold"
-            style={{ fontFamily: "Fraunces, serif", color: "#f0f0ee" }}
-          >
-            Recent projects
-          </h2>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {projects.map((p) => (
-            <div
-              key={p.title}
-              className="group relative overflow-hidden rounded-sm cursor-pointer"
-              style={{ aspectRatio: "4/3" }}
-            >
-              <img
-                src={`https://images.unsplash.com/${p.img}?w=800&h=600&fit=crop&auto=format`}
-                alt={`${p.title} project screenshot`}
-                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-              />
-              <div
-                className="absolute inset-0 transition-opacity duration-300"
-                style={{ background: "linear-gradient(to top, rgba(10,10,10,0.9) 0%, rgba(10,10,10,0.2) 60%, transparent 100%)" }}
-              />
-              <div className="absolute inset-0 p-6 flex flex-col justify-end">
-                <div
-                  className="text-xs font-medium mb-2 tracking-widest uppercase"
-                  style={{ color: "#c8ff00", fontFamily: "JetBrains Mono, monospace" }}
-                >
-                  {p.category}
-                </div>
-                <div
-                  className="text-xl font-semibold"
-                  style={{ fontFamily: "Outfit, sans-serif", color: "#f0f0ee" }}
-                >
-                  {p.title}
-                </div>
-              </div>
-              <div
-                className="absolute top-4 right-4 w-8 h-8 rounded-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-2 group-hover:translate-x-0"
-                style={{ background: "#c8ff00" }}
-              >
-                <ExternalLink size={14} style={{ color: "#0a0a0a" }} />
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <div className="mt-12 text-center">
-          <a
-            href="#contact"
-            className="inline-flex items-center gap-2 px-8 py-4 text-sm font-semibold rounded-sm border transition-all duration-200 hover:border-white/20 hover:text-white group"
-            style={{ borderColor: "rgba(255,255,255,0.1)", color: "#888880", fontFamily: "Outfit, sans-serif" }}
-          >
-            View all 140+ projects
-            <ArrowRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
-          </a>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function Process() {
-  return (
-    <section id="process" className="py-24 lg:py-32" style={{ background: "#0a0a0a" }}>
-      <div className="max-w-7xl mx-auto px-6 lg:px-8">
-        <div className="mb-16">
-          <div
-            className="text-xs font-medium mb-4 tracking-widest uppercase"
-            style={{ color: "#c8ff00", fontFamily: "JetBrains Mono, monospace" }}
-          >
-            How We Work
-          </div>
-          <h2
-            className="text-4xl lg:text-6xl font-bold"
-            style={{ fontFamily: "Fraunces, serif", color: "#f0f0ee" }}
-          >
-            A process with{" "}
-            <em className="not-italic" style={{ color: "#c8ff00" }}>
-              no blind spots
-            </em>
-          </h2>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-px" style={{ background: "rgba(255,255,255,0.06)" }}>
-          {steps.map((s, i) => (
-            <div
-              key={s.num}
-              className="flex gap-6 p-8 group transition-colors duration-300 hover:bg-white/[0.02]"
-              style={{ background: "#0a0a0a" }}
-            >
-              <div
-                className="text-5xl font-bold leading-none shrink-0 transition-colors duration-300 group-hover:text-[#c8ff00]"
-                style={{ fontFamily: "Fraunces, serif", color: "rgba(255,255,255,0.06)" }}
-              >
-                {s.num}
-              </div>
-              <div>
-                <h3
-                  className="text-lg font-semibold mb-2"
-                  style={{ fontFamily: "Outfit, sans-serif", color: "#f0f0ee" }}
-                >
-                  {s.title}
-                </h3>
-                <p className="text-sm leading-relaxed" style={{ color: "#888880", fontFamily: "Outfit, sans-serif" }}>
-                  {s.desc}
-                </p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-
-function Contact() {
-  const [form, setForm] = useState({ name: "", email: "", budget: "", message: "" });
-  const [submitted, setSubmitted] = useState(false);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      const res = await fetch(CLOUDFLARE_WORKER_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action: "submit_contact",
-          ...form
-        })
-      });
-      const data = await res.json();
-      if (data.result === "success") {
-        setSubmitted(true);
-      } else {
-        alert("Failed to send message: " + (data.error || "Unknown server error"));
-      }
-    } catch (err: any) {
-      alert("Failed to connect to contact server: " + (err.message || String(err)));
-    }
-  };
-
-  return (
-    <section id="contact" className="py-24 lg:py-32" style={{ background: "#0a0a0a" }}>
-      <div className="max-w-7xl mx-auto px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24">
-          {/* Left */}
-          <div>
-            <div
-              className="text-xs font-medium mb-4 tracking-widest uppercase"
-              style={{ color: "#c8ff00", fontFamily: "JetBrains Mono, monospace" }}
-            >
-              Get in Touch
-            </div>
-            <h2
-              className="text-4xl lg:text-6xl font-bold mb-6 leading-tight"
-              style={{ fontFamily: "Fraunces, serif", color: "#f0f0ee" }}
-            >
-              Ready to build something{" "}
-              <em className="not-italic" style={{ color: "#c8ff00" }}>
-                great?
-              </em>
-            </h2>
-            <p
-              className="text-base leading-relaxed mb-10"
-              style={{ color: "#888880", fontFamily: "Outfit, sans-serif" }}
-            >
-              Tell us about your project. We review every inquiry and respond within 24 hours with honest feedback on scope, feasibility, and fit.
-            </p>
-
-            <div className="flex flex-col gap-5">
-              {[
-                { icon: Mail, label: "Email", val: "sparkredx@gmail.com" },
-              ].map((c) => (
-                <div key={c.label} className="flex items-start gap-4">
-                  <div
-                    className="w-9 h-9 rounded-sm flex items-center justify-center shrink-0"
-                    style={{ background: "rgba(200,255,0,0.08)" }}
-                  >
-                    <c.icon size={15} style={{ color: "#c8ff00" }} />
-                  </div>
-                  <div>
-                    <div className="text-xs mb-0.5" style={{ color: "#888880", fontFamily: "JetBrains Mono, monospace" }}>
-                      {c.label}
-                    </div>
-                    <div className="text-sm" style={{ color: "#f0f0ee", fontFamily: "Outfit, sans-serif" }}>
-                      {c.val}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Form */}
-          <div>
-            {submitted ? (
-              <div
-                className="h-full flex flex-col items-center justify-center text-center p-12 rounded-sm border"
-                style={{ background: "#131313", borderColor: "rgba(200,255,0,0.2)" }}
-              >
-                <div
-                  className="w-16 h-16 rounded-full flex items-center justify-center mb-6"
-                  style={{ background: "rgba(200,255,0,0.1)" }}
-                >
-                  <Check size={28} style={{ color: "#c8ff00" }} />
-                </div>
-                <h3
-                  className="text-2xl font-bold mb-3"
-                  style={{ fontFamily: "Fraunces, serif", color: "#f0f0ee" }}
-                >
-                  Message received.
-                </h3>
-                <p className="text-sm" style={{ color: "#888880", fontFamily: "Outfit, sans-serif" }}>
-                  We will review your project and reply within 24 hours with initial thoughts and next steps.
-                </p>
-              </div>
+        {/* Whitelist / Signup section */}
+        <div style={{ marginTop: 80, padding: 48, borderRadius: 16, background: 'linear-gradient(135deg, rgba(0,229,255,0.06), rgba(139,92,246,0.06))', border: '1px solid rgba(0,229,255,0.12)', textAlign: 'center' }}>
+          <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', fontWeight: 700, color: '#f1f5f9', marginBottom: 12 }}>Whitelist Credentials</h3>
+          <p style={{ color: '#6b7280', marginBottom: 28, maxWidth: 440, margin: '0 auto 28px' }}>
+            Logging in via Google automatically registers your whitelist status. Unlock free download assets and track orders in one place.
+          </p>
+          <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap', alignItems: 'center' }}>
+            {!userEmail ? (
+              <div id="google-signin-btn-container" style={{ minHeight: 40 }}></div>
             ) : (
-              <form
-                onSubmit={handleSubmit}
-                className="p-8 lg:p-10 rounded-sm border flex flex-col gap-5"
-                style={{ background: "#131313", borderColor: "rgba(255,255,255,0.06)" }}
-              >
-                {[
-                  { id: "name", label: "Your Name", type: "text", placeholder: "Alex Johnson" },
-                  { id: "email", label: "Email Address", type: "email", placeholder: "alex@company.com" },
-                  { id: "budget", label: "Project Budget", type: "text", placeholder: "$5,000 – $15,000" },
-                ].map((field) => (
-                  <div key={field.id}>
-                    <label
-                      htmlFor={field.id}
-                      className="block text-xs font-medium mb-2"
-                      style={{ color: "#888880", fontFamily: "JetBrains Mono, monospace" }}
-                    >
-                      {field.label}
-                    </label>
-                    <input
-                      id={field.id}
-                      type={field.type}
-                      placeholder={field.placeholder}
-                      value={form[field.id as keyof typeof form]}
-                      onChange={(e) => setForm({ ...form, [field.id]: e.target.value })}
-                      required
-                      className="w-full px-4 py-3 text-sm rounded-sm border outline-none transition-colors focus:border-[#c8ff00]/40"
-                      style={{
-                        background: "#0a0a0a",
-                        borderColor: "rgba(255,255,255,0.08)",
-                        color: "#f0f0ee",
-                        fontFamily: "Outfit, sans-serif",
-                      }}
-                    />
-                  </div>
-                ))}
-                <div>
-                  <label
-                    htmlFor="message"
-                    className="block text-xs font-medium mb-2"
-                    style={{ color: "#888880", fontFamily: "JetBrains Mono, monospace" }}
-                  >
-                    Tell us about the project
-                  </label>
-                  <textarea
-                    id="message"
-                    rows={5}
-                    placeholder="What are you building, who is it for, and what is the timeline?"
-                    value={form.message}
-                    onChange={(e) => setForm({ ...form, message: e.target.value })}
-                    required
-                    className="w-full px-4 py-3 text-sm rounded-sm border outline-none transition-colors focus:border-[#c8ff00]/40 resize-none"
-                    style={{
-                      background: "#0a0a0a",
-                      borderColor: "rgba(255,255,255,0.08)",
-                      color: "#f0f0ee",
-                      fontFamily: "Outfit, sans-serif",
-                    }}
-                  />
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                <span className="text-sm font-semibold" style={{ color: isWhitelisted ? '#22c55e' : '#f59e0b' }}>
+                  Logged in: {userEmail} {isWhitelisted ? '(Whitelisted ✅)' : '(Awaiting Whitelist Approval ⏳)'}
+                </span>
+                <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
+                  <button onClick={openUPIModal} className="btn-ghost" style={{ padding: '8px 18px', borderRadius: 8, cursor: 'pointer', fontSize: '0.82rem' }}>
+                    Submit UPI UTR ID
+                  </button>
                 </div>
-                <button
-                  type="submit"
-                  className="w-full py-4 text-sm font-semibold rounded-sm transition-all duration-200 hover:opacity-90 active:scale-[0.99] flex items-center justify-center gap-2 group"
-                  style={{ background: "#c8ff00", color: "#0a0a0a", fontFamily: "Outfit, sans-serif" }}
-                >
-                  Send Message
-                  <ArrowRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
-                </button>
-              </form>
-            )}
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function Footer({ onAdminClick }: { onAdminClick: () => void }) {
-  return (
-    <footer
-      className="py-12 border-t"
-      style={{ background: "#0a0a0a", borderColor: "rgba(255,255,255,0.06)" }}
-    >
-      <div className="max-w-7xl mx-auto px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-10 mb-12">
-          <div className="md:col-span-2">
-            <div className="flex items-center gap-2 mb-4">
-              <span
-                className="w-7 h-7 rounded-sm flex items-center justify-center text-xs font-bold"
-                style={{ background: "#c8ff00", color: "#0a0a0a", fontFamily: "JetBrains Mono, monospace" }}
-              >
-                SP
-              </span>
-              <span className="text-sm font-semibold" style={{ fontFamily: "Outfit, sans-serif", color: "#f0f0ee" }}>
-                Spark Web
-              </span>
-            </div>
-            <p
-              className="text-sm leading-relaxed max-w-xs"
-              style={{ color: "#888880", fontFamily: "Outfit, sans-serif" }}
-            >
-              We build premium full-stack websites & custom applications with high-converting designs, clean code, and rapid performance—perfectly tailored to your budget.
-            </p>
-          </div>
-
-          {[
-            { title: "Company", links: ["About", "Work", "Process", "Careers"] },
-            { title: "Services", links: ["Landing Pages", "Web Apps", "E-Commerce", "Audits"] },
-          ].map((col) => (
-            <div key={col.title}>
-              <div
-                className="text-xs font-medium mb-4 tracking-widest uppercase"
-                style={{ color: "#888880", fontFamily: "JetBrains Mono, monospace" }}
-              >
-                {col.title}
-              </div>
-              <div className="flex flex-col gap-2.5">
-                {col.links.map((l) => (
-                  <a
-                    key={l}
-                    href="#"
-                    className="text-sm transition-colors hover:text-white"
-                    style={{ color: "#666660", fontFamily: "Outfit, sans-serif" }}
-                  >
-                    {l}
-                  </a>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Adsterra Secure Banner Container */}
-        <div className="my-8 flex justify-center w-full">
-          <iframe 
-            src="/ad-banner.html"
-            sandbox="allow-scripts allow-same-origin"
-            width="100%" 
-            height="250" 
-            style={{ border: "none", overflow: "hidden" }}
-            title="Advertisement"
-          />
-        </div>
-
-        <div
-          className="pt-8 border-t flex flex-col sm:flex-row items-center justify-between gap-4 text-xs"
-          style={{ borderColor: "rgba(255,255,255,0.06)", color: "#666660", fontFamily: "Outfit, sans-serif" }}
-        >
-          <span>© 2026 Spark Web. All rights reserved.</span>
-          <div className="flex items-center gap-6">
-            <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>
-            <a href="#" className="hover:text-white transition-colors">Terms of Service</a>
-          </div>
-        </div>
-      </div>
-    </footer>
-  );
-}
-
-// ─── Admin ────────────────────────────────────────────────────────────────────
-
-const ADMIN_USERS = [
-  { email: "admin@webxstudio.co", password: "admin2026", name: "Alex Rivera", role: "Super Admin" },
-  { email: "dev@webxstudio.co", password: "devpass", name: "Sam Chen", role: "Developer" },
-];
-
-type AdminUser = typeof ADMIN_USERS[0];
-
-function AdminLogin({ onLogin }: { onLogin: (user: AdminUser) => void; onBack: () => void }) {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError("");
-    setTimeout(() => {
-      const match = ADMIN_USERS.find((u) => u.email === email && u.password === password);
-      if (match) {
-        onLogin(match);
-      } else {
-        setError("Invalid credentials. Access denied.");
-      }
-      setLoading(false);
-    }, 800);
-  };
-
-  return (
-    <div
-      className="min-h-screen flex items-center justify-center px-4"
-      style={{ background: "#0a0a0a" }}
-    >
-      {/* Background grid */}
-      <div
-        className="fixed inset-0 opacity-[0.03] pointer-events-none"
-        style={{
-          backgroundImage: "linear-gradient(rgba(200,255,0,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(200,255,0,0.5) 1px, transparent 1px)",
-          backgroundSize: "60px 60px",
-        }}
-      />
-
-      <div className="relative w-full max-w-sm">
-        {/* Logo */}
-        <div className="flex items-center justify-center gap-2 mb-10">
-          <span
-            className="w-8 h-8 rounded-sm flex items-center justify-center text-sm font-bold"
-            style={{ background: "#c8ff00", color: "#0a0a0a", fontFamily: "JetBrains Mono, monospace" }}
-          >
-            SP
-          </span>
-          <span className="text-base font-semibold" style={{ fontFamily: "Outfit, sans-serif", color: "#f0f0ee" }}>
-            Spark Web
-          </span>
-        </div>
-
-        <div
-          className="rounded-sm border p-8"
-          style={{ background: "#131313", borderColor: "rgba(255,255,255,0.08)" }}
-        >
-          <div className="flex items-center gap-2 mb-1">
-            <Lock size={14} style={{ color: "#c8ff00" }} />
-            <span className="text-xs font-medium tracking-widest uppercase" style={{ color: "#c8ff00", fontFamily: "JetBrains Mono, monospace" }}>
-              Admin Access
-            </span>
-          </div>
-          <h1 className="text-2xl font-bold mb-1" style={{ fontFamily: "Fraunces, serif", color: "#f0f0ee" }}>
-            Sign in
-          </h1>
-          <p className="text-sm mb-8" style={{ color: "#888880", fontFamily: "Outfit, sans-serif" }}>
-            Restricted to authorised team members only.
-          </p>
-
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-            <div>
-              <label className="block text-xs font-medium mb-1.5" style={{ color: "#888880", fontFamily: "JetBrains Mono, monospace" }}>
-                Email
-              </label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="admin@webxstudio.co"
-                required
-                className="w-full px-4 py-3 text-sm rounded-sm border outline-none transition-colors focus:border-[#c8ff00]/40"
-                style={{ background: "#0a0a0a", borderColor: "rgba(255,255,255,0.08)", color: "#f0f0ee", fontFamily: "Outfit, sans-serif" }}
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-medium mb-1.5" style={{ color: "#888880", fontFamily: "JetBrains Mono, monospace" }}>
-                Password
-              </label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                required
-                className="w-full px-4 py-3 text-sm rounded-sm border outline-none transition-colors focus:border-[#c8ff00]/40"
-                style={{ background: "#0a0a0a", borderColor: "rgba(255,255,255,0.08)", color: "#f0f0ee", fontFamily: "Outfit, sans-serif" }}
-              />
-            </div>
-
-            {error && (
-              <div
-                className="flex items-center gap-2 px-3 py-2.5 rounded-sm text-xs"
-                style={{ background: "rgba(255,68,68,0.08)", border: "1px solid rgba(255,68,68,0.2)", color: "#ff6666", fontFamily: "Outfit, sans-serif" }}
-              >
-                <AlertCircle size={12} /> {error}
               </div>
             )}
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-3.5 text-sm font-semibold rounded-sm transition-all hover:opacity-90 active:scale-[0.99] flex items-center justify-center gap-2 mt-2 disabled:opacity-60"
-              style={{ background: "#c8ff00", color: "#0a0a0a", fontFamily: "Outfit, sans-serif" }}
-            >
-              {loading ? "Verifying…" : "Sign In"}
-              {!loading && <ArrowRight size={14} />}
-            </button>
-          </form>
-
-          <p className="mt-6 text-center text-xs" style={{ color: "#444440", fontFamily: "JetBrains Mono, monospace" }}>
-            Hint: admin@webxstudio.co / admin2026
-          </p>
+          </div>
         </div>
       </div>
     </div>
-  );
+  )
 }
 
-type AdminTab = "overview" | "templates" | "orders" | "users" | "inquiries" | "settings";
+function SandboxPage({ activeTemplate }: { activeTemplate?: Template }) {
+  const [viewport, setViewport] = useState<Viewport>('desktop')
+  const [html, setHtml] = useState(SANDBOX_DEFAULT.html)
+  const [css, setCss] = useState(SANDBOX_DEFAULT.css)
+  const [js, setJs] = useState(SANDBOX_DEFAULT.js)
+  const [activeTab, setActiveTab] = useState<'html' | 'css' | 'js'>('html')
+  const [srcDoc, setSrcDoc] = useState('')
+  const iframeRef = useRef<HTMLIFrameElement>(null)
 
-interface AdminDashboardProps {
-  user: AdminUser;
-  onLogout: () => void;
-  templatesList: any[];
+  useEffect(() => {
+    if (activeTemplate) {
+      setHtml(activeTemplate.htmlCode || SANDBOX_DEFAULT.html);
+      setCss(activeTemplate.cssCode || SANDBOX_DEFAULT.css);
+      setJs(activeTemplate.jsCode || SANDBOX_DEFAULT.js);
+    }
+  }, [activeTemplate])
+
+  const buildSrcDoc = () => {
+    return `<!DOCTYPE html><html><head><style>${css}</style></head><body>${html}<script>${js}<\/script></body></html>`
+  }
+
+  useEffect(() => {
+    setSrcDoc(buildSrcDoc())
+  }, [html, css, js])
+
+  const runPreview = () => setSrcDoc(buildSrcDoc())
+
+  const viewportDims: Record<Viewport, { width: string; label: string }> = {
+    desktop: { width: '100%', label: '1280px' },
+    tablet: { width: '768px', label: '768px' },
+    mobile: { width: '375px', label: '375px' },
+  }
+
+  const editors: { id: 'html' | 'css' | 'js'; label: string; color: string }[] = [
+    { id: 'html', label: 'HTML', color: '#f97316' },
+    { id: 'css', label: 'CSS', color: '#38bdf8' },
+    { id: 'js', label: 'JS', color: '#fbbf24' },
+  ]
+
+  const currentValue = activeTab === 'html' ? html : activeTab === 'css' ? css : js
+  const setValue = activeTab === 'html' ? setHtml : activeTab === 'css' ? setCss : setJs
+
+  return (
+    <div style={{ minHeight: '100vh', paddingTop: 64, display: 'flex', flexDirection: 'column' }}>
+      {/* Toolbar */}
+      <div style={{ background: '#0d1422', borderBottom: '1px solid rgba(255,255,255,0.06)', padding: '12px 24px', display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
+        <div className="section-label" style={{ color: '#6b7280' }}>Live Sandbox</div>
+
+        {/* Viewport toggles */}
+        <div style={{ display: 'flex', gap: 2, background: 'rgba(255,255,255,0.04)', borderRadius: 8, padding: 3 }}>
+          {(['desktop', 'tablet', 'mobile'] as Viewport[]).map(v => (
+            <button
+              key={v}
+              onClick={() => setViewport(v)}
+              style={{
+                padding: '5px 14px', borderRadius: 6, border: 'none', cursor: 'pointer', fontSize: '0.75rem', fontFamily: 'var(--font-mono)',
+                background: viewport === v ? 'rgba(0,229,255,0.12)' : 'transparent',
+                color: viewport === v ? '#00e5ff' : '#6b7280',
+                textTransform: 'capitalize', transition: 'all 0.15s',
+              }}
+            >
+              {v}
+            </button>
+          ))}
+        </div>
+        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: '#374151' }}>{viewportDims[viewport].label}</span>
+
+        <div style={{ marginLeft: 'auto', display: 'flex', gap: 10 }}>
+          <button
+            onClick={runPreview}
+            className="btn-primary"
+            style={{ padding: '7px 18px', borderRadius: 7, border: 'none', cursor: 'pointer', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: 6 }}
+          >
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3" /></svg>
+            Run Code
+          </button>
+        </div>
+      </div>
+
+      <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '420px 1fr', minHeight: 0 }}>
+        {/* Editor Panel */}
+        <div style={{ borderRight: '1px solid rgba(255,255,255,0.06)', display: 'flex', flexDirection: 'column', background: '#080e19' }}>
+          {/* Editor tabs */}
+          <div style={{ display: 'flex', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+            {editors.map(e => (
+              <button
+                key={e.id}
+                onClick={() => setActiveTab(e.id)}
+                style={{
+                  flex: 1, padding: '10px 0', border: 'none', background: 'none', cursor: 'pointer',
+                  fontFamily: 'var(--font-mono)', fontSize: '0.72rem', fontWeight: 600,
+                  color: activeTab === e.id ? e.color : '#374151',
+                  borderBottom: `2px solid ${activeTab === e.id ? e.color : 'transparent'}`,
+                  transition: 'all 0.15s',
+                }}
+              >
+                {e.label}
+              </button>
+            ))}
+          </div>
+          <textarea
+            value={currentValue}
+            onChange={e => setValue(e.target.value)}
+            spellCheck={false}
+            style={{
+              flex: 1, background: 'transparent', border: 'none', outline: 'none', resize: 'none',
+              color: '#d4d4d4', fontFamily: 'var(--font-mono)', fontSize: '0.78rem', lineHeight: 1.7,
+              padding: '20px 20px', tabSize: 2,
+            }}
+          />
+          <div style={{ padding: '8px 16px', borderTop: '1px solid rgba(255,255,255,0.04)', display: 'flex', gap: 12 }}>
+            {editors.map(e => (
+              <span key={e.id} style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: '#374151' }}>
+                {e.label}: {(e.id === 'html' ? html : e.id === 'css' ? css : js).length / 1000 < 0.1 ? `${(e.id === 'html' ? html : e.id === 'css' ? css : js).length} B` : `${((e.id === 'html' ? html : e.id === 'css' ? css : js).length / 1024).toFixed(1)} KB`}
+                <span style={{ color: '#22c55e', marginLeft: 4 }}>✓</span>
+              </span>
+            ))}
+          </div>
+        </div>
+
+        {/* Preview Panel */}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', background: '#050810', padding: '24px' }}>
+          <div style={{
+            width: viewportDims[viewport].width, maxWidth: '100%',
+            flex: 1, borderRadius: 8, overflow: 'hidden',
+            border: '1px solid rgba(255,255,255,0.08)',
+            boxShadow: '0 20px 60px rgba(0,0,0,0.5)',
+            transition: 'width 0.3s ease',
+          }}>
+            <iframe
+              ref={iframeRef}
+              srcDoc={srcDoc}
+              sandbox="allow-scripts allow-same-origin"
+              style={{ width: '100%', height: '100%', border: 'none', minHeight: 500 }}
+              title="Sandbox Visual Render"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function AdminDashboard({
+  templatesList,
+  onRefreshTemplates
+}: {
+  templatesList: Template[];
   onRefreshTemplates: () => void;
-}
+}) {
+  const [tab, setTab] = useState<AdminTab>('overview')
+  const [inquirySearch, setInquirySearch] = useState('')
+  const [budgetFilter, setBudgetFilter] = useState('All')
+  const [dateFilter, setDateFilter] = useState('')
+  const [selectedInquiry, setSelectedInquiry] = useState<Inquiry | null>(null)
+  const [showPurgeConfirm, setShowPurgeConfirm] = useState(false)
+  const [editingTemplate, setEditingTemplate] = useState<Template | null>(null)
+  
+  // Real database states
+  const [data, setData] = useState<{
+    requests: AccessRequest[]
+    verified: VerifiedEmail[]
+    builds: any[]
+    upiRequests: UPIRequest[]
+    messages: Inquiry[]
+  }>({
+    requests: [],
+    verified: [],
+    builds: [],
+    upiRequests: [],
+    messages: []
+  })
 
-function AdminDashboard({ user, onLogout, templatesList, onRefreshTemplates }: AdminDashboardProps) {
-  const [tab, setTab] = useState<AdminTab>("overview");
-  const [search, setSearch] = useState("");
-  const [editingTemplate, setEditingTemplate] = useState<any | null>(null);
-  const [addModalOpen, setAddModalOpen] = useState(false);
-  const [deleteConfirm, setDeleteConfirm] = useState<string | number | null>(null);
-  const [viewingMessage, setViewingMessage] = useState<any | null>(null);
-  const [inquiryFilter, setInquiryFilter] = useState<"all" | "has-budget" | "no-budget">("all");
-  const [inquirySort, setInquirySort] = useState<"newest" | "oldest">("newest");
-  const [inquiryDateFilter, setInquiryDateFilter] = useState("");
-
-  const [newTemplate, setNewTemplate] = useState({
-    name: "",
-    category: "SaaS",
-    description: "",
-    thumbnail: "",
-    demoPath: "template-1",
-    price: "Free",
-    payhipUrl: "",
-    figmaUrl: "",
-    htmlCode: "",
-    cssCode: "",
-    jsCode: "",
-  });
-
-  const [newTplHtmlFile, setNewTplHtmlFile] = useState<File | null>(null);
-  const [newTplCssFile, setNewTplCssFile] = useState<File | null>(null);
-  const [newTplJsFile, setNewTplJsFile] = useState<File | null>(null);
-  const [newTplThumbnailFile, setNewTplThumbnailFile] = useState<File | null>(null);
+  // Add & edit template fields
   const [editTplHtmlFile, setEditTplHtmlFile] = useState<File | null>(null);
   const [editTplCssFile, setEditTplCssFile] = useState<File | null>(null);
   const [editTplJsFile, setEditTplJsFile] = useState<File | null>(null);
   const [editTplThumbnailFile, setEditTplThumbnailFile] = useState<File | null>(null);
 
-  const readFileAsDataURL = (file: File | null): Promise<string> =>
-    new Promise((resolve) => {
-      if (!file) { resolve(""); return; }
-      const reader = new FileReader();
-      reader.onload = (e) => resolve((e.target?.result as string) || "");
-      reader.readAsDataURL(file);
-    });
+  // New Template form fields
+  const [newTemplate, setNewTemplate] = useState({
+    id: '',
+    name: '',
+    category: '',
+    description: '',
+    price: 'Free',
+    thumbnail: '',
+    demoPath: '',
+    payhipUrl: '',
+    figmaUrl: ''
+  })
+  const [newTplHtmlFile, setNewTplHtmlFile] = useState<File | null>(null);
+  const [newTplCssFile, setNewTplCssFile] = useState<File | null>(null);
+  const [newTplJsFile, setNewTplJsFile] = useState<File | null>(null);
+  const [newTplThumbnailFile, setNewTplThumbnailFile] = useState<File | null>(null);
 
-  const readFileAsText = (file: File | null): Promise<string> =>
-    new Promise((resolve) => {
-      if (!file) { resolve(""); return; }
-      const reader = new FileReader();
-      reader.onload = (e) => resolve((e.target?.result as string) || "");
-      reader.readAsText(file);
-    });
-
-  const [data, setData] = useState<{
-    requests: any[];
-    verified: any[];
-    upiRequests: any[];
-    messages: any[];
-    builds: any[];
-  }>({
-    requests: [],
-    verified: [],
-    upiRequests: [],
-    messages: [],
-    builds: []
-  });
-
-  const sidebarItems: { id: AdminTab; icon: React.ElementType; label: string }[] = [
-    { id: "overview", icon: LayoutDashboard, label: "Overview" },
-    { id: "templates", icon: Package, label: "Templates" },
-    { id: "orders", icon: DollarSign, label: "Approvals" },
-    { id: "users", icon: Users, label: "Whitelisted" },
-    { id: "inquiries", icon: Mail, label: "Inquiries" },
-    { id: "settings", icon: Settings, label: "Settings" },
-  ];
-
-  const loadAdminData = async () => {
+  const fetchAdminData = async () => {
     try {
       const res = await fetch(CLOUDFLARE_WORKER_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "get_admin_data" })
-      });
-      const resData = await res.json();
-      if (resData.result === "success") {
+      })
+      const d = await res.json()
+      if (d.result === "success") {
         setData({
-          requests: resData.requests || [],
-          verified: resData.verified || [],
-          upiRequests: resData.upiRequests || [],
-          messages: resData.messages || [],
-          builds: resData.builds || []
-        });
+          requests: d.requests || [],
+          verified: d.verified || [],
+          builds: d.builds || [],
+          upiRequests: d.upiRequests || [],
+          messages: d.messages || []
+        })
       }
-    } catch (err) {
-      console.error("Failed to load admin dashboard data", err);
+    } catch (e) {
+      console.error(e)
     }
-  };
+  }
 
   useEffect(() => {
-    loadAdminData();
-  }, []);
+    fetchAdminData()
+  }, [])
 
-  const handleApproveAccess = async (email: string) => {
-    if (!confirm(`Approve access request for ${email}?`)) return;
+  // Approve whitelist request
+  const handleApproveWhitelist = async (email: string) => {
+    if (!confirm(`Approve whitelist request for ${email}?`)) return
     try {
       const res = await fetch(CLOUDFLARE_WORKER_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "approve_request", email })
-      });
-      const resData = await res.json();
-      if (resData.result === "success") {
-        alert("Access request approved!");
-        loadAdminData();
+      })
+      const d = await res.json()
+      if (d.result === "success") {
+        alert("Account approved and whitelisted successfully!")
+        fetchAdminData()
       }
     } catch (e) {
-      alert("Error approving request");
+      alert("Failed to approve")
     }
-  };
+  }
 
-  const handleDenyAccess = async (email: string) => {
-    if (!confirm(`Deny access request for ${email}?`)) return;
+  // Deny whitelist request
+  const handleDenyWhitelist = async (email: string) => {
+    if (!confirm(`Deny access request for ${email}?`)) return
     try {
       const res = await fetch(CLOUDFLARE_WORKER_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "deny_request", email })
-      });
-      const resData = await res.json();
-      if (resData.result === "success") {
-        alert("Access request denied!");
-        loadAdminData();
+      })
+      const d = await res.json()
+      if (d.result === "success") {
+        alert("Access request denied.")
+        fetchAdminData()
       }
     } catch (e) {
-      alert("Error denying request");
+      alert("Failed to deny request.")
     }
-  };
+  }
 
-  const handleDeleteInquiry = async (id: number) => {
-    if (!confirm("Are you sure you want to delete this inquiry?")) return;
+  // Approve UPI Purchase Verification
+  const handleApproveUPI = async (req: UPIRequest) => {
+    if (!confirm(`Approve transaction reference UTR: ${req.utr} to unlock template ${req.templateId}?`)) return
     try {
       const res = await fetch(CLOUDFLARE_WORKER_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "delete_contact_message", id })
-      });
-      const resData = await res.json();
-      if (resData.result === "success") {
-        alert("Inquiry deleted successfully!");
-        loadAdminData();
-      } else {
-        alert("Error: " + (resData.error || "Failed to delete inquiry"));
-      }
-    } catch (e: any) {
-      alert("Error: " + (e?.message || String(e)));
-    }
-  };
-
-  const handleClearAllInquiries = async () => {
-    if (!confirm("Are you sure you want to delete ALL inquiries? This action is permanent and cannot be undone!")) return;
-    try {
-      const res = await fetch(CLOUDFLARE_WORKER_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "clear_all_inquiries" })
-      });
-      const resData = await res.json();
-      if (resData.result === "success") {
-        alert("All inquiries deleted successfully!");
-        loadAdminData();
-      } else {
-        alert("Error: " + (resData.error || "Failed to clear inquiries"));
-      }
-    } catch (e: any) {
-      alert("Error: " + (e?.message || String(e)));
-    }
-  };
-
-  const handleApproveUPI = async (id: number, email: string, templateId: string) => {
-    if (!confirm(`Approve UPI payment for ${email} on template ${templateId}?`)) return;
-    try {
-      const res = await fetch(CLOUDFLARE_WORKER_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "approve_upi_request", id, email, templateId })
-      });
-      const resData = await res.json();
-      if (resData.result === "success") {
-        alert("UPI payment approved & template unlocked!");
-        loadAdminData();
+        body: JSON.stringify({ action: "approve_upi_request", id: req.id, email: req.email, templateId: req.templateId })
+      })
+      const d = await res.json()
+      if (d.result === "success") {
+        alert("UPI Request approved, template unlocked!")
+        fetchAdminData()
       }
     } catch (e) {
-      alert("Error approving UPI");
+      alert("Failed to approve transaction")
     }
-  };
+  }
 
+  // Reject UPI transaction
   const handleRejectUPI = async (id: number) => {
-    if (!confirm("Reject this UPI request?")) return;
+    if (!confirm("Reject this UPI transaction reference?")) return
     try {
       const res = await fetch(CLOUDFLARE_WORKER_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "reject_upi_request", id })
-      });
-      const resData = await res.json();
-      if (resData.result === "success") {
-        alert("UPI request rejected.");
-        loadAdminData();
+      })
+      const d = await res.json()
+      if (d.result === "success") {
+        alert("UPI verification request rejected.")
+        fetchAdminData()
       }
     } catch (e) {
-      alert("Error rejecting UPI");
+      alert("Failed to reject transaction")
     }
-  };
+  }
 
-  const handleDeleteTemplate = async (id: string | number) => {
+  // Delete dynamic template
+  const handleDeleteTemplate = async (id: string) => {
+    if (!confirm(`Are you sure you want to permanently delete template ${id}?`)) return
     try {
       const res = await fetch(CLOUDFLARE_WORKER_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "delete_template", id })
-      });
-      const resData = await res.json();
-      if (resData.result === "success") {
-        alert("Template deleted successfully.");
-        onRefreshTemplates();
-        setDeleteConfirm(null);
+      })
+      const d = await res.json()
+      if (d.result === "success") {
+        alert("Template deleted successfully!")
+        onRefreshTemplates()
       }
     } catch (e) {
-      alert("Failed to delete template.");
+      alert("Failed to delete template.")
     }
-  };
+  }
 
+  // Submit Template Creation to D1
   const handleAddTemplateSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault()
     try {
-      const htmlCode = await readFileAsText(newTplHtmlFile);
-      const cssCode = await readFileAsText(newTplCssFile);
-      const jsCode = await readFileAsText(newTplJsFile);
-      const thumbnailDataUrl = await readFileAsDataURL(newTplThumbnailFile);
+      const htmlCode = newTplHtmlFile ? await readFileAsText(newTplHtmlFile) : '';
+      const cssCode = newTplCssFile ? await readFileAsText(newTplCssFile) : '';
+      const jsCode = newTplJsFile ? await readFileAsText(newTplJsFile) : '';
+      const thumbnailDataUrl = newTplThumbnailFile ? await readFileAsDataURL(newTplThumbnailFile) : '';
 
       const res = await fetch(CLOUDFLARE_WORKER_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           action: "add_template",
-          ...newTemplate,
-          thumbnail: thumbnailDataUrl || newTemplate.thumbnail,
+          id: newTemplate.id,
+          name: newTemplate.name,
+          category: newTemplate.category,
+          description: newTemplate.description,
+          price: newTemplate.price,
+          thumbnail: thumbnailDataUrl || newTemplate.thumbnail || '',
+          demoPath: newTemplate.demoPath || newTemplate.id,
+          payhipUrl: newTemplate.payhipUrl,
+          figmaUrl: newTemplate.figmaUrl,
           htmlCode,
           cssCode,
-          jsCode,
+          jsCode
         })
-      });
-      const resData = await res.json();
-      if (resData.result === "success") {
-        alert("Template published successfully!");
-        onRefreshTemplates();
-        setAddModalOpen(false);
-        setNewTplHtmlFile(null);
-        setNewTplCssFile(null);
-        setNewTplJsFile(null);
-        setNewTplThumbnailFile(null);
-        setNewTemplate({
-          name: "",
-          category: "SaaS",
-          description: "",
-          thumbnail: "",
-          demoPath: "template-1",
-          price: "Free",
-          payhipUrl: "",
-          figmaUrl: "",
-          htmlCode: "",
-          cssCode: "",
-          jsCode: "",
-        });
+      })
+      const data = await res.json()
+      if (data.result === "success") {
+        alert("Template saved to D1 database successfully!")
+        onRefreshTemplates()
+        // Reset form
+        setNewTemplate({ id: '', name: '', category: '', description: '', price: 'Free', thumbnail: '', demoPath: '', payhipUrl: '', figmaUrl: '' })
+        setNewTplHtmlFile(null)
+        setNewTplCssFile(null)
+        setNewTplJsFile(null)
+        setNewTplThumbnailFile(null)
       } else {
-        alert("Error: " + (resData.error || "Unknown error from server"));
+        alert("Error: " + data.error)
       }
-    } catch (e: any) {
-      alert("Failed to add template: " + (e?.message || String(e)));
+    } catch (err: any) {
+      alert("Failed to create template: " + err?.message)
     }
-  };
+  }
 
+  // Submit Template Modifications to D1
   const handleEditTemplateSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault()
+    if (!editingTemplate) return
     try {
       const htmlCode = editTplHtmlFile ? await readFileAsText(editTplHtmlFile) : undefined;
       const cssCode = editTplCssFile ? await readFileAsText(editTplCssFile) : undefined;
@@ -2050,1594 +1023,1115 @@ function AdminDashboard({ user, onLogout, templatesList, onRefreshTemplates }: A
           id: editingTemplate.id,
           name: editingTemplate.name,
           category: editingTemplate.category,
-          description: editingTemplate.description || editingTemplate.desc,
+          description: editingTemplate.description,
+          price: editingTemplate.price,
           thumbnail: thumbnailDataUrl !== undefined ? thumbnailDataUrl : (editingTemplate.thumbnail !== undefined && editingTemplate.thumbnail !== null ? editingTemplate.thumbnail : ""),
           demoPath: editingTemplate.demoPath,
-          price: editingTemplate.price,
           payhipUrl: editingTemplate.payhipUrl,
           figmaUrl: editingTemplate.figmaUrl,
           ...(htmlCode !== undefined && { htmlCode }),
           ...(cssCode !== undefined && { cssCode }),
-          ...(jsCode !== undefined && { jsCode }),
+          ...(jsCode !== undefined && { jsCode })
         })
-      });
-      const resData = await res.json();
-      if (resData.result === "success") {
-        alert("Template updated successfully!");
-        onRefreshTemplates();
-        setEditTplHtmlFile(null);
-        setEditTplCssFile(null);
-        setEditTplJsFile(null);
-        setEditTplThumbnailFile(null);
-        setEditingTemplate(null);
+      })
+      const d = await res.json()
+      if (d.result === "success") {
+        alert("Template updated successfully!")
+        setEditingTemplate(null)
+        setEditTplHtmlFile(null)
+        setEditTplCssFile(null)
+        setEditTplJsFile(null)
+        setEditTplThumbnailFile(null)
+        onRefreshTemplates()
       } else {
-        alert("Error: " + (resData.error || "Unknown error from server"));
+        alert("Error: " + d.error)
       }
-    } catch (e: any) {
-      alert("Failed to update template: " + (e?.message || String(e)));
+    } catch (err: any) {
+      alert("Failed to update template: " + err?.message)
     }
-  };
+  }
 
+  // Purge Messages inbox
+  const handlePurgeMessages = async () => {
+    try {
+      const res = await fetch(CLOUDFLARE_WORKER_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "clear_all_inquiries" })
+      })
+      const d = await res.json()
+      if (d.result === "success") {
+        alert("Inquiries inbox cleared successfully!")
+        fetchAdminData()
+        setShowPurgeConfirm(false)
+      }
+    } catch (e) {
+      alert("Failed to clear inquiries inbox.")
+    }
+  }
 
-  const getTmplThumbnail = (t: any) => {
-    if (!t.thumbnail && !t.img) return "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=56&h=36&fit=crop&auto=format";
-    const thumb = t.thumbnail || t.img;
-    if (thumb.startsWith("http")) return thumb;
-    if (thumb.includes("/")) return thumb;
-    return `https://images.unsplash.com/${thumb}?w=56&h=36&fit=crop&auto=format`;
-  };
+  // Manual Whitelist submission
+  const [manualEmail, setManualEmail] = useState('')
+  const handleManualWhitelist = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!manualEmail) return
+    try {
+      const res = await fetch(CLOUDFLARE_WORKER_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "approve_request", email: manualEmail })
+      })
+      const d = await res.json()
+      if (d.result === "success") {
+        alert(`${manualEmail} has been whitelisted!`)
+        setManualEmail('')
+        fetchAdminData()
+      }
+    } catch (e) {
+      alert("Failed to whitelist email")
+    }
+  }
 
-  const totalDownloads = templatesList.reduce((s, t) => s + (t.downloads || 1200), 0);
-  const pendingRequestsCount = data.requests.filter(r => r.status.includes("Pending")).length;
-  const pendingUPIRequestsCount = data.upiRequests.filter(r => r.status === "Pending Verification").length;
+  // Filters for messages
+  const filteredInquiries = data.messages.filter(q => {
+    const matchSearch = q.name.toLowerCase().includes(inquirySearch.toLowerCase()) ||
+      q.email.toLowerCase().includes(inquirySearch.toLowerCase()) ||
+      q.message.toLowerCase().includes(inquirySearch.toLowerCase())
+    const matchBudget = budgetFilter === 'All' || q.budget === budgetFilter
+    const matchDate = !dateFilter || q.timestamp.startsWith(dateFilter)
+    return matchSearch && matchBudget && matchDate
+  })
+
+  const budgets = ['All', '$100–$200', '$200–$500', '$500–$1000', '$1000+', "Let's discuss"]
+
+  const pendingRequestsCount = data.requests.filter(r => r.status === "Pending Approval").length
+  const pendingUPIRequestsCount = data.upiRequests.filter(r => r.status === "Pending Verification").length
+
+  const stats = [
+    { label: 'Total Templates', val: String(templatesList.length), icon: '◧', color: '#00e5ff' },
+    { label: 'Pending Requests', val: String(pendingRequestsCount + pendingUPIRequestsCount), icon: '◎', color: '#f59e0b' },
+    { label: 'Approved Accounts', val: String(data.verified.length), icon: '◉', color: '#22c55e' },
+    { label: 'Inbox Messages', val: String(data.messages.length), icon: '◫', color: '#8b5cf6' },
+  ]
+
+  const tabs: { id: AdminTab; label: string }[] = [
+    { id: 'overview', label: 'Overview' },
+    { id: 'templates', label: 'Template Manager' },
+    { id: 'inquiries', label: 'Inquiries Inbox' },
+    { id: 'access', label: 'Access Requests' },
+  ]
 
   return (
-    <div className="min-h-screen flex" style={{ background: "#0a0a0a", fontFamily: "Outfit, sans-serif" }}>
+    <div style={{ minHeight: '100vh', paddingTop: 64, display: 'grid', gridTemplateColumns: '220px 1fr' }}>
       {/* Sidebar */}
-      <aside
-        className="w-56 shrink-0 flex flex-col border-r"
-        style={{ background: "#0d0d0d", borderColor: "rgba(255,255,255,0.06)" }}
-      >
-        {/* Logo */}
-        <div className="flex items-center gap-2 px-5 py-5 border-b" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
-          <span
-            className="w-7 h-7 rounded-sm flex items-center justify-center text-xs font-bold"
-            style={{ background: "#c8ff00", color: "#0a0a0a", fontFamily: "JetBrains Mono, monospace" }}
-          >
-            SP
-          </span>
-          <div>
-            <div className="text-xs font-semibold leading-tight" style={{ color: "#f0f0ee" }}>Spark Web</div>
-            <div className="text-xs" style={{ color: "#888880", fontFamily: "JetBrains Mono, monospace" }}>Admin</div>
-          </div>
+      <div style={{ background: '#0a1020', borderRight: '1px solid rgba(255,255,255,0.06)', padding: '32px 0', display: 'flex', flexDirection: 'column' }}>
+        <div style={{ padding: '0 20px', marginBottom: 28 }}>
+          <div className="section-label" style={{ color: '#374151' }}>Super Admin</div>
         </div>
-
-        {/* Nav */}
-        <nav className="flex-1 px-3 py-4 flex flex-col gap-1">
-          {sidebarItems.map((item) => (
-            <button
-              key={item.id}
-              onClick={() => setTab(item.id)}
-              className="flex items-center gap-3 px-3 py-2.5 rounded-sm text-sm text-left transition-all duration-150"
-              style={{
-                background: tab === item.id ? "rgba(200,255,0,0.08)" : "transparent",
-                color: tab === item.id ? "#c8ff00" : "#888880",
-              }}
-            >
-              <item.icon size={15} />
-              {item.label}
-            </button>
-          ))}
-        </nav>
-
-        {/* User card */}
-        <div className="px-3 pb-4">
-          <div
-            className="p-3 rounded-sm border flex items-center gap-3"
-            style={{ background: "#131313", borderColor: "rgba(255,255,255,0.06)" }}
-          >
-            <div
-              className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
-              style={{ background: "rgba(200,255,0,0.15)", color: "#c8ff00", fontFamily: "JetBrains Mono, monospace" }}
-            >
-              {user.name.split(" ").map((n) => n[0]).join("")}
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="text-xs font-medium truncate" style={{ color: "#f0f0ee" }}>{user.name}</div>
-              <div className="text-xs truncate" style={{ color: "#888880", fontFamily: "JetBrains Mono, monospace" }}>{user.role}</div>
-            </div>
-            <button onClick={onLogout} className="shrink-0 hover:text-white transition-colors" style={{ color: "#888880" }}>
-              <LogOut size={13} />
-            </button>
-          </div>
-        </div>
-      </aside>
-
-      {/* Main */}
-      <div className="flex-1 flex flex-col min-w-0">
-        {/* Top bar */}
-        <header
-          className="flex items-center justify-between px-8 py-4 border-b shrink-0"
-          style={{ borderColor: "rgba(255,255,255,0.06)", background: "#0a0a0a" }}
-        >
-          <div>
-            <h1 className="text-lg font-bold capitalize" style={{ fontFamily: "Fraunces, serif", color: "#f0f0ee" }}>
-              {tab === "orders" ? "Payment & Whitelist Approvals" : tab === "users" ? "Whitelisted Users" : tab}
-            </h1>
-            <p className="text-xs" style={{ color: "#888880", fontFamily: "JetBrains Mono, monospace" }}>
-              Live Connected DB Endpoint
-            </p>
-          </div>
-          <div className="flex items-center gap-3">
-            <div
-              className="flex items-center gap-2 px-3 py-2 rounded-sm border"
-              style={{ background: "#131313", borderColor: "rgba(255,255,255,0.06)" }}
-            >
-              <Search size={12} style={{ color: "#888880" }} />
-              <input
-                type="text"
-                placeholder="Search…"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="text-xs outline-none w-32 bg-transparent"
-                style={{ color: "#f0f0ee", fontFamily: "Outfit, sans-serif" }}
-              />
-            </div>
-          </div>
-        </header>
-
-        {/* Content */}
-        <main className="flex-1 overflow-y-auto p-8">
-
-          {/* ── Overview ── */}
-          {tab === "overview" && (
-            <div className="flex flex-col gap-8">
-              {/* Stat cards */}
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                {[
-                  { label: "Active Whitelisted", val: String(data.verified.length), sub: "Access granted", icon: Users, up: true },
-                  { label: "Marketplace Templates", val: String(templatesList.length), sub: "Templates live", icon: Package, up: true },
-                  { label: "Sync Action Logs", val: String(data.builds.length), sub: "Developer builds", icon: LayoutDashboard, up: true },
-                  { label: "Pending Approvals", val: String(pendingRequestsCount + pendingUPIRequestsCount), sub: "Needs review", icon: AlertCircle, up: false },
-                ].map((s) => (
-                  <div
-                    key={s.label}
-                    className="p-5 rounded-sm border flex flex-col gap-3"
-                    style={{ background: "#131313", borderColor: "rgba(255,255,255,0.06)" }}
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs" style={{ color: "#888880", fontFamily: "JetBrains Mono, monospace" }}>{s.label}</span>
-                      <div
-                        className="w-7 h-7 rounded-sm flex items-center justify-center"
-                        style={{ background: "rgba(200,255,0,0.08)" }}
-                      >
-                        <s.icon size={13} style={{ color: "#c8ff00" }} />
-                      </div>
-                    </div>
-                    <div className="text-2xl font-bold" style={{ fontFamily: "Fraunces, serif", color: "#f0f0ee" }}>
-                      {s.val}
-                    </div>
-                    <div className="flex items-center gap-1 text-xs" style={{ color: s.up ? "#c8ff00" : "#ffaa00", fontFamily: "JetBrains Mono, monospace" }}>
-                      {s.sub}
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Recent customizer builds + pending approvals */}
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Recent builds */}
-                <div
-                  className="lg:col-span-2 rounded-sm border overflow-hidden"
-                  style={{ background: "#131313", borderColor: "rgba(255,255,255,0.06)" }}
-                >
-                  <div className="flex items-center justify-between px-5 py-4 border-b" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
-                    <span className="text-sm font-semibold" style={{ color: "#f0f0ee" }}>Recent Customizer Builds</span>
-                  </div>
-                  <div className="divide-y" style={{ borderColor: "rgba(255,255,255,0.04)" }}>
-                    {data.builds.slice(0, 5).map((b, idx) => (
-                      <div key={idx} className="flex items-center justify-between px-5 py-3">
-                        <div className="flex-1 min-w-0">
-                          <div className="text-sm font-medium truncate" style={{ color: "#f0f0ee" }}>{b.email}</div>
-                          <div className="text-xs truncate" style={{ color: "#888880", fontFamily: "JetBrains Mono, monospace" }}>
-                            Built customization settings for <strong style={{ color: "#c8ff00" }}>{b.templateId}</strong>
-                          </div>
-                        </div>
-                        <span className="text-xs" style={{ color: "#666660", fontFamily: "JetBrains Mono, monospace" }}>
-                          {b.timestamp}
-                        </span>
-                      </div>
-                    ))}
-                    {data.builds.length === 0 && (
-                      <div className="p-5 text-center text-xs" style={{ color: "#888880" }}>No recent sync actions recorded.</div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Top templates list */}
-                <div
-                  className="rounded-sm border overflow-hidden"
-                  style={{ background: "#131313", borderColor: "rgba(255,255,255,0.06)" }}
-                >
-                  <div className="px-5 py-4 border-b" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
-                    <span className="text-sm font-semibold" style={{ color: "#f0f0ee" }}>Top Templates</span>
-                  </div>
-                  <div className="divide-y" style={{ borderColor: "rgba(255,255,255,0.04)" }}>
-                    {[...templatesList].sort((a, b) => (b.downloads || 0) - (a.downloads || 0)).slice(0, 5).map((t, i) => (
-                      <div key={t.id} className="flex items-center gap-3 px-5 py-3">
-                        <span
-                          className="text-xs font-bold w-4 shrink-0"
-                          style={{ color: i === 0 ? "#c8ff00" : "#444440", fontFamily: "JetBrains Mono, monospace" }}
-                        >
-                          {i + 1}
-                        </span>
-                        <div className="flex-1 min-w-0">
-                          <div className="text-sm truncate" style={{ color: "#f0f0ee" }}>{t.name}</div>
-                          <div className="text-xs" style={{ color: "#888880", fontFamily: "JetBrains Mono, monospace" }}>
-                            {(t.downloads || 1200).toLocaleString()} downloads
-                          </div>
-                        </div>
-                        <div className="text-sm font-semibold shrink-0" style={{ color: "#c8ff00" }}>{t.price}</div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* ── Templates Management ── */}
-          {tab === "templates" && (
-            <div className="flex flex-col gap-6">
-              <div className="flex items-center justify-between">
-                <p className="text-sm" style={{ color: "#888880" }}>{templatesList.length} templates total</p>
-                <button
-                  onClick={() => setAddModalOpen(true)}
-                  className="flex items-center gap-2 px-4 py-2 rounded-sm text-xs font-semibold"
-                  style={{ background: "#c8ff00", color: "#0a0a0a" }}
-                >
-                  <Plus size={13} /> Add Template
-                </button>
-              </div>
-
-              <div
-                className="rounded-sm border overflow-hidden"
-                style={{ background: "#131313", borderColor: "rgba(255,255,255,0.06)" }}
-              >
-                {/* Table header */}
-                <div
-                  className="grid text-xs font-medium px-5 py-3 border-b"
-                  style={{
-                    gridTemplateColumns: "2fr 1fr 80px 80px 80px",
-                    borderColor: "rgba(255,255,255,0.06)",
-                    color: "#888880",
-                    fontFamily: "JetBrains Mono, monospace",
-                  }}
-                >
-                  <span>Name</span><span>Category</span><span>Price</span><span>Demo Code Path</span><span>Actions</span>
-                </div>
-                {templatesList.filter((t) => !search || t.name.toLowerCase().includes(search.toLowerCase())).map((t) => (
-                  <div
-                    key={t.id}
-                    className="grid items-center px-5 py-3.5 border-b hover:bg-white/[0.02] transition-colors"
-                    style={{
-                      gridTemplateColumns: "2fr 1fr 80px 80px 80px",
-                      borderColor: "rgba(255,255,255,0.04)",
-                    }}
-                  >
-                    <div className="flex items-center gap-3 min-w-0">
-                      {!t.thumbnail || t.thumbnail.trim() === "" || (!t.thumbnail.startsWith("data:") && !t.thumbnail.startsWith("http") && !t.thumbnail.startsWith("/")) ? (
-                        <div className="w-14 h-9 rounded-sm overflow-hidden pointer-events-none select-none relative shrink-0" style={{ background: "#0a0a0a" }}>
-                          <iframe
-                            src={t.htmlCode && t.htmlCode.trim()
-                              ? `${CLOUDFLARE_WORKER_URL}/api/preview?templateId=${t.id}`
-                              : `/previews/${t.demoPath}/index.html`}
-                            title={`${t.name} admin preview`}
-                            className="absolute"
-                            style={{
-                              width: "1400px",
-                              height: "900px",
-                              transform: "scale(0.04)",
-                              transformOrigin: "top left",
-                              border: "none",
-                              background: "#0a0a0a"
-                            }}
-                          />
-                        </div>
-                      ) : (
-                        <img
-                          src={t.thumbnail}
-                          alt={t.name}
-                          className="w-14 h-9 rounded-sm object-cover shrink-0"
-                        />
-                      )}
-                      <div className="min-w-0">
-                        <div className="text-sm font-medium truncate" style={{ color: "#f0f0ee" }}>{t.name}</div>
-                        <div className="text-xs truncate text-[#888880] font-mono">{t.id}</div>
-                      </div>
-                    </div>
-                    <span
-                      className="px-2 py-0.5 rounded-sm text-xs w-fit capitalize"
-                      style={{ background: "rgba(255,255,255,0.05)", color: "#888880", fontFamily: "JetBrains Mono, monospace" }}
-                    >
-                      {t.category}
-                    </span>
-                    <span className="text-sm font-semibold" style={{ color: "#c8ff00" }}>{t.price}</span>
-                    <span className="text-xs font-mono" style={{ color: "#c0c0bc" }}>{t.demoPath}</span>
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => setEditingTemplate(t)}
-                        className="p-1.5 rounded-sm hover:bg-white/5 transition-colors"
-                        style={{ color: "#888880" }}
-                      >
-                        <Edit3 size={13} />
-                      </button>
-                      <button
-                        onClick={() => setDeleteConfirm(t.id)}
-                        className="p-1.5 rounded-sm hover:bg-red-500/10 transition-colors"
-                        style={{ color: "#888880" }}
-                      >
-                        <Trash2 size={13} />
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Add Template Modal */}
-              {addModalOpen && (
-                <div
-                  className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto"
-                  style={{ background: "rgba(0,0,0,0.8)" }}
-                  onClick={() => setAddModalOpen(false)}
-                >
-                  <div
-                    className="w-full max-w-lg rounded-sm border p-6 max-h-[90vh] overflow-y-auto"
-                    style={{ background: "#131313", borderColor: "rgba(255,255,255,0.1)" }}
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <div className="flex items-center justify-between mb-5">
-                      <h3 className="text-base font-bold" style={{ fontFamily: "Fraunces, serif", color: "#f0f0ee" }}>
-                        Add New Template
-                      </h3>
-                      <button onClick={() => setAddModalOpen(false)} style={{ color: "#888880" }}><X size={16} /></button>
-                    </div>
-                    <form onSubmit={handleAddTemplateSubmit} className="flex flex-col gap-4">
-                      <div>
-                        <label className="block text-xs mb-1.5" style={{ color: "#888880", fontFamily: "JetBrains Mono, monospace" }}>Template Name</label>
-                        <input
-                          required
-                          value={newTemplate.name}
-                          onChange={(e) => setNewTemplate({ ...newTemplate, name: e.target.value })}
-                          className="w-full px-3 py-2 text-sm rounded-sm border outline-none bg-black"
-                          style={{ borderColor: "rgba(255,255,255,0.08)", color: "#f0f0ee" }}
-                          placeholder="e.g. Genesis Marketing Hub"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs mb-1.5" style={{ color: "#888880", fontFamily: "JetBrains Mono, monospace" }}>Category</label>
-                        <input
-                          required
-                          value={newTemplate.category}
-                          onChange={(e) => setNewTemplate({ ...newTemplate, category: e.target.value })}
-                          className="w-full px-3 py-2 text-sm rounded-sm border outline-none bg-black text-[#f0f0ee]"
-                          style={{ borderColor: "rgba(255,255,255,0.08)" }}
-                          placeholder="e.g. SaaS, Portfolio, Blog, Agency, E-Commerce, Corporate"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs mb-1.5" style={{ color: "#888880", fontFamily: "JetBrains Mono, monospace" }}>Description</label>
-                        <textarea
-                          required
-                          value={newTemplate.description}
-                          onChange={(e) => setNewTemplate({ ...newTemplate, description: e.target.value })}
-                          className="w-full px-3 py-2 text-sm rounded-sm border outline-none bg-black resize-none"
-                          style={{ borderColor: "rgba(255,255,255,0.08)", color: "#f0f0ee" }}
-                          placeholder="Brief summary of features..."
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs mb-1.5" style={{ color: "#888880", fontFamily: "JetBrains Mono, monospace" }}>Thumbnail Image URL</label>
-                        <input
-                          value={newTemplate.thumbnail}
-                          onChange={(e) => setNewTemplate({ ...newTemplate, thumbnail: e.target.value })}
-                          className="w-full px-3 py-2 text-sm rounded-sm border outline-none bg-black mb-2"
-                          style={{ borderColor: "rgba(255,255,255,0.08)", color: "#f0f0ee" }}
-                          placeholder="https://images.unsplash.com/... (optional)"
-                        />
-                        <div className="flex flex-col gap-1.5 mt-2">
-                          <span className="text-[10px]" style={{ color: "#888880", fontFamily: "JetBrains Mono, monospace" }}>Or Upload Image File:</span>
-                          <input
-                            type="file"
-                            accept="image/*"
-                            onChange={(e) => {
-                              const file = e.target.files?.[0] || null;
-                              setNewTplThumbnailFile(file);
-                            }}
-                            className="text-xs text-[#888880] file:mr-3 file:py-1 file:px-2.5 file:rounded-sm file:border-0 file:text-[10px] file:font-semibold file:bg-[#c8ff00] file:text-[#0a0a0a] file:cursor-pointer"
-                          />
-                          {newTplThumbnailFile && (
-                            <span className="text-[10px] text-[#c8ff00]" style={{ fontFamily: "JetBrains Mono, monospace" }}>
-                              Selected: {newTplThumbnailFile.name}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                      <div>
-                        <label className="block text-xs mb-1.5" style={{ color: "#888880", fontFamily: "JetBrains Mono, monospace" }}>Sandbox Base Path (e.g. template-1)</label>
-                        <input
-                          required
-                          value={newTemplate.demoPath}
-                          onChange={(e) => setNewTemplate({ ...newTemplate, demoPath: e.target.value })}
-                          className="w-full px-3 py-2 text-sm rounded-sm border outline-none bg-black"
-                          style={{ borderColor: "rgba(255,255,255,0.08)", color: "#f0f0ee" }}
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs mb-1.5" style={{ color: "#888880", fontFamily: "JetBrains Mono, monospace" }}>Price Tag</label>
-                        <input
-                          required
-                          value={newTemplate.price}
-                          onChange={(e) => setNewTemplate({ ...newTemplate, price: e.target.value })}
-                          className="w-full px-3 py-2 text-sm rounded-sm border outline-none bg-black"
-                          style={{ borderColor: "rgba(255,255,255,0.08)", color: "#f0f0ee" }}
-                          placeholder="Free or $9.00"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs mb-1.5" style={{ color: "#888880", fontFamily: "JetBrains Mono, monospace" }}>Payhip Product URL (Optional)</label>
-                        <input
-                          value={newTemplate.payhipUrl}
-                          onChange={(e) => setNewTemplate({ ...newTemplate, payhipUrl: e.target.value })}
-                          className="w-full px-3 py-2 text-sm rounded-sm border outline-none bg-black"
-                          style={{ borderColor: "rgba(255,255,255,0.08)", color: "#f0f0ee" }}
-                          placeholder="e.g. https://payhip.com/b/XXXX"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs mb-1.5" style={{ color: "#888880", fontFamily: "JetBrains Mono, monospace" }}>Upload Preview HTML (.html)</label>
-                        <input
-                          type="file"
-                          accept=".html"
-                          onChange={(e) => setNewTplHtmlFile(e.target.files?.[0] || null)}
-                          className="w-full px-3 py-2 text-sm rounded-sm border outline-none bg-black"
-                          style={{ borderColor: "rgba(255,255,255,0.08)", color: "#888880" }}
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs mb-1.5" style={{ color: "#888880", fontFamily: "JetBrains Mono, monospace" }}>Upload Preview CSS (.css)</label>
-                        <input
-                          type="file"
-                          accept=".css"
-                          onChange={(e) => setNewTplCssFile(e.target.files?.[0] || null)}
-                          className="w-full px-3 py-2 text-sm rounded-sm border outline-none bg-black"
-                          style={{ borderColor: "rgba(255,255,255,0.08)", color: "#888880" }}
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs mb-1.5" style={{ color: "#888880", fontFamily: "JetBrains Mono, monospace" }}>Upload Preview JS (.js)</label>
-                        <input
-                          type="file"
-                          accept=".js"
-                          onChange={(e) => setNewTplJsFile(e.target.files?.[0] || null)}
-                          className="w-full px-3 py-2 text-sm rounded-sm border outline-none bg-black"
-                          style={{ borderColor: "rgba(255,255,255,0.08)", color: "#888880" }}
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs mb-1.5" style={{ color: "#888880", fontFamily: "JetBrains Mono, monospace" }}>Figma Demo URL (Optional)</label>
-                        <input
-                          value={newTemplate.figmaUrl}
-                          onChange={(e) => setNewTemplate({ ...newTemplate, figmaUrl: e.target.value })}
-                          className="w-full px-3 py-2 text-sm rounded-sm border outline-none bg-black"
-                          style={{ borderColor: "rgba(255,255,255,0.08)", color: "#f0f0ee" }}
-                          placeholder="e.g. https://www.figma.com/design/XXXX"
-                        />
-                      </div>
-                      <button
-                        type="submit"
-                        className="w-full py-2.5 text-xs font-semibold rounded-sm text-[#0a0a0a]"
-                        style={{ background: "#c8ff00" }}
-                      >
-                        Publish Template
-                      </button>
-                    </form>
-                  </div>
-                </div>
-              )}
-
-              {/* Edit modal */}
-              {editingTemplate && (
-                <div
-                  className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto"
-                  style={{ background: "rgba(0,0,0,0.8)" }}
-                  onClick={() => setEditingTemplate(null)}
-                >
-                  <div
-                    className="w-full max-w-lg rounded-sm border p-6 max-h-[90vh] overflow-y-auto"
-                    style={{ background: "#131313", borderColor: "rgba(255,255,255,0.1)" }}
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <div className="flex items-center justify-between mb-5">
-                      <h3 className="text-base font-bold" style={{ fontFamily: "Fraunces, serif", color: "#f0f0ee" }}>
-                        Edit Template
-                      </h3>
-                      <button onClick={() => setEditingTemplate(null)} style={{ color: "#888880" }}><X size={16} /></button>
-                    </div>
-                    <form onSubmit={handleEditTemplateSubmit} className="flex flex-col gap-4">
-                      <div>
-                        <label className="block text-xs mb-1.5" style={{ color: "#888880", fontFamily: "JetBrains Mono, monospace" }}>Template Name</label>
-                        <input
-                          required
-                          value={editingTemplate.name}
-                          onChange={(e) => setEditingTemplate({ ...editingTemplate, name: e.target.value })}
-                          className="w-full px-3 py-2 text-sm rounded-sm border outline-none bg-black"
-                          style={{ borderColor: "rgba(255,255,255,0.08)", color: "#f0f0ee" }}
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs mb-1.5" style={{ color: "#888880", fontFamily: "JetBrains Mono, monospace" }}>Category</label>
-                        <input
-                          required
-                          value={editingTemplate.category}
-                          onChange={(e) => setEditingTemplate({ ...editingTemplate, category: e.target.value })}
-                          className="w-full px-3 py-2 text-sm rounded-sm border outline-none bg-black text-[#f0f0ee]"
-                          style={{ borderColor: "rgba(255,255,255,0.08)" }}
-                          placeholder="e.g. SaaS, Portfolio, Blog, Agency, E-Commerce, Corporate"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs mb-1.5" style={{ color: "#888880", fontFamily: "JetBrains Mono, monospace" }}>Description</label>
-                        <textarea
-                          required
-                          value={editingTemplate.description || editingTemplate.desc}
-                          onChange={(e) => setEditingTemplate({ ...editingTemplate, description: e.target.value })}
-                          className="w-full px-3 py-2 text-sm rounded-sm border outline-none bg-black resize-none"
-                          style={{ borderColor: "rgba(255,255,255,0.08)", color: "#f0f0ee" }}
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs mb-1.5" style={{ color: "#888880", fontFamily: "JetBrains Mono, monospace" }}>Thumbnail Image URL</label>
-                        <input
-                          value={editingTemplate.thumbnail || editingTemplate.img}
-                          onChange={(e) => setEditingTemplate({ ...editingTemplate, thumbnail: e.target.value })}
-                          className="w-full px-3 py-2 text-sm rounded-sm border outline-none bg-black mb-2"
-                          style={{ borderColor: "rgba(255,255,255,0.08)", color: "#f0f0ee" }}
-                        />
-                        <div className="flex flex-col gap-1.5 mt-2">
-                          <span className="text-[10px]" style={{ color: "#888880", fontFamily: "JetBrains Mono, monospace" }}>Or Upload Image File:</span>
-                          <input
-                            type="file"
-                            accept="image/*"
-                            onChange={(e) => {
-                              const file = e.target.files?.[0] || null;
-                              setEditTplThumbnailFile(file);
-                            }}
-                            className="text-xs text-[#888880] file:mr-3 file:py-1 file:px-2.5 file:rounded-sm file:border-0 file:text-[10px] file:font-semibold file:bg-[#c8ff00] file:text-[#0a0a0a] file:cursor-pointer"
-                          />
-                          {editTplThumbnailFile && (
-                            <span className="text-[10px] text-[#c8ff00]" style={{ fontFamily: "JetBrains Mono, monospace" }}>
-                              Selected: {editTplThumbnailFile.name}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                      <div>
-                        <label className="block text-xs mb-1.5" style={{ color: "#888880", fontFamily: "JetBrains Mono, monospace" }}>Sandbox Base Path (e.g. template-1)</label>
-                        <input
-                          required
-                          value={editingTemplate.demoPath}
-                          onChange={(e) => setEditingTemplate({ ...editingTemplate, demoPath: e.target.value })}
-                          className="w-full px-3 py-2 text-sm rounded-sm border outline-none bg-black"
-                          style={{ borderColor: "rgba(255,255,255,0.08)", color: "#f0f0ee" }}
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs mb-1.5" style={{ color: "#888880", fontFamily: "JetBrains Mono, monospace" }}>Price Tag</label>
-                        <input
-                          required
-                          value={editingTemplate.price}
-                          onChange={(e) => setEditingTemplate({ ...editingTemplate, price: e.target.value })}
-                          className="w-full px-3 py-2 text-sm rounded-sm border outline-none bg-black"
-                          style={{ borderColor: "rgba(255,255,255,0.08)", color: "#f0f0ee" }}
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs mb-1.5" style={{ color: "#888880", fontFamily: "JetBrains Mono, monospace" }}>Payhip Product URL (Optional)</label>
-                        <input
-                          value={editingTemplate.payhipUrl}
-                          onChange={(e) => setEditingTemplate({ ...editingTemplate, payhipUrl: e.target.value })}
-                          className="w-full px-3 py-2 text-sm rounded-sm border outline-none bg-black"
-                          style={{ borderColor: "rgba(255,255,255,0.08)", color: "#f0f0ee" }}
-                        />
-                      </div>
-                      <div>
-                        <div className="flex items-center justify-between mb-1.5">
-                          <label className="block text-xs" style={{ color: "#888880", fontFamily: "JetBrains Mono, monospace" }}>Upload Preview HTML (.html) — Optional</label>
-                          {editingTemplate.htmlCode && editingTemplate.htmlCode.trim() && (
-                            <span className="text-[10px] font-semibold text-[#c8ff00] bg-[#c8ff00]/10 px-1.5 py-0.5 rounded-sm">
-                              Saved Code: {(editingTemplate.htmlCode.length / 1024).toFixed(1)} KB ✅
-                            </span>
-                          )}
-                        </div>
-                        <input
-                          type="file"
-                          accept=".html"
-                          onChange={(e) => setEditTplHtmlFile(e.target.files?.[0] || null)}
-                          className="w-full px-3 py-2 text-sm rounded-sm border outline-none bg-black"
-                          style={{ borderColor: "rgba(255,255,255,0.08)", color: "#888880" }}
-                        />
-                        <p className="text-[10px] mt-1 text-[#444440]">Leave empty to keep existing code.</p>
-                      </div>
-                      <div>
-                        <div className="flex items-center justify-between mb-1.5">
-                          <label className="block text-xs" style={{ color: "#888880", fontFamily: "JetBrains Mono, monospace" }}>Upload Preview CSS (.css) — Optional</label>
-                          {editingTemplate.cssCode && editingTemplate.cssCode.trim() && (
-                            <span className="text-[10px] font-semibold text-[#c8ff00] bg-[#c8ff00]/10 px-1.5 py-0.5 rounded-sm">
-                              Saved Code: {(editingTemplate.cssCode.length / 1024).toFixed(1)} KB ✅
-                            </span>
-                          )}
-                        </div>
-                        <input
-                          type="file"
-                          accept=".css"
-                          onChange={(e) => setEditTplCssFile(e.target.files?.[0] || null)}
-                          className="w-full px-3 py-2 text-sm rounded-sm border outline-none bg-black"
-                          style={{ borderColor: "rgba(255,255,255,0.08)", color: "#888880" }}
-                        />
-                        <p className="text-[10px] mt-1 text-[#444440]">Leave empty to keep existing styles.</p>
-                      </div>
-                      <div>
-                        <div className="flex items-center justify-between mb-1.5">
-                          <label className="block text-xs" style={{ color: "#888880", fontFamily: "JetBrains Mono, monospace" }}>Upload Preview JS (.js) — Optional</label>
-                          {editingTemplate.jsCode && editingTemplate.jsCode.trim() && (
-                            <span className="text-[10px] font-semibold text-[#c8ff00] bg-[#c8ff00]/10 px-1.5 py-0.5 rounded-sm">
-                              Saved Code: {(editingTemplate.jsCode.length / 1024).toFixed(1)} KB ✅
-                            </span>
-                          )}
-                        </div>
-                        <input
-                          type="file"
-                          accept=".js"
-                          onChange={(e) => setEditTplJsFile(e.target.files?.[0] || null)}
-                          className="w-full px-3 py-2 text-sm rounded-sm border outline-none bg-black"
-                          style={{ borderColor: "rgba(255,255,255,0.08)", color: "#888880" }}
-                        />
-                        <p className="text-[10px] mt-1 text-[#444440]">Leave empty to keep existing script.</p>
-                      </div>
-                      <div>
-                        <label className="block text-xs mb-1.5" style={{ color: "#888880", fontFamily: "JetBrains Mono, monospace" }}>Figma Demo URL (Optional)</label>
-                        <input
-                          value={editingTemplate.figmaUrl}
-                          onChange={(e) => setEditingTemplate({ ...editingTemplate, figmaUrl: e.target.value })}
-                          className="w-full px-3 py-2 text-sm rounded-sm border outline-none bg-black"
-                          style={{ borderColor: "rgba(255,255,255,0.08)", color: "#f0f0ee" }}
-                        />
-                      </div>
-                      <div className="flex gap-3">
-                        <button
-                          type="button"
-                          onClick={() => setEditingTemplate(null)}
-                          className="flex-1 py-2.5 text-xs font-semibold rounded-sm border"
-                          style={{ borderColor: "rgba(255,255,255,0.1)", color: "#888880" }}
-                        >
-                          Cancel
-                        </button>
-                        <button
-                          type="submit"
-                          className="flex-1 py-2.5 text-xs font-semibold rounded-sm text-[#0a0a0a]"
-                          style={{ background: "#c8ff00" }}
-                        >
-                          Save Changes
-                        </button>
-                      </div>
-                    </form>
-                  </div>
-                </div>
-              )}
-
-              {/* Delete confirm */}
-              {deleteConfirm !== null && (
-                <div
-                  className="fixed inset-0 z-50 flex items-center justify-center p-4"
-                  style={{ background: "rgba(0,0,0,0.8)" }}
-                  onClick={() => setDeleteConfirm(null)}
-                >
-                  <div
-                    className="w-full max-w-sm rounded-sm border p-6 text-center"
-                    style={{ background: "#131313", borderColor: "rgba(255,68,68,0.2)" }}
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <div
-                      className="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4"
-                      style={{ background: "rgba(255,68,68,0.1)" }}
-                    >
-                      <Trash2 size={20} style={{ color: "#ff6666" }} />
-                    </div>
-                    <h3 className="text-base font-bold mb-2" style={{ fontFamily: "Fraunces, serif", color: "#f0f0ee" }}>
-                      Delete template?
-                    </h3>
-                    <p className="text-sm mb-6" style={{ color: "#888880" }}>
-                      This action cannot be undone.
-                    </p>
-                    <div className="flex gap-3">
-                      <button
-                        onClick={() => setDeleteConfirm(null)}
-                        className="flex-1 py-2.5 text-xs font-semibold rounded-sm border"
-                        style={{ borderColor: "rgba(255,255,255,0.1)", color: "#888880" }}
-                      >
-                        Cancel
-                      </button>
-                      <button
-                        onClick={() => handleDeleteTemplate(deleteConfirm)}
-                        className="flex-1 py-2.5 text-xs font-semibold rounded-sm"
-                        style={{ background: "#ff4444", color: "#fff" }}
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* ── Payment & Access Approvals ── */}
-          {tab === "orders" && (
-            <div className="flex flex-col gap-8">
-              {/* UPI QR Approvals */}
-              <div className="rounded-sm border overflow-hidden" style={{ background: "#131313", borderColor: "rgba(255,255,255,0.06)" }}>
-                <div className="px-5 py-4 border-b" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
-                  <span className="text-sm font-semibold" style={{ color: "#f0f0ee" }}>Pending UPI Verification Requests</span>
-                </div>
-                <div className="grid text-xs font-medium px-5 py-3 border-b" style={{ gridTemplateColumns: "2fr 1fr 1fr 1fr 120px", borderColor: "rgba(255,255,255,0.06)", color: "#888880", fontFamily: "JetBrains Mono, monospace" }}>
-                  <span>Buyer Email</span><span>Template ID</span><span>UTR / Ref No.</span><span>Timestamp</span><span>Actions</span>
-                </div>
-                <div className="divide-y" style={{ borderColor: "rgba(255,255,255,0.04)" }}>
-                  {data.upiRequests.filter(r => r.status === "Pending Verification").map((req) => (
-                    <div key={req.id} className="grid items-center px-5 py-3.5" style={{ gridTemplateColumns: "2fr 1fr 1fr 1fr 120px" }}>
-                      <span className="text-sm font-semibold" style={{ color: "#f0f0ee" }}>{req.email}</span>
-                      <span className="text-xs font-mono" style={{ color: "#a259ff" }}>{req.templateId}</span>
-                      <span className="text-xs font-mono font-semibold" style={{ color: "#c8ff00" }}>{req.utr}</span>
-                      <span className="text-xs" style={{ color: "#888880" }}>{req.timestamp}</span>
-                      <div className="flex gap-2">
-                        <button onClick={() => handleApproveUPI(req.id, req.email, req.templateId)} className="px-2.5 py-1 text-[11px] font-semibold bg-[#c8ff00] text-[#0a0a0a] rounded-sm">Approve</button>
-                        <button onClick={() => handleRejectUPI(req.id)} className="px-2.5 py-1 text-[11px] font-semibold bg-[#ff4444] text-white rounded-sm">Reject</button>
-                      </div>
-                    </div>
-                  ))}
-                  {data.upiRequests.filter(r => r.status === "Pending Verification").length === 0 && (
-                    <div className="p-5 text-center text-xs" style={{ color: "#888880" }}>No pending UPI purchase requests.</div>
-                  )}
-                </div>
-              </div>
-
-              {/* Free Whitelist Email Approvals */}
-              <div className="rounded-sm border overflow-hidden" style={{ background: "#131313", borderColor: "rgba(255,255,255,0.06)" }}>
-                <div className="px-5 py-4 border-b" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
-                  <span className="text-sm font-semibold" style={{ color: "#f0f0ee" }}>Free / Custom Whitelist Email Requests</span>
-                </div>
-                <div className="grid text-xs font-medium px-5 py-3 border-b" style={{ gridTemplateColumns: "2fr 1.5fr 1fr 120px", borderColor: "rgba(255,255,255,0.06)", color: "#888880", fontFamily: "JetBrains Mono, monospace" }}>
-                  <span>Requesting Email</span><span>Requested Date</span><span>Status</span><span>Actions</span>
-                </div>
-                <div className="divide-y" style={{ borderColor: "rgba(255,255,255,0.04)" }}>
-                  {data.requests.filter(r => r.status.includes("Pending")).map((req, idx) => (
-                    <div key={idx} className="grid items-center px-5 py-3.5" style={{ gridTemplateColumns: "2fr 1.5fr 1fr 120px" }}>
-                      <span className="text-sm font-semibold" style={{ color: "#f0f0ee" }}>{req.email}</span>
-                      <span className="text-xs" style={{ color: "#888880" }}>{req.date}</span>
-                      <span className="text-xs font-semibold text-[#ffaa00]">{req.status}</span>
-                      <div className="flex gap-2">
-                        <button onClick={() => handleApproveAccess(req.email)} className="px-2.5 py-1 text-[11px] font-semibold bg-[#c8ff00] text-[#0a0a0a] rounded-sm">Approve</button>
-                        <button onClick={() => handleDenyAccess(req.email)} className="px-2.5 py-1 text-[11px] font-semibold bg-[#ff4444] text-white rounded-sm">Deny</button>
-                      </div>
-                    </div>
-                  ))}
-                  {data.requests.filter(r => r.status.includes("Pending")).length === 0 && (
-                    <div className="p-5 text-center text-xs" style={{ color: "#888880" }}>No pending whitelist access requests.</div>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* ── Whitelisted Users ── */}
-          {tab === "users" && (
-            <div className="flex flex-col gap-6">
-              <p className="text-sm" style={{ color: "#888880" }}>{data.verified.length} users with template access</p>
-              <div className="rounded-sm border overflow-hidden" style={{ background: "#131313", borderColor: "rgba(255,255,255,0.06)" }}>
-                <div className="grid text-xs font-medium px-5 py-3 border-b" style={{ gridTemplateColumns: "2fr 1fr", borderColor: "rgba(255,255,255,0.06)", color: "#888880", fontFamily: "JetBrains Mono, monospace" }}>
-                  <span>Whitelisted User Email</span><span>Date Whitelisted</span>
-                </div>
-                <div className="divide-y" style={{ borderColor: "rgba(255,255,255,0.04)" }}>
-                  {data.verified.filter(u => !search || u.email.toLowerCase().includes(search.toLowerCase())).map((u, idx) => (
-                    <div key={idx} className="grid items-center px-5 py-3.5" style={{ gridTemplateColumns: "2fr 1fr" }}>
-                      <span className="text-sm font-semibold" style={{ color: "#f0f0ee" }}>{u.email}</span>
-                      <span className="text-xs" style={{ color: "#888880" }}>{u.date}</span>
-                    </div>
-                  ))}
-                  {data.verified.length === 0 && (
-                    <div className="p-5 text-center text-xs" style={{ color: "#888880" }}>No whitelisted users yet.</div>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* ── Inquiries ── */}
-          {tab === "inquiries" && (() => {
-            const filteredMessages = data.messages
-              .filter((msg) => {
-                // 1. Search query filter
-                if (search) {
-                  const q = search.toLowerCase();
-                  const matchesSearch =
-                    msg.name.toLowerCase().includes(q) ||
-                    msg.email.toLowerCase().includes(q) ||
-                    (msg.budget && msg.budget.toLowerCase().includes(q)) ||
-                    msg.message.toLowerCase().includes(q);
-                  if (!matchesSearch) return false;
-                }
-                
-                // 2. Budget filter dropdown
-                if (inquiryFilter === "has-budget") {
-                  if (!(msg.budget && msg.budget.trim())) return false;
-                } else if (inquiryFilter === "no-budget") {
-                  if (msg.budget && msg.budget.trim()) return false;
-                }
-
-                // 3. Date filter picker (format check)
-                if (inquiryDateFilter) {
-                  const parts = msg.timestamp.split(",");
-                  if (parts.length > 0) {
-                    try {
-                      const msgDate = new Date(parts[0].trim());
-                      const filterDate = new Date(inquiryDateFilter);
-                      const isSameDay =
-                        msgDate.getFullYear() === filterDate.getFullYear() &&
-                        msgDate.getMonth() === filterDate.getMonth() &&
-                        msgDate.getDate() === filterDate.getDate();
-                      if (!isSameDay) return false;
-                    } catch (e) {
-                      return false;
-                    }
-                  } else {
-                    return false;
-                  }
-                }
-                return true;
-              })
-              .sort((a, b) => {
-                // 4. Sorting order
-                if (inquirySort === "oldest") {
-                  return a.id - b.id;
-                }
-                return b.id - a.id;
-              });
-
-            return (
-              <div className="flex flex-col gap-6">
-                <div
-                  className="rounded-sm border overflow-hidden"
-                  style={{ background: "#131313", borderColor: "rgba(255,255,255,0.06)" }}
-                >
-                  <div className="px-6 py-4 border-b flex flex-wrap items-center justify-between gap-4" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
-                    <div className="flex items-center gap-4 flex-wrap">
-                      <h3 className="text-sm font-semibold" style={{ color: "#f0f0ee", fontFamily: "Fraunces, serif" }}>
-                        Customer Contact Inquiries
-                      </h3>
-                      {/* Budget Filter */}
-                      <select
-                        value={inquiryFilter}
-                        onChange={(e) => setInquiryFilter(e.target.value as any)}
-                        className="text-xs px-2.5 py-1 rounded-sm border outline-none cursor-pointer"
-                        style={{
-                          background: "#0a0a0a",
-                          borderColor: "rgba(255,255,255,0.08)",
-                          color: "#888880",
-                          fontFamily: "JetBrains Mono, monospace",
-                        }}
-                      >
-                        <option value="all">All Budgets</option>
-                        <option value="has-budget">Has Budget</option>
-                        <option value="no-budget">No Budget</option>
-                      </select>
-                      {/* Date Sort */}
-                      <select
-                        value={inquirySort}
-                        onChange={(e) => setInquirySort(e.target.value as any)}
-                        className="text-xs px-2.5 py-1 rounded-sm border outline-none cursor-pointer"
-                        style={{
-                          background: "#0a0a0a",
-                          borderColor: "rgba(255,255,255,0.08)",
-                          color: "#888880",
-                          fontFamily: "JetBrains Mono, monospace",
-                        }}
-                      >
-                        <option value="newest">Newest First</option>
-                        <option value="oldest">Oldest First</option>
-                      </select>
-                      {/* Date Filter */}
-                      <div className="flex items-center gap-2">
-                        <span className="text-[10px]" style={{ color: "#888880", fontFamily: "JetBrains Mono, monospace" }}>Date:</span>
-                        <input
-                          type="date"
-                          value={inquiryDateFilter}
-                          onChange={(e) => setInquiryDateFilter(e.target.value)}
-                          className="text-xs px-2 py-0.5 rounded-sm border outline-none cursor-pointer bg-black text-[#888880]"
-                          style={{
-                            borderColor: "rgba(255,255,255,0.08)",
-                            fontFamily: "JetBrains Mono, monospace",
-                          }}
-                        />
-                        {inquiryDateFilter && (
-                          <button
-                            onClick={() => setInquiryDateFilter("")}
-                            className="text-[10px] text-[#ff6666] hover:underline"
-                            style={{ fontFamily: "JetBrains Mono, monospace" }}
-                          >
-                            Clear
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      {data.messages.length > 0 && (
-                        <button
-                          onClick={handleClearAllInquiries}
-                          className="px-2.5 py-1 text-[10px] font-semibold rounded-sm border hover:bg-red-500/10 hover:border-red-500/20 text-[#ff6666] transition-all"
-                          style={{ borderColor: "rgba(255,255,255,0.06)", fontFamily: "JetBrains Mono, monospace" }}
-                        >
-                          Clear All Inquiries 🗑️
-                        </button>
-                      )}
-                      <span className="px-2 py-0.5 rounded-sm text-[10px] font-semibold" style={{ background: "rgba(200,255,0,0.1)", color: "#c8ff00", fontFamily: "JetBrains Mono, monospace" }}>
-                        {filteredMessages.length} of {data.messages.length} inquiries
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="divide-y" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
-                    {filteredMessages.map((msg) => (
-                      <div
-                        key={msg.id}
-                        onClick={(e) => {
-                          const target = e.target as HTMLElement;
-                          if (target.closest("button") || target.closest("svg")) return;
-                          setViewingMessage(msg);
-                        }}
-                        className="p-6 flex flex-col md:flex-row md:items-start justify-between gap-4 transition-colors hover:bg-white/[0.02] cursor-pointer"
-                      >
-                        <div className="flex-1 flex flex-col gap-2">
-                          <div className="flex flex-wrap items-center gap-3">
-                            <span className="text-sm font-semibold text-[#f0f0ee]" style={{ fontFamily: "Outfit, sans-serif" }}>
-                              {msg.name}
-                            </span>
-                            <span className="text-xs" style={{ color: "#888880", fontFamily: "JetBrains Mono, monospace" }}>
-                              {msg.email}
-                            </span>
-                            {msg.budget && (
-                              <span className="px-2 py-0.5 rounded-sm text-[10px] font-semibold" style={{ background: "rgba(255,255,255,0.05)", color: "#c8ff00", fontFamily: "JetBrains Mono, monospace" }}>
-                                {msg.budget}
-                              </span>
-                            )}
-                            <span className="text-[10px] text-[#444440]" style={{ fontFamily: "JetBrains Mono, monospace" }}>
-                              {msg.timestamp}
-                            </span>
-                          </div>
-                          <p className="text-xs leading-relaxed text-[#888880]" style={{ fontFamily: "Outfit, sans-serif" }}>
-                            {msg.message}
-                          </p>
-                        </div>
-                        <button
-                          onClick={() => handleDeleteInquiry(msg.id)}
-                          className="shrink-0 flex items-center justify-center p-2 rounded-sm border hover:bg-red-500/10 hover:border-red-500/20 text-[#ff6666] transition-all self-end md:self-start"
-                          style={{ borderColor: "rgba(255,255,255,0.06)" }}
-                          title="Delete inquiry"
-                        >
-                          <Trash2 size={13} />
-                        </button>
-                      </div>
-                    ))}
-                    {filteredMessages.length === 0 && (
-                      <div className="p-8 text-center text-xs" style={{ color: "#888880", fontFamily: "Outfit, sans-serif" }}>
-                        {data.messages.length === 0 ? "No inquiries received yet." : "No matching inquiries found."}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            );
-          })()}
-
-          {/* ── Settings ── */}
-          {tab === "settings" && (
-            <div className="max-w-lg flex flex-col gap-6">
-              <div
-                className="rounded-sm border p-6"
-                style={{ background: "#131313", borderColor: "rgba(255,255,255,0.06)" }}
-              >
-                <h3 className="text-sm font-semibold mb-4" style={{ color: "#f0f0ee", fontFamily: "Fraunces, serif" }}>
-                  Admin Settings
-                </h3>
-                <div className="flex flex-col gap-4">
-                  <div>
-                    <label className="block text-xs mb-1.5" style={{ color: "#888880", fontFamily: "JetBrains Mono, monospace" }}>Display Name</label>
-                    <input readOnly value={user.name} className="w-full px-3 py-2 text-sm rounded-sm border outline-none bg-black text-[#f0f0ee]" style={{ borderColor: "rgba(255,255,255,0.08)" }} />
-                  </div>
-                  <div>
-                    <label className="block text-xs mb-1.5" style={{ color: "#888880", fontFamily: "JetBrains Mono, monospace" }}>Email Address</label>
-                    <input readOnly value={user.email} className="w-full px-3 py-2 text-sm rounded-sm border outline-none bg-black text-[#f0f0ee]" style={{ borderColor: "rgba(255,255,255,0.08)" }} />
-                  </div>
-                </div>
-              </div>
-
-              <div
-                className="rounded-sm border p-6"
-                style={{ background: "#131313", borderColor: "rgba(255,68,68,0.15)" }}
-              >
-                <h3 className="text-sm font-semibold mb-2" style={{ color: "#ff6666", fontFamily: "Fraunces, serif" }}>
-                  Danger Zone
-                </h3>
-                <p className="text-xs mb-4" style={{ color: "#888880" }}>
-                  Log out of the admin panel and return to the public site.
-                </p>
-                <button
-                  onClick={onLogout}
-                  className="flex items-center gap-2 px-4 py-2.5 text-xs font-semibold rounded-sm border"
-                  style={{ borderColor: "rgba(255,68,68,0.3)", color: "#ff6666" }}
-                >
-                  <LogOut size={13} /> Sign Out
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* ── View Inquiry Modal ── */}
-          {viewingMessage && (
-            <div
-              className="fixed inset-0 z-50 flex items-center justify-center p-4"
-              style={{ background: "rgba(0,0,0,0.85)", backdropFilter: "blur(4px)" }}
-            >
-              <div
-                className="w-full max-w-lg rounded-sm border p-6 flex flex-col gap-5 text-left relative animate-in fade-in zoom-in-95 duration-200"
-                style={{ background: "#131313", borderColor: "rgba(255,255,255,0.08)" }}
-              >
-                <div className="flex items-center justify-between border-b pb-4" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
-                  <h3 className="text-lg font-bold" style={{ fontFamily: "Fraunces, serif", color: "#f0f0ee" }}>
-                    Inquiry Details
-                  </h3>
-                  <button
-                    onClick={() => setViewingMessage(null)}
-                    className="text-[#888880] hover:text-[#f0f0ee] transition-colors text-lg"
-                  >
-                    &times;
-                  </button>
-                </div>
-
-                <div className="flex flex-col gap-4 text-sm">
-                  <div className="grid grid-cols-3 gap-2 py-1.5 border-b" style={{ borderColor: "rgba(255,255,255,0.04)" }}>
-                    <span style={{ color: "#888880", fontFamily: "JetBrains Mono, monospace" }}>From</span>
-                    <span className="col-span-2 font-semibold text-[#f0f0ee]">{viewingMessage.name}</span>
-                  </div>
-                  <div className="grid grid-cols-3 gap-2 py-1.5 border-b" style={{ borderColor: "rgba(255,255,255,0.04)" }}>
-                    <span style={{ color: "#888880", fontFamily: "JetBrains Mono, monospace" }}>Email</span>
-                    <a href={`mailto:${viewingMessage.email}`} className="col-span-2 text-[#c8ff00] hover:underline">{viewingMessage.email}</a>
-                  </div>
-                  <div className="grid grid-cols-3 gap-2 py-1.5 border-b" style={{ borderColor: "rgba(255,255,255,0.04)" }}>
-                    <span style={{ color: "#888880", fontFamily: "JetBrains Mono, monospace" }}>Budget</span>
-                    <span className="col-span-2 text-[#c8ff00] font-semibold">{viewingMessage.budget || "Not Specified"}</span>
-                  </div>
-                  <div className="grid grid-cols-3 gap-2 py-1.5 border-b" style={{ borderColor: "rgba(255,255,255,0.04)" }}>
-                    <span style={{ color: "#888880", fontFamily: "JetBrains Mono, monospace" }}>Received</span>
-                    <span className="col-span-2 text-[#888880]">{viewingMessage.timestamp}</span>
-                  </div>
-
-                  <div className="flex flex-col gap-2 pt-2">
-                    <span style={{ color: "#888880", fontFamily: "JetBrains Mono, monospace" }}>Message</span>
-                    <div
-                      className="p-4 rounded-sm border bg-[#0a0a0a] whitespace-pre-wrap leading-relaxed text-[#cbd5e1] max-h-60 overflow-y-auto"
-                      style={{ borderColor: "rgba(255,255,255,0.06)", fontFamily: "Outfit, sans-serif" }}
-                    >
-                      {viewingMessage.message}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-end gap-3 pt-4 border-t" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
-                  <button
-                    onClick={() => {
-                      handleDeleteInquiry(viewingMessage.id);
-                      setViewingMessage(null);
-                    }}
-                    className="px-4 py-2 text-xs font-semibold rounded-sm border hover:bg-red-500/10 hover:border-red-500/20 text-[#ff6666] transition-all mr-auto"
-                    style={{ borderColor: "rgba(255,255,255,0.06)" }}
-                  >
-                    Delete Message
-                  </button>
-                  <button
-                    onClick={() => setViewingMessage(null)}
-                    className="px-5 py-2 text-xs font-semibold rounded-sm text-[#0a0a0a]"
-                    style={{ background: "#c8ff00" }}
-                  >
-                    Close
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-
-        </main>
-      </div>
-    </div>
-  );
-}
-
-interface UserProfileProps {
-  userEmail: string;
-  userName: string | null;
-  userPicture: string | null;
-  purchasedTemplates: string[];
-  templatesList: any[];
-  onBack: () => void;
-  onSignOut: () => void;
-}
-
-function UserProfile({
-  userEmail,
-  userName,
-  userPicture,
-  purchasedTemplates,
-  templatesList,
-  onBack,
-  onSignOut,
-}: UserProfileProps) {
-  const getTmplThumbnail = (t: any) => {
-    if (!t.thumbnail) return "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=640&h=400&fit=crop&auto=format";
-    if (t.thumbnail.startsWith("http")) return t.thumbnail;
-    if (t.thumbnail.includes("/")) return t.thumbnail;
-    return `https://images.unsplash.com/${t.thumbnail}?w=640&h=400&fit=crop&auto=format`;
-  };
-
-  const handleDownloadReceipt = (tmpl: any) => {
-    const canvas = document.createElement("canvas");
-    canvas.width = 600;
-    canvas.height = 700;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    // Draw background
-    ctx.fillStyle = "#0a0a0a";
-    ctx.fillRect(0, 0, 600, 700);
-
-    // Draw border
-    ctx.strokeStyle = "rgba(255, 255, 255, 0.08)";
-    ctx.lineWidth = 2;
-    ctx.strokeRect(20, 20, 560, 660);
-
-    // Draw top logo/brand header
-    ctx.fillStyle = "#c8ff00";
-    // Logo square
-    ctx.fillRect(50, 60, 40, 40);
-    ctx.fillStyle = "#0a0a0a";
-    ctx.font = "bold 16px 'Courier New', monospace";
-    ctx.fillText("SP", 58, 86);
-
-    ctx.fillStyle = "#f0f0ee";
-    ctx.font = "bold 20px sans-serif";
-    ctx.fillText("SPARK WEB", 105, 86);
-
-    ctx.fillStyle = "#888880";
-    ctx.font = "12px monospace";
-    ctx.fillText("TRANSACTION RECEIPT", 420, 86);
-
-    // Separator line
-    ctx.strokeStyle = "rgba(255, 255, 255, 0.06)";
-    ctx.beginPath();
-    ctx.moveTo(50, 125);
-    ctx.lineTo(550, 125);
-    ctx.stroke();
-
-    // Invoice Meta (Date, Inv #)
-    const dateStr = new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
-    const invId = "INV-" + Math.floor(100000 + Math.random() * 900000);
-
-    ctx.fillStyle = "#888880";
-    ctx.font = "12px sans-serif";
-    ctx.fillText("Date Issued:", 50, 160);
-    ctx.fillStyle = "#f0f0ee";
-    ctx.fillText(dateStr, 150, 160);
-
-    ctx.fillStyle = "#888880";
-    ctx.fillText("Invoice ID:", 50, 190);
-    ctx.fillStyle = "#f0f0ee";
-    ctx.fillText(invId, 150, 190);
-
-    ctx.fillStyle = "#888880";
-    ctx.fillText("Client Account:", 50, 220);
-    ctx.fillStyle = "#f0f0ee";
-    ctx.fillText(userEmail, 150, 220);
-
-    // Separator line
-    ctx.beginPath();
-    ctx.moveTo(50, 250);
-    ctx.lineTo(550, 250);
-    ctx.stroke();
-
-    // Items Header
-    ctx.fillStyle = "#888880";
-    ctx.font = "bold 12px monospace";
-    ctx.fillText("ITEM DESCRIPTION", 50, 280);
-    ctx.fillText("QTY", 400, 280);
-    ctx.fillText("AMOUNT", 490, 280);
-
-    // Separator line
-    ctx.beginPath();
-    ctx.moveTo(50, 295);
-    ctx.lineTo(550, 295);
-    ctx.stroke();
-
-    // Item line
-    ctx.fillStyle = "#f0f0ee";
-    ctx.font = "bold 14px sans-serif";
-    ctx.fillText(tmpl.name + " (" + (tmpl.category || "HTML Template") + ")", 50, 335);
-
-    ctx.fillStyle = "#f0f0ee";
-    ctx.font = "14px sans-serif";
-    ctx.fillText("1", 405, 335);
-
-    ctx.fillStyle = "#c8ff00";
-    ctx.font = "bold 14px sans-serif";
-    ctx.fillText(tmpl.price || "$0.00", 490, 335);
-
-    // Separator line
-    ctx.beginPath();
-    ctx.moveTo(50, 480);
-    ctx.lineTo(550, 480);
-    ctx.stroke();
-
-    // Total section
-    ctx.fillStyle = "#888880";
-    ctx.font = "14px sans-serif";
-    ctx.fillText("Total Amount Paid:", 330, 520);
-    ctx.fillStyle = "#c8ff00";
-    ctx.font = "bold 20px sans-serif";
-    ctx.fillText(tmpl.price || "$0.00", 480, 522);
-
-    // Support Footer
-    ctx.fillStyle = "#888880";
-    ctx.font = "italic 11px sans-serif";
-    ctx.fillText("Thank you for purchasing from Spark Web.", 50, 580);
-    ctx.fillText("This document serves as verification of a Commercial Single-Use License.", 50, 600);
-    ctx.fillText("For customer support, contact support@sparkweb.com", 50, 620);
-
-    // Trigger download
-    const link = document.createElement("a");
-    link.download = `SparkWeb_${tmpl.name.replace(/\s+/g, "_")}_Receipt.png`;
-    link.href = canvas.toDataURL("image/png");
-    link.click();
-  };
-
-  const unlocked = templatesList.filter((t) => purchasedTemplates.includes(t.id));
-
-  return (
-    <div className="min-h-screen pb-24" style={{ background: "#0a0a0a" }}>
-      {/* Upper sub-header bar */}
-      <div className="border-b" style={{ background: "#111111", borderColor: "rgba(255,255,255,0.06)" }}>
-        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+        {tabs.map(t => (
           <button
-            onClick={onBack}
-            className="flex items-center gap-2 text-xs font-semibold text-[#888880] hover:text-white transition-colors"
+            key={t.id}
+            onClick={() => setTab(t.id)}
+            style={{
+              padding: '11px 20px', border: 'none', cursor: 'pointer', textAlign: 'left',
+              fontFamily: 'var(--font-body)', fontSize: '0.85rem', fontWeight: tab === t.id ? 600 : 400,
+              background: tab === t.id ? 'rgba(0,229,255,0.08)' : 'transparent',
+              color: tab === t.id ? '#00e5ff' : '#6b7280',
+              borderLeft: `2px solid ${tab === t.id ? '#00e5ff' : 'transparent'}`,
+              transition: 'all 0.15s',
+            }}
           >
-            ← Back to Storefront
+            {t.label}
           </button>
-          <div className="flex items-center gap-3">
-            <span className="text-xs" style={{ color: "#888880", fontFamily: "JetBrains Mono, monospace" }}>
-              Logged in: {userEmail}
-            </span>
-            <button
-              onClick={onSignOut}
-              className="px-3 py-1.5 rounded-sm border text-xs font-semibold text-[#ff6666] hover:bg-red-500/5 transition-all"
-              style={{ borderColor: "rgba(255,102,102,0.15)" }}
-            >
-              Sign Out
-            </button>
+        ))}
+
+        <div style={{ marginTop: 'auto', padding: '20px', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'linear-gradient(135deg, #00e5ff, #8b5cf6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.7rem', fontWeight: 700, color: '#070b12' }}>A</div>
+            <div>
+              <div style={{ fontFamily: 'var(--font-body)', fontSize: '0.78rem', color: '#f1f5f9', fontWeight: 500 }}>Admin</div>
+              <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: '#374151' }}>oxoredz@gmail.com</div>
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 lg:px-8 mt-12">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      {/* Main content */}
+      <div style={{ padding: '36px 36px', overflow: 'auto' }}>
 
-          {/* Profile Card Sidebar */}
-          <div
-            className="rounded-sm border p-8 flex flex-col items-center text-center gap-6"
-            style={{ background: "#131313", borderColor: "rgba(255,255,255,0.06)", height: "fit-content" }}
-          >
-            {userPicture ? (
-              <img
-                src={userPicture}
-                alt={userName || "User profile"}
-                className="w-20 h-20 rounded-full border-2 border-[#c8ff00]"
-              />
-            ) : (
-              <div
-                className="w-20 h-20 rounded-full flex items-center justify-center font-bold text-2xl"
-                style={{ background: "#1c1c1c", color: "#c8ff00" }}
-              >
-                {(userName || userEmail).substring(0, 2).toUpperCase()}
-              </div>
-            )}
-            <div>
-              <h2 className="text-xl font-bold" style={{ fontFamily: "Outfit, sans-serif", color: "#f0f0ee" }}>
-                {userName || "Valued Customer"}
-              </h2>
-              <p className="text-xs mt-1" style={{ color: "#888880", fontFamily: "JetBrains Mono, monospace" }}>
-                {userEmail}
-              </p>
+        {/* Overview */}
+        {tab === 'overview' && (
+          <div>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.6rem', fontWeight: 700, color: '#f1f5f9', marginBottom: 8 }}>Dashboard Overview</h2>
+            <p style={{ color: '#4b5563', marginBottom: 32, fontSize: '0.85rem' }}>Real-time edge metrics and system status.</p>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16, marginBottom: 40 }}>
+              {stats.map(s => (
+                <div key={s.label} style={{ padding: '24px', borderRadius: 12, background: '#0d1422', border: '1px solid rgba(255,255,255,0.06)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justify: 'space-between', marginBottom: 16 }}>
+                    <span style={{ fontSize: '1.2rem', color: s.color }}>{s.icon}</span>
+                    <span style={{ width: 6, height: 6, borderRadius: '50%', background: s.color, display: 'inline-block' }} className="animate-pulse-glow" />
+                  </div>
+                  <div style={{ fontFamily: 'var(--font-display)', fontSize: '2rem', fontWeight: 800, color: '#f1f5f9' }}>{s.val}</div>
+                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: '#374151', marginTop: 4, letterSpacing: '0.08em' }}>{s.label.toUpperCase()}</div>
+                </div>
+              ))}
             </div>
 
-            <div
-              className="w-full rounded-sm border p-4 text-left"
-              style={{ background: "rgba(255,255,255,0.02)", borderColor: "rgba(255,255,255,0.04)" }}
-            >
-              <div className="text-[10px] uppercase font-bold tracking-widest" style={{ color: "#888880" }}>
-                Account Tier
-              </div>
-              <div className="text-sm font-bold text-[#c8ff00] mt-1 flex items-center gap-1.5">
-                <Shield size={14} /> Premium Creator
-              </div>
-            </div>
-
-            <div
-              className="w-full rounded-sm border p-4 text-left"
-              style={{ background: "rgba(255,255,255,0.02)", borderColor: "rgba(255,255,255,0.04)" }}
-            >
-              <div className="text-[10px] uppercase font-bold tracking-widest" style={{ color: "#888880" }}>
-                Statistics
-              </div>
-              <div className="mt-2 text-xs flex justify-between">
-                <span style={{ color: "#888880" }}>Unlocked templates:</span>
-                <span className="font-bold text-white">{purchasedTemplates.length}</span>
-              </div>
+            {/* Build Log Activity */}
+            <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', fontWeight: 700, color: '#f1f5f9', marginBottom: 16 }}>Build Logs</h3>
+            <div style={{ borderRadius: 10, border: '1px solid rgba(255,255,255,0.06)', overflow: 'hidden' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: 'var(--font-body)', fontSize: '0.82rem' }}>
+                <thead>
+                  <tr style={{ background: '#111827' }}>
+                    {['Email', 'Activity details', 'Timestamp'].map(h => (
+                      <th key={h} style={{ padding: '10px 16px', textAlign: 'left', color: '#374151', fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.08em', fontWeight: 500 }}>{h.toUpperCase()}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.builds.map((r, i) => (
+                    <tr key={i} style={{ borderTop: '1px solid rgba(255,255,255,0.04)', background: i % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.01)' }}>
+                      <td style={{ padding: '12px 16px', color: '#9ca3af' }}>{r.email}</td>
+                      <td style={{ padding: '12px 16px', color: '#e2e8f0', fontWeight: 500 }}>{r.templateId}</td>
+                      <td style={{ padding: '12px 16px', fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: '#4b5563' }}>{r.timestamp}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
+        )}
 
-          {/* Library Section */}
-          <div className="lg:col-span-2 flex flex-col gap-6">
-            <div>
-              <h1 className="text-3xl font-bold mb-2" style={{ fontFamily: "Fraunces, serif", color: "#f0f0ee" }}>
-                My Purchased Library
-              </h1>
-              <p className="text-sm" style={{ color: "#888880" }}>
-                Manage, preview, and download the templates associated with your license.
-              </p>
-            </div>
+        {/* Template Manager */}
+        {tab === 'templates' && (
+          <div>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.6rem', fontWeight: 700, color: '#f1f5f9', marginBottom: 8 }}>Template Manager</h2>
+            <p style={{ color: '#4b5563', marginBottom: 36, fontSize: '0.85rem' }}>Create and upload new templates. Thumbnails are stored in D1 or rendered via sandbox iframe preview.</p>
 
-            {unlocked.length === 0 ? (
-              <div
-                className="rounded-sm border p-12 text-center flex flex-col items-center gap-6"
-                style={{ background: "#131313", borderColor: "rgba(255,255,255,0.06)" }}
-              >
-                <div
-                  className="w-12 h-12 rounded-full flex items-center justify-center"
-                  style={{ background: "rgba(200,255,0,0.05)", color: "#c8ff00" }}
-                >
-                  <Package size={24} />
+            <form onSubmit={handleAddTemplateSubmit} style={{ padding: 32, borderRadius: 12, background: '#0d1422', border: '1px solid rgba(255,255,255,0.07)', marginBottom: 28 }}>
+              <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', fontWeight: 700, color: '#f1f5f9', marginBottom: 24 }}>Upload New Template</h3>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 20 }}>
+                <div>
+                  <label style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.1em', color: '#4b5563', marginBottom: 6 }}>TEMPLATE ID</label>
+                  <input
+                    required
+                    placeholder="e.g. template-5"
+                    value={newTemplate.id}
+                    onChange={e => setNewTemplate({ ...newTemplate, id: e.target.value })}
+                    style={{ width: '100%', padding: '9px 12px', background: '#111827', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 7, color: '#e2e8f0', fontSize: '0.82rem', outline: 'none' }}
+                  />
                 </div>
                 <div>
-                  <h3 className="text-base font-bold mb-1" style={{ color: "#f0f0ee", fontFamily: "Outfit, sans-serif" }}>
-                    Your library is currently empty
-                  </h3>
-                  <p className="text-xs max-w-sm leading-relaxed" style={{ color: "#888880" }}>
-                    You haven't purchased or whitelisted any templates yet. Browse the marketplace and unlock premium layouts to get started!
-                  </p>
+                  <label style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.1em', color: '#4b5563', marginBottom: 6 }}>TEMPLATE NAME</label>
+                  <input
+                    required
+                    placeholder="e.g. Apex Dashboard Pro"
+                    value={newTemplate.name}
+                    onChange={e => setNewTemplate({ ...newTemplate, name: e.target.value })}
+                    style={{ width: '100%', padding: '9px 12px', background: '#111827', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 7, color: '#e2e8f0', fontSize: '0.82rem', outline: 'none' }}
+                  />
                 </div>
-                <button
-                  onClick={onBack}
-                  className="px-6 py-2.5 text-xs font-semibold rounded-sm text-[#0a0a0a]"
-                  style={{ background: "#c8ff00" }}
-                >
-                  Browse Marketplace
-                </button>
+                <div>
+                  <label style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.1em', color: '#4b5563', marginBottom: 6 }}>CATEGORY</label>
+                  <input
+                    required
+                    placeholder="SaaS / Portfolio / Blog / eCommerce"
+                    value={newTemplate.category}
+                    onChange={e => setNewTemplate({ ...newTemplate, category: e.target.value })}
+                    style={{ width: '100%', padding: '9px 12px', background: '#111827', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 7, color: '#e2e8f0', fontSize: '0.82rem', outline: 'none' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.1em', color: '#4b5563', marginBottom: 6 }}>PRICE</label>
+                  <input
+                    required
+                    placeholder="Free or $14.99"
+                    value={newTemplate.price}
+                    onChange={e => setNewTemplate({ ...newTemplate, price: e.target.value })}
+                    style={{ width: '100%', padding: '9px 12px', background: '#111827', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 7, color: '#e2e8f0', fontSize: '0.82rem', outline: 'none' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.1em', color: '#4b5563', marginBottom: 6 }}>PAYHIP CHECKOUT URL (OPTIONAL)</label>
+                  <input
+                    placeholder="https://payhip.com/b/..."
+                    value={newTemplate.payhipUrl}
+                    onChange={e => setNewTemplate({ ...newTemplate, payhipUrl: e.target.value })}
+                    style={{ width: '100%', padding: '9px 12px', background: '#111827', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 7, color: '#e2e8f0', fontSize: '0.82rem', outline: 'none' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.1em', color: '#4b5563', marginBottom: 6 }}>FIGMA FILE URL (OPTIONAL)</label>
+                  <input
+                    placeholder="https://figma.com/file/..."
+                    value={newTemplate.figmaUrl}
+                    onChange={e => setNewTemplate({ ...newTemplate, figmaUrl: e.target.value })}
+                    style={{ width: '100%', padding: '9px 12px', background: '#111827', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 7, color: '#e2e8f0', fontSize: '0.82rem', outline: 'none' }}
+                  />
+                </div>
               </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                {unlocked.map((tmpl) => (
-                  <div
-                    key={tmpl.id}
-                    className="rounded-sm border overflow-hidden flex flex-col"
-                    style={{ background: "#131313", borderColor: "rgba(255,255,255,0.06)" }}
-                  >
-                    <div style={{ aspectRatio: "16/10", overflow: "hidden", background: "#1a1a1a", position: "relative" }}>
-                      {!tmpl.thumbnail || tmpl.thumbnail.trim() === "" || (!tmpl.thumbnail.startsWith("data:") && !tmpl.thumbnail.startsWith("http") && !tmpl.thumbnail.startsWith("/")) ? (
-                        <div className="absolute inset-0 w-full h-full overflow-hidden pointer-events-none select-none">
-                          <iframe
-                            src={tmpl.htmlCode && tmpl.htmlCode.trim()
-                              ? `${CLOUDFLARE_WORKER_URL}/api/preview?templateId=${tmpl.id}`
-                              : `/previews/${tmpl.demoPath}/index.html`}
-                            title={`${tmpl.name} library preview`}
-                            className="absolute"
-                            style={{
-                              width: "400%",
-                              height: "400%",
-                              transform: "scale(0.25)",
-                              transformOrigin: "top left",
-                              border: "none",
-                              background: "#0a0a0a"
-                            }}
-                          />
-                        </div>
-                      ) : (
-                        <img
-                          src={tmpl.thumbnail}
-                          alt={tmpl.name}
-                          className="w-full h-full object-cover"
-                        />
-                      )}
-                    </div>
-                    <div className="p-5 flex flex-col gap-4 flex-1">
-                      <div>
-                        <div className="text-sm font-semibold" style={{ color: "#f0f0ee", fontFamily: "Outfit, sans-serif" }}>
-                          {tmpl.name}
-                        </div>
-                        <div className="text-xs mt-0.5" style={{ color: "#888880", fontFamily: "Outfit, sans-serif" }}>
-                          {tmpl.category}
-                        </div>
+
+              <div style={{ marginBottom: 20 }}>
+                <label style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.1em', color: '#4b5563', marginBottom: 6 }}>DESCRIPTION</label>
+                <textarea
+                  required
+                  placeholder="Brief description of the template features..."
+                  value={newTemplate.description}
+                  onChange={e => setNewTemplate({ ...newTemplate, description: e.target.value })}
+                  rows={2}
+                  style={{ width: '100%', padding: '9px 12px', background: '#111827', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 7, color: '#e2e8f0', fontSize: '0.82rem', outline: 'none', resize: 'vertical' }}
+                />
+              </div>
+
+              <div style={{ marginBottom: 20 }}>
+                <label style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.1em', color: '#4b5563', marginBottom: 6 }}>THUMBNAIL IMAGE URL / UPLOAD IMAGE</label>
+                <input
+                  placeholder="https://unsplash.com/..."
+                  value={newTemplate.thumbnail}
+                  onChange={e => setNewTemplate({ ...newTemplate, thumbnail: e.target.value })}
+                  style={{ width: '100%', padding: '9px 12px', background: '#111827', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 7, color: '#e2e8f0', fontSize: '0.82rem', outline: 'none', marginBottom: 8 }}
+                />
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={e => setNewTplThumbnailFile(e.target.files?.[0] || null)}
+                  className="text-xs text-muted"
+                />
+              </div>
+
+              {/* File uploads */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 24 }}>
+                {[
+                  { label: 'HTML File', ext: '.html', file: newTplHtmlFile, setFile: setNewTplHtmlFile },
+                  { label: 'CSS File', ext: '.css', file: newTplCssFile, setFile: setNewTplCssFile },
+                  { label: 'JS File', ext: '.js', file: newTplJsFile, setFile: setNewTplJsFile },
+                ].map(f => (
+                  <div key={f.label} style={{ padding: '16px', borderRadius: 8, border: '1px dashed rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.02)', textAlign: 'center' }}>
+                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: '#4b5563', marginBottom: 8 }}>{f.label.toUpperCase()}</div>
+                    <label style={{ cursor: 'pointer' }}>
+                      <input type="file" accept={f.ext} style={{ display: 'none' }} onChange={e => f.setFile(e.target.files?.[0] || null)} />
+                      <div style={{ padding: '6px 12px', borderRadius: 5, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.07)', color: '#6b7280', fontSize: '0.75rem', fontFamily: 'var(--font-body)', cursor: 'pointer', display: 'inline-block' }}>
+                        {f.file ? f.file.name : `Choose ${f.ext}`}
                       </div>
-                      <p className="text-xs leading-relaxed flex-1" style={{ color: "#888880" }}>
-                        {tmpl.description || tmpl.desc}
-                      </p>
-                      <div className="flex flex-col gap-2">
-                        <div className="flex gap-2">
-                          <a
-                            href={`/previews/${tmpl.demoPath}/index.html`}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="w-full py-2 text-center text-xs font-semibold rounded-sm border hover:bg-white/5 transition-all"
-                            style={{ borderColor: "rgba(255,255,255,0.1)", color: "#888880" }}
-                          >
-                            Preview Demo
-                          </a>
-                        </div>
-                        <button
-                          onClick={() => handleDownloadReceipt(tmpl)}
-                          className="w-full py-2 text-center text-xs font-semibold rounded-sm border transition-all duration-200 hover:bg-white/5"
-                          style={{ borderColor: "rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.02)", color: "#f0f0ee" }}
-                        >
-                          📥 Download Receipt
-                        </button>
-                      </div>
-                    </div>
+                    </label>
                   </div>
                 ))}
               </div>
+
+              <button type="submit" className="btn-primary" style={{ padding: '10px 24px', borderRadius: 8, border: 'none', cursor: 'pointer', fontSize: '0.85rem' }}>
+                Save Template to D1
+              </button>
+            </form>
+
+            {/* Template list */}
+            <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', fontWeight: 700, color: '#f1f5f9', marginBottom: 16 }}>Existing Templates</h3>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 12 }}>
+              {templatesList.map(t => (
+                <div key={t.id} style={{ padding: '16px', borderRadius: 10, background: '#0d1422', border: '1px solid rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <div style={{ width: 40, height: 40, borderRadius: 8, background: '#0a0a0a', border: '1px solid rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, overflow: 'hidden' }}>
+                    {t.thumbnail ? (
+                      <img src={t.thumbnail} alt={t.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    ) : (
+                      <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.65rem', fontWeight: 800, color: '#00e5ff' }}>{t.name[0]}</span>
+                    )}
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontFamily: 'var(--font-body)', fontSize: '0.82rem', fontWeight: 600, color: '#e2e8f0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.name}</div>
+                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.62rem', color: '#374151', marginTop: 2 }}>{t.id} · {t.price}</div>
+                  </div>
+                  <div style={{ display: 'flex', gap: 4 }}>
+                    <button onClick={() => setEditingTemplate(t)} style={{ background: 'none', border: 'none', color: '#6b7280', cursor: 'pointer', fontSize: '0.75rem', padding: 4 }}>✎</button>
+                    <button onClick={() => handleDeleteTemplate(t.id)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '0.75rem', padding: 4 }}>✕</button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Editing modal overlay */}
+            {editingTemplate && (
+              <div style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }} onClick={() => setEditingTemplate(null)}>
+                <form onSubmit={handleEditTemplateSubmit} onClick={e => e.stopPropagation()} style={{ background: '#0d1422', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 16, width: '100%', maxWidth: 560, padding: 32, maxHeight: '90vh', overflowY: 'auto' }}>
+                  <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.2rem', fontWeight: 700, color: '#f1f5f9', marginBottom: 24 }}>Edit {editingTemplate.name}</h3>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginBottom: 24 }}>
+                    <div>
+                      <label style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: '#4b5563', marginBottom: 6 }}>NAME</label>
+                      <input required value={editingTemplate.name} onChange={e => setEditingTemplate({ ...editingTemplate, name: e.target.value })} style={{ width: '100%', padding: '9px 12px', background: '#111827', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 7, color: '#e2e8f0', fontSize: '0.82rem' }} />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: '#4b5563', marginBottom: 6 }}>CATEGORY</label>
+                      <input required value={editingTemplate.category} onChange={e => setEditingTemplate({ ...editingTemplate, category: e.target.value })} style={{ width: '100%', padding: '9px 12px', background: '#111827', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 7, color: '#e2e8f0', fontSize: '0.82rem' }} />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: '#4b5563', marginBottom: 6 }}>PRICE</label>
+                      <input required value={editingTemplate.price} onChange={e => setEditingTemplate({ ...editingTemplate, price: e.target.value })} style={{ width: '100%', padding: '9px 12px', background: '#111827', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 7, color: '#e2e8f0', fontSize: '0.82rem' }} />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: '#4b5563', marginBottom: 6 }}>PAYHIP URL</label>
+                      <input value={editingTemplate.payhipUrl || ''} onChange={e => setEditingTemplate({ ...editingTemplate, payhipUrl: e.target.value })} style={{ width: '100%', padding: '9px 12px', background: '#111827', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 7, color: '#e2e8f0', fontSize: '0.82rem' }} />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: '#4b5563', marginBottom: 6 }}>FIGMA FILE URL</label>
+                      <input value={editingTemplate.figmaUrl || ''} onChange={e => setEditingTemplate({ ...editingTemplate, figmaUrl: e.target.value })} style={{ width: '100%', padding: '9px 12px', background: '#111827', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 7, color: '#e2e8f0', fontSize: '0.82rem' }} />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: '#4b5563', marginBottom: 6 }}>DESCRIPTION</label>
+                      <textarea required value={editingTemplate.description} onChange={e => setEditingTemplate({ ...editingTemplate, description: e.target.value })} rows={2} style={{ width: '100%', padding: '9px 12px', background: '#111827', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 7, color: '#e2e8f0', fontSize: '0.82rem' }} />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: '#4b5563', marginBottom: 6 }}>THUMBNAIL URL (LEAVE EMPTY TO CLEAR)</label>
+                      <input value={editingTemplate.thumbnail || ''} onChange={e => setEditingTemplate({ ...editingTemplate, thumbnail: e.target.value })} style={{ width: '100%', padding: '9px 12px', background: '#111827', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 7, color: '#e2e8f0', fontSize: '0.82rem', marginBottom: 6 }} />
+                      <input type="file" accept="image/*" onChange={e => setEditTplThumbnailFile(e.target.files?.[0] || null)} className="text-xs text-muted" />
+                    </div>
+
+                    {/* HTML File Upload */}
+                    <div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                        <label style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: '#4b5563' }}>PREVIEW HTML (.HTML)</label>
+                        {editingTemplate.htmlCode && editingTemplate.htmlCode.trim() && (
+                          <span style={{ fontSize: '0.65rem', color: '#22c55e', background: 'rgba(34,197,94,0.1)', padding: '2px 6px', borderRadius: 4 }}>
+                            Saved Code: {(editingTemplate.htmlCode.length/1024).toFixed(1)} KB ✅
+                          </span>
+                        )}
+                      </div>
+                      <input type="file" accept=".html" onChange={e => setEditTplHtmlFile(e.target.files?.[0] || null)} className="text-xs text-muted" />
+                    </div>
+
+                    {/* CSS File Upload */}
+                    <div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                        <label style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: '#4b5563' }}>PREVIEW CSS (.CSS)</label>
+                        {editingTemplate.cssCode && editingTemplate.cssCode.trim() && (
+                          <span style={{ fontSize: '0.65rem', color: '#22c55e', background: 'rgba(34,197,94,0.1)', padding: '2px 6px', borderRadius: 4 }}>
+                            Saved Code: {(editingTemplate.cssCode.length/1024).toFixed(1)} KB ✅
+                          </span>
+                        )}
+                      </div>
+                      <input type="file" accept=".css" onChange={e => setEditTplCssFile(e.target.files?.[0] || null)} className="text-xs text-muted" />
+                    </div>
+
+                    {/* JS File Upload */}
+                    <div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                        <label style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: '#4b5563' }}>PREVIEW JS (.JS)</label>
+                        {editingTemplate.jsCode && editingTemplate.jsCode.trim() && (
+                          <span style={{ fontSize: '0.65rem', color: '#22c55e', background: 'rgba(34,197,94,0.1)', padding: '2px 6px', borderRadius: 4 }}>
+                            Saved Code: {(editingTemplate.jsCode.length/1024).toFixed(1)} KB ✅
+                          </span>
+                        )}
+                      </div>
+                      <input type="file" accept=".js" onChange={e => setEditTplJsFile(e.target.files?.[0] || null)} className="text-xs text-muted" />
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
+                    <button type="button" onClick={() => setEditingTemplate(null)} className="btn-ghost" style={{ padding: '8px 18px', borderRadius: 7, fontSize: '0.82rem' }}>Cancel</button>
+                    <button type="submit" className="btn-primary" style={{ padding: '8px 18px', borderRadius: 7, fontSize: '0.82rem' }}>Save Changes</button>
+                  </div>
+                </form>
+              </div>
             )}
           </div>
+        )}
+
+        {/* Inquiries Inbox */}
+        {tab === 'inquiries' && (
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8, flexWrap: 'wrap', gap: 12 }}>
+              <div>
+                <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.6rem', fontWeight: 700, color: '#f1f5f9', marginBottom: 4 }}>Inquiries Inbox</h2>
+                <p style={{ color: '#4b5563', fontSize: '0.85rem' }}>{filteredInquiries.length} messages</p>
+              </div>
+              <button
+                onClick={() => setShowPurgeConfirm(true)}
+                style={{ padding: '8px 18px', borderRadius: 7, border: '1px solid rgba(239,68,68,0.3)', background: 'rgba(239,68,68,0.06)', color: '#ef4444', cursor: 'pointer', fontSize: '0.8rem', fontFamily: 'var(--font-mono)', transition: 'all 0.2s' }}
+              >
+                ⚠ Purge Queue
+              </button>
+            </div>
+
+            {/* Filters */}
+            <div style={{ display: 'flex', gap: 10, marginBottom: 20, flexWrap: 'wrap' }}>
+              <input
+                placeholder="Search name, email, message..."
+                value={inquirySearch}
+                onChange={e => setInquirySearch(e.target.value)}
+                style={{ flex: 1, minWidth: 200, padding: '9px 14px', background: '#0d1422', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 7, color: '#e2e8f0', fontSize: '0.82rem', outline: 'none' }}
+              />
+              <select
+                value={budgetFilter}
+                onChange={e => setBudgetFilter(e.target.value)}
+                style={{ padding: '9px 12px', background: '#0d1422', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 7, color: '#9ca3af', fontSize: '0.82rem', outline: 'none', cursor: 'pointer' }}
+              >
+                {budgets.map(b => <option key={b}>{b}</option>)}
+              </select>
+              <input
+                type="date"
+                value={dateFilter}
+                onChange={e => setDateFilter(e.target.value)}
+                style={{ padding: '9px 12px', background: '#0d1422', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 7, color: '#9ca3af', fontSize: '0.82rem', outline: 'none', colorScheme: 'dark' }}
+              />
+            </div>
+
+            {/* Inquiry cards */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {filteredInquiries.map(q => (
+                <div
+                  key={q.id}
+                  onClick={() => setSelectedInquiry(q)}
+                  className="card-hover"
+                  style={{ padding: '18px 20px', borderRadius: 10, background: '#0d1422', border: '1px solid rgba(255,255,255,0.06)', cursor: 'pointer', display: 'grid', gridTemplateColumns: '1fr auto', alignItems: 'start', gap: 16 }}
+                >
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
+                      <span style={{ fontFamily: 'var(--font-body)', fontWeight: 600, color: '#f1f5f9', fontSize: '0.9rem' }}>{q.name}</span>
+                      <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', padding: '2px 8px', borderRadius: 4, background: 'rgba(139,92,246,0.12)', color: '#8b5cf6' }}>{q.budget}</span>
+                    </div>
+                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.68rem', color: '#374151', marginBottom: 8 }}>{q.email}</div>
+                    <div style={{ color: '#6b7280', fontSize: '0.82rem', lineHeight: 1.5, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{q.message}</div>
+                  </div>
+                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: '#374151', whiteSpace: 'nowrap' }}>{q.timestamp}</div>
+                </div>
+              ))}
+              {filteredInquiries.length === 0 && (
+                <div style={{ padding: '60px', textAlign: 'center', color: '#374151', fontFamily: 'var(--font-mono)', fontSize: '0.8rem' }}>No messages found.</div>
+              )}
+            </div>
+
+            {/* Inquiry detail modal */}
+            {selectedInquiry && (
+              <div
+                style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}
+                onClick={() => setSelectedInquiry(null)}
+              >
+                <div onClick={e => e.stopPropagation()} style={{ background: '#0d1422', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 16, width: '100%', maxWidth: 560, padding: 32 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24 }}>
+                    <div>
+                      <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, color: '#f1f5f9', fontSize: '1.1rem', marginBottom: 4 }}>{selectedInquiry.name}</div>
+                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.68rem', color: '#4b5563' }}>{selectedInquiry.email}</div>
+                    </div>
+                    <button onClick={() => setSelectedInquiry(null)} style={{ background: 'none', border: 'none', color: '#6b7280', cursor: 'pointer', fontSize: '1.2rem' }}>✕</button>
+                  </div>
+                  <div style={{ display: 'flex', gap: 10, marginBottom: 20 }}>
+                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.68rem', padding: '4px 10px', borderRadius: 6, background: 'rgba(139,92,246,0.12)', color: '#8b5cf6' }}>Budget: {selectedInquiry.budget}</span>
+                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.68rem', padding: '4px 10px', borderRadius: 6, background: 'rgba(255,255,255,0.05)', color: '#4b5563' }}>{selectedInquiry.timestamp}</span>
+                  </div>
+                  <div style={{ padding: '16px', background: '#111827', borderRadius: 8, border: '1px solid rgba(255,255,255,0.06)', color: '#9ca3af', fontSize: '0.88rem', lineHeight: 1.7, overflowWrap: 'anywhere' }}>{selectedInquiry.message}</div>
+                  <div style={{ display: 'flex', gap: 10, marginTop: 20, justifyContent: 'flex-end' }}>
+                    <button onClick={() => setSelectedInquiry(null)} className="btn-ghost" style={{ padding: '8px 18px', borderRadius: 7, cursor: 'pointer', fontSize: '0.82rem', background: 'transparent' }}>Close</button>
+                    <a href={`mailto:${selectedInquiry.email}`} className="btn-primary" style={{ padding: '8px 18px', borderRadius: 7, cursor: 'pointer', fontSize: '0.82rem', border: 'none', textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}>
+                      Reply via Email
+                    </a>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Purge confirm modal */}
+            {showPurgeConfirm && (
+              <div
+                style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}
+                onClick={() => setShowPurgeConfirm(false)}
+              >
+                <div onClick={e => e.stopPropagation()} style={{ background: '#0d1422', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 16, width: '100%', maxWidth: 400, padding: 32, textAlign: 'center' }}>
+                  <div style={{ fontSize: '2rem', marginBottom: 16 }}>⚠</div>
+                  <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem', fontWeight: 700, color: '#f1f5f9', marginBottom: 8 }}>Clear Inbox Queue?</div>
+                  <p style={{ color: '#6b7280', fontSize: '0.85rem', marginBottom: 24 }}>This will permanently delete all {data.messages.length} messages. This action cannot be undone.</p>
+                  <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
+                    <button onClick={() => setShowPurgeConfirm(false)} className="btn-ghost" style={{ padding: '9px 20px', borderRadius: 7, cursor: 'pointer', fontSize: '0.85rem', background: 'transparent' }}>Cancel</button>
+                    <button
+                      onClick={handlePurgeMessages}
+                      style={{ padding: '9px 20px', borderRadius: 7, border: '1px solid rgba(239,68,68,0.4)', background: 'rgba(239,68,68,0.12)', color: '#ef4444', cursor: 'pointer', fontSize: '0.85rem', fontFamily: 'var(--font-body)', fontWeight: 600 }}
+                    >
+                      Purge All Messages
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Access Requests */}
+        {tab === 'access' && (
+          <div>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.6rem', fontWeight: 700, color: '#f1f5f9', marginBottom: 8 }}>Access Requests</h2>
+            <p style={{ color: '#4b5563', marginBottom: 32, fontSize: '0.85rem' }}>Manage whitelisted users, UPI payment verifications, and access approvals.</p>
+
+            {/* Pending UPI Payments Queue */}
+            <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', fontWeight: 700, color: '#f1f5f9', marginBottom: 16 }}>Pending UPI Payments Queue</h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 40 }}>
+              {data.upiRequests.map(r => (
+                <div key={r.id} style={{ padding: '20px', borderRadius: 10, background: '#0d1422', border: '1px solid rgba(255,255,255,0.06)', display: 'grid', gridTemplateColumns: '1fr auto', alignItems: 'center', gap: 20 }}>
+                  <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap', alignItems: 'center' }}>
+                    <div>
+                      <div style={{ fontFamily: 'var(--font-body)', fontSize: '0.85rem', fontWeight: 500, color: '#e2e8f0' }}>{r.email}</div>
+                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: '#374151', marginTop: 2 }}>Template Code: {r.templateId}</div>
+                    </div>
+                    <div style={{ padding: '6px 12px', borderRadius: 6, background: 'rgba(139,92,246,0.08)', border: '1px solid rgba(139,92,246,0.15)' }}>
+                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: '#6b7280', marginBottom: 2 }}>UTR CODE</div>
+                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: '#8b5cf6' }}>{r.utr}</div>
+                    </div>
+                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: '#374151' }}>{r.timestamp}</span>
+                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', padding: '3px 10px', borderRadius: 100, background: r.status === 'Approved' ? 'rgba(34,197,94,0.1)' : 'rgba(245,158,11,0.1)', color: r.status === 'Approved' ? '#22c55e' : '#f59e0b' }}>
+                      {r.status}
+                    </span>
+                  </div>
+                  {r.status === 'Pending Verification' && (
+                    <div style={{ display: 'flex', gap: 8 }}>
+                      <button onClick={() => handleApproveUPI(r)} className="btn-primary" style={{ padding: '6px 14px', borderRadius: 6, border: 'none', cursor: 'pointer', fontSize: '0.75rem', whiteSpace: 'nowrap' }}>
+                        Approve
+                      </button>
+                      <button onClick={() => handleRejectUPI(r.id)} style={{ padding: '6px 14px', borderRadius: 6, border: '1px solid rgba(239,68,68,0.3)', background: 'rgba(239,68,68,0.06)', color: '#ef4444', cursor: 'pointer', fontSize: '0.75rem', whiteSpace: 'nowrap' }}>
+                        Reject
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ))}
+              {data.upiRequests.length === 0 && (
+                <div style={{ padding: 24, textAlign: 'center', border: '1px dashed rgba(255,255,255,0.05)', borderRadius: 10, color: '#374151', fontFamily: 'var(--font-mono)', fontSize: '0.8rem' }}>No UPI transactions found.</div>
+              )}
+            </div>
+
+            {/* Pending Whitelist Requests */}
+            <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', fontWeight: 700, color: '#f1f5f9', marginBottom: 16 }}>Whitelist Email Access Requests</h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 40 }}>
+              {data.requests.map((r, i) => (
+                <div key={i} style={{ padding: '20px', borderRadius: 10, background: '#0d1422', border: '1px solid rgba(255,255,255,0.06)', display: 'grid', gridTemplateColumns: '1fr auto', alignItems: 'center', gap: 20 }}>
+                  <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap', alignItems: 'center' }}>
+                    <div>
+                      <div style={{ fontFamily: 'var(--font-body)', fontSize: '0.85rem', fontWeight: 500, color: '#e2e8f0' }}>{r.email}</div>
+                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: '#374151', marginTop: 2 }}>Requested: {r.timestamp}</div>
+                    </div>
+                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', padding: '3px 10px', borderRadius: 100, background: r.status.includes('Pending') ? 'rgba(245,158,11,0.1)' : 'rgba(34,197,94,0.1)', color: r.status.includes('Pending') ? '#f59e0b' : '#22c55e' }}>{r.status}</span>
+                  </div>
+                  {r.status === 'Pending Approval' && (
+                    <div style={{ display: 'flex', gap: 8 }}>
+                      <button onClick={() => handleApproveWhitelist(r.email)} className="btn-primary" style={{ padding: '6px 14px', borderRadius: 6, border: 'none', cursor: 'pointer', fontSize: '0.75rem', whiteSpace: 'nowrap' }}>
+                        Approve Whitelist
+                      </button>
+                      <button onClick={() => handleDenyWhitelist(r.email)} style={{ padding: '6px 14px', borderRadius: 6, border: '1px solid rgba(239,68,68,0.3)', background: 'rgba(239,68,68,0.06)', color: '#ef4444', cursor: 'pointer', fontSize: '0.75rem', whiteSpace: 'nowrap' }}>
+                        Deny
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ))}
+              {data.requests.length === 0 && (
+                <div style={{ padding: 24, textAlign: 'center', border: '1px dashed rgba(255,255,255,0.05)', borderRadius: 10, color: '#374151', fontFamily: 'var(--font-mono)', fontSize: '0.8rem' }}>No pending access requests.</div>
+              )}
+            </div>
+
+            {/* Manually Whitelist Form */}
+            <form onSubmit={handleManualWhitelist} style={{ padding: '24px', borderRadius: 12, background: '#0d1422', border: '1px solid rgba(255,255,255,0.07)' }}>
+              <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, color: '#f1f5f9', marginBottom: 16, fontSize: '0.95rem' }}>Manually Whitelist Email Address</h3>
+              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                <input required type="email" placeholder="Email address (e.g. client@gmail.com)" value={manualEmail} onChange={e => setManualEmail(e.target.value)} style={{ flex: 1, minWidth: 200, padding: '9px 12px', background: '#111827', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 7, color: '#e2e8f0', fontSize: '0.82rem', outline: 'none' }} />
+                <button type="submit" className="btn-primary" style={{ padding: '9px 20px', borderRadius: 7, border: 'none', cursor: 'pointer', fontSize: '0.82rem' }}>
+                  Whitelist Account
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+function ContactPage() {
+  const [form, setForm] = useState({ name: '', email: '', budget: '', message: '' })
+  const [submitted, setSubmitted] = useState(false)
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    try {
+      const res = await fetch(CLOUDFLARE_WORKER_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "add_contact_message",
+          name: form.name,
+          email: form.email,
+          budget: form.budget || "Let's discuss",
+          message: form.message
+        })
+      })
+      const d = await res.json()
+      if (d.result === "success") {
+        setSubmitted(true)
+      } else {
+        alert("Failed to submit inquiry: " + d.error)
+      }
+    } catch (err: any) {
+      alert("Failed to submit inquiry: " + err?.message)
+    }
+  }
+
+  return (
+    <div style={{ minHeight: '100vh', paddingTop: 64, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '100px 24px 80px' }}>
+      <div style={{ width: '100%', maxWidth: 1100, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 80, alignItems: 'start' }}>
+
+        {/* Left column */}
+        <div>
+          <div className="section-label" style={{ marginBottom: 16 }}>Let's Build Together</div>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(2rem, 4vw, 3rem)', fontWeight: 700, color: '#f1f5f9', letterSpacing: '-0.02em', marginBottom: 20, lineHeight: 1.1 }}>
+            Start a project<br />
+            <span className="gradient-text">with Spark Web</span>
+          </h2>
+          <p style={{ color: '#6b7280', lineHeight: 1.8, marginBottom: 40, maxWidth: 400 }}>
+            We build high-performance web products, interactive user experiences, and responsive layouts. Let us know your goals and we'll reply within 24 hours.
+          </p>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+            {[
+              { icon: '◈', title: 'Custom Development', desc: 'Bespoke web applications built on Cloudflare edge stack' },
+              { icon: '◉', title: 'Template Tuning', desc: 'Brand-customized builds matching your custom styling requirements' },
+              { icon: '◧', title: 'Premium Engineering', desc: 'Highly optimized templates with rapid load speeds' },
+            ].map(i => (
+              <div key={i.title} style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>
+                <div style={{ width: 36, height: 36, borderRadius: 8, background: 'rgba(0,229,255,0.08)', border: '1px solid rgba(0,229,255,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: '#00e5ff', fontSize: '1rem' }}>{i.icon}</div>
+                <div>
+                  <div style={{ fontFamily: 'var(--font-display)', fontWeight: 600, color: '#f1f5f9', fontSize: '0.9rem', marginBottom: 2 }}>{i.title}</div>
+                  <div style={{ color: '#4b5563', fontSize: '0.82rem' }}>{i.desc}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Form */}
+        <div style={{ background: '#0d1422', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 16, padding: 36 }}>
+          {submitted ? (
+            <div style={{ textAlign: 'center', padding: '40px 0' }}>
+              <div style={{ fontSize: '2.5rem', marginBottom: 16, color: '#22c55e' }}>✓</div>
+              <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.3rem', fontWeight: 700, color: '#22c55e', marginBottom: 10 }}>Inquiry Received</div>
+              <p style={{ color: '#6b7280', fontSize: '0.88rem' }}>Thank you! We will review your message and reach out to {form.email} within 24 hours.</p>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit}>
+              <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', fontWeight: 700, color: '#f1f5f9', marginBottom: 24 }}>Send an Inquiry</h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                {[
+                  { key: 'name', label: 'Full Name', placeholder: 'Aryan Kapoor', type: 'text' },
+                  { key: 'email', label: 'Email Address', placeholder: 'aryan@company.com', type: 'email' },
+                ].map(f => (
+                  <div key={f.key}>
+                    <label style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: '0.63rem', letterSpacing: '0.1em', color: '#4b5563', marginBottom: 6 }}>{f.label.toUpperCase()}</label>
+                    <input
+                      type={f.type}
+                      required
+                      placeholder={f.placeholder}
+                      value={(form as any)[f.key]}
+                      onChange={e => setForm(prev => ({ ...prev, [f.key]: e.target.value }))}
+                      style={{ width: '100%', padding: '10px 13px', background: '#111827', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 7, color: '#e2e8f0', fontSize: '0.85rem', outline: 'none' }}
+                    />
+                  </div>
+                ))}
+
+                <div>
+                  <label style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: '0.63rem', letterSpacing: '0.1em', color: '#4b5563', marginBottom: 6 }}>BUDGET RANGE</label>
+                  <select
+                    required
+                    value={form.budget}
+                    onChange={e => setForm(prev => ({ ...prev, budget: e.target.value }))}
+                    style={{ width: '100%', padding: '10px 13px', background: '#111827', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 7, color: form.budget ? '#e2e8f0' : '#4b5563', fontSize: '0.85rem', outline: 'none', cursor: 'pointer', colorScheme: 'dark' }}
+                  >
+                    <option value="">Select budget range</option>
+                    <option>$100–$200</option>
+                    <option>$200–$500</option>
+                    <option>$500–$1000</option>
+                    <option>$1000+</option>
+                    <option>Let's discuss</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: '0.63rem', letterSpacing: '0.1em', color: '#4b5563', marginBottom: 6 }}>MESSAGE</label>
+                  <textarea
+                    required
+                    rows={4}
+                    placeholder="Describe your design goals, timeline, and feature lists..."
+                    value={form.message}
+                    onChange={e => setForm(prev => ({ ...prev, message: e.target.value }))}
+                    style={{ width: '100%', padding: '10px 13px', background: '#111827', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 7, color: '#e2e8f0', fontSize: '0.85rem', outline: 'none', resize: 'vertical' }}
+                  />
+                </div>
+
+                <button type="submit" className="btn-primary" style={{ padding: '13px', borderRadius: 8, border: 'none', cursor: 'pointer', fontSize: '0.9rem', fontFamily: 'var(--font-display)', fontWeight: 600 }}>
+                  Submit Project Request →
+                </button>
+              </div>
+            </form>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function Footer({ setPage }: { setPage: (p: NavPage) => void }) {
+  return (
+    <footer style={{ borderTop: '1px solid rgba(255,255,255,0.05)', padding: '48px 24px 32px', background: '#070b12' }}>
+      <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', gap: 48, marginBottom: 48, flexWrap: 'wrap' }}>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+              <div style={{ width: 28, height: 28, borderRadius: 7, background: 'linear-gradient(135deg, #00e5ff, #8b5cf6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: 800, color: '#070b12', fontFamily: 'var(--font-display)' }}>S</div>
+              <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, color: '#f1f5f9' }}>Spark<span style={{ color: '#00e5ff' }}>Web</span></span>
+            </div>
+            <p style={{ color: '#374151', fontSize: '0.82rem', lineHeight: 1.7, maxWidth: 260 }}>
+              Premium responsive design templates built with Cloudflare Workers serverless edge engine.
+            </p>
+          </div>
+          {[
+            { title: 'Platform', links: [{ label: 'Templates', page: 'templates' }, { label: 'Sandbox', page: 'sandbox' }, { label: 'Contact Us', page: 'contact' }] },
+            { title: 'Information', links: [{ label: 'Privacy Policy', page: 'home' }, { label: 'Terms of Use', page: 'home' }, { label: 'Whitelists', page: 'templates' }] },
+            { title: 'Company', links: [{ label: 'Get Support', page: 'contact' }, { label: 'Admin Access', page: 'dashboard' }] },
+          ].map(col => (
+            <div key={col.title}>
+              <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.62rem', letterSpacing: '0.12em', color: '#374151', marginBottom: 14, textTransform: 'uppercase' }}>{col.title}</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {col.links.map(l => (
+                  <button key={l.label} onClick={() => setPage(l.page as NavPage)} style={{ background: 'none', border: 'none', padding: 0, textAlign: 'left', color: '#4b5563', fontSize: '0.82rem', cursor: 'pointer', fontFamily: 'var(--font-body)', transition: 'color 0.15s' }}>
+                    {l.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+        <div style={{ borderTop: '1px solid rgba(255,255,255,0.04)', paddingTop: 24, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: '#1f2937' }}>© 2026 SparkWeb. Edge platform.</div>
+          <div style={{ display: 'flex', gap: 16 }}>
+            {['Cloudflare Edge', 'D1 Database', 'Google Whitelists'].map(t => (
+              <span key={t} style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: '#1f2937', letterSpacing: '0.06em' }}>{t}</span>
+            ))}
+          </div>
+        </div>
+      </div>
+    </footer>
+  )
+}
+
+// ─── UPI Verification Modal ──────────────────────────────────────────────────
+function UPIVerificationModal({
+  templatesList,
+  userEmail,
+  onClose
+}: {
+  templatesList: Template[];
+  userEmail: string;
+  onClose: () => void;
+}) {
+  const [selectedTpl, setSelectedTpl] = useState('');
+  const [utr, setUtr] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (templatesList.length > 0) {
+      setSelectedTpl(templatesList[0].id);
+    }
+  }, [templatesList]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedTpl || !utr || utr.trim().length < 6) {
+      alert("Please enter a valid 12-digit transaction UTR code.");
+      return;
+    }
+    setLoading(true);
+    try {
+      const res = await fetch(CLOUDFLARE_WORKER_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "submit_upi_request",
+          email: userEmail,
+          templateId: selectedTpl,
+          utr: utr.trim()
+        })
+      });
+      const d = await res.json();
+      if (d.result === "success") {
+        alert("UPI Payment request submitted! The administrator will review and unlock access within 2-4 hours.");
+        onClose();
+      } else {
+        alert("Failed to submit request: " + d.error);
+      }
+    } catch (err: any) {
+      alert("Failed: " + err?.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div style={{ position: 'fixed', inset: 0, zIndex: 300, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
+      <form onSubmit={handleSubmit} style={{ background: '#0d1422', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 16, width: '100%', maxWidth: 440, padding: 32 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+          <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.2rem', fontWeight: 700, color: '#f1f5f9' }}>Submit UPI Payment</h3>
+          <button type="button" onClick={onClose} style={{ background: 'none', border: 'none', color: '#6b7280', cursor: 'pointer', fontSize: '1.2rem' }}>✕</button>
+        </div>
+
+        <p style={{ color: '#6b7280', fontSize: '0.82rem', marginBottom: 20, lineHeight: 1.6 }}>
+          Scan the QR code using any UPI app (GPay/PhonePe/Paytm), pay the template amount, and paste the 12-digit transaction UTR code below.
+        </p>
+
+        {/* UPI QR Code Container */}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', background: '#111827', padding: 20, borderRadius: 10, marginBottom: 20, border: '1px solid rgba(255,255,255,0.06)' }}>
+          <img
+            src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=upi://pay?pa=oxoredz@okaxis%26pn=SparkWeb%26cu=INR"
+            alt="UPI QR Code Scan to Pay"
+            style={{ width: 150, height: 150, background: '#fff', padding: 4, borderRadius: 4 }}
+          />
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: '#e2e8f0', marginTop: 12 }}>UPI ID: oxoredz@okaxis</div>
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginBottom: 24 }}>
+          <div>
+            <label style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: '#4b5563', marginBottom: 6 }}>SELECT TEMPLATE</label>
+            <select
+              value={selectedTpl}
+              onChange={e => setSelectedTpl(e.target.value)}
+              style={{ width: '100%', padding: '9px 12px', background: '#111827', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 7, color: '#e2e8f0', fontSize: '0.82rem', colorScheme: 'dark' }}
+            >
+              {templatesList.map(t => (
+                <option key={t.id} value={t.id}>{t.name} ({t.price})</option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: '#4b5563', marginBottom: 6 }}>12-DIGIT TRANSACTION UTR CODE</label>
+            <input
+              required
+              placeholder="e.g. 482930184729"
+              value={utr}
+              onChange={e => setUtr(e.target.value)}
+              style={{ width: '100%', padding: '9px 12px', background: '#111827', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 7, color: '#e2e8f0', fontSize: '0.82rem' }}
+            />
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
+          <button type="button" onClick={onClose} className="btn-ghost" style={{ padding: '8px 18px', borderRadius: 7, fontSize: '0.82rem' }}>Cancel</button>
+          <button type="submit" disabled={loading} className="btn-primary" style={{ padding: '8px 18px', borderRadius: 7, fontSize: '0.82rem' }}>
+            {loading ? 'Submitting...' : 'Submit Request'}
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+}
+
+// ─── Purchase Detail Modal ───────────────────────────────────────────────────
+function PurchaseCheckoutModal({
+  template,
+  userEmail,
+  onClose,
+  onOpenUPI
+}: {
+  template: Template;
+  userEmail: string;
+  onClose: () => void;
+  onOpenUPI: () => void;
+}) {
+  const payhipUrl = template.payhipUrl || "";
+
+  useEffect(() => {
+    // Rebind Payhip scan overlay script trigger
+    if (payhipUrl && (window as any).Payhip && typeof (window as any).Payhip.scan === "function") {
+      try {
+        (window as any).Payhip.scan();
+      } catch (e) {
+        console.error("Payhip scan error:", e);
+      }
+    }
+  }, [payhipUrl]);
+
+  const finalCheckoutUrl = payhipUrl
+    ? payhipUrl + (payhipUrl.includes("?") ? "&" : "?") + "email=" + encodeURIComponent(userEmail)
+    : "";
+
+  return (
+    <div style={{ position: 'fixed', inset: 0, zIndex: 300, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
+      <div style={{ background: '#0d1422', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 16, width: '100%', maxWidth: 440, padding: 32, textAlign: 'center' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+          <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.2rem', fontWeight: 700, color: '#f1f5f9', textAlign: 'left' }}>Unlock {template.name}</h3>
+          <button type="button" onClick={onClose} style={{ background: 'none', border: 'none', color: '#6b7280', cursor: 'pointer', fontSize: '1.2rem' }}>✕</button>
+        </div>
+
+        <p style={{ color: '#6b7280', fontSize: '0.85rem', marginBottom: 24, lineHeight: 1.6 }}>
+          Choose a payment method to purchase this premium design layout. Access is linked to: <br/><strong>{userEmail}</strong>
+        </p>
+
+        <div style={{ fontSize: '2.2rem', fontFamily: 'var(--font-display)', fontWeight: 800, color: '#00e5ff', marginBottom: 28 }}>
+          {template.price}
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          {finalCheckoutUrl ? (
+            <a
+              href={finalCheckoutUrl}
+              className="btn-primary payhip-buy-button"
+              style={{ padding: '12px', borderRadius: 8, display: 'block', textDecoration: 'none', fontSize: '0.9rem' }}
+              onClick={onClose}
+            >
+              Pay via Card / PayPal (Instant)
+            </a>
+          ) : (
+            <div style={{ padding: 12, background: 'rgba(239,68,68,0.06)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 8, color: '#ef4444', fontSize: '0.78rem' }}>
+              Checkout link not configured for this template.
+            </div>
+          )}
+
+          <button
+            onClick={() => { onClose(); onOpenUPI(); }}
+            className="btn-ghost"
+            style={{ padding: '12px', borderRadius: 8, cursor: 'pointer', fontSize: '0.9rem' }}
+          >
+            Pay via UPI QR Code
+          </button>
         </div>
       </div>
     </div>
   );
 }
 
-// ─── App ──────────────────────────────────────────────────────────────────────
-
-type AppView = "site" | "admin-login" | "admin-dashboard" | "profile";
+// ─── App Main Router ──────────────────────────────────────────────────────────
 
 export default function App() {
-  const [view, setView] = useState<AppView>(() => {
-    if (window.location.hash === "#admin" || window.location.search.includes("view=admin")) {
-      return "admin-login";
-    }
-    return "site";
-  });
-  const [adminUser, setAdminUser] = useState<AdminUser | null>(() => {
-    const email = localStorage.getItem("tf_user_email");
-    if (email && ADMIN_EMAILS.includes(email.toLowerCase().trim())) {
-      return {
-        email,
-        name: localStorage.getItem("tf_user_name") || "Admin User",
-        role: "Super Admin"
-      };
-    }
-    return null;
-  });
+  const [page, setPage] = useState<NavPage>('home')
+  
+  // Whitelist user state hooks
+  const [templatesList, setTemplatesList] = useState<Template[]>([])
+  const [purchasedTemplates, setPurchasedTemplates] = useState<string[]>([])
+  const [userEmail, setUserEmail] = useState<string | null>(localStorage.getItem("tf_user_email"))
+  const [userName, setUserName] = useState<string | null>(localStorage.getItem("tf_user_name"))
+  const [userPicture, setUserPicture] = useState<string | null>(localStorage.getItem("tf_user_picture"))
+  const [isWhitelisted, setIsWhitelisted] = useState(false)
+  const [activeSandboxTemplate, setActiveSandboxTemplate] = useState<Template | undefined>(undefined)
 
-  const [templatesList, setTemplatesList] = useState<any[]>([]);
-  const [purchasedTemplates, setPurchasedTemplates] = useState<string[]>([]);
-  const [userEmail, setUserEmail] = useState<string | null>(localStorage.getItem("tf_user_email"));
-  const [userName, setUserName] = useState<string | null>(localStorage.getItem("tf_user_name"));
-  const [userPicture, setUserPicture] = useState<string | null>(localStorage.getItem("tf_user_picture"));
+  // Overlay state hooks
+  const [checkoutTemplate, setCheckoutTemplate] = useState<Template | null>(null)
+  const [showUPIModal, setShowUPIModal] = useState(false)
 
-  const [checkoutTemplate, setCheckoutTemplate] = useState<any | null>(null);
-  const [showAuthModal, setShowAuthModal] = useState(false);  // Helper to normalize template column keys from SQLite (case-insensitive fallback)
-  const normalizeTemplate = (t: any) => {
-    if (!t) return t;
-
-    // Map numerical IDs or names to demoPath and payhipUrl if missing
-    let defaultDemoPath = "template-1";
-    const tid = String(t.id || t.ID);
-    const tname = String(t.name || t.NAME || "").toLowerCase();
-
-    if (tid === "2" || tid.includes("template-2") || tname.includes("portfolio") || tname.includes("zenith")) {
-      defaultDemoPath = "template-2";
-    } else if (tid === "3" || tid.includes("template-3") || tname.includes("blog") || tname.includes("echo")) {
-      defaultDemoPath = "template-3";
-    } else if (tid === "4" || tid.includes("template-4") || tname.includes("nova")) {
-      defaultDemoPath = "template-4";
-    } else if (tid === "5" || tid.includes("template-5")) {
-      defaultDemoPath = "template-5";
-    }
-
-    return {
-      id: t.id || t.ID,
-      name: t.name || t.NAME,
-      category: t.category || t.CATEGORY,
-      description: t.description || t.desc || t.DESCRIPTION || t.DESC,
-      thumbnail: t.thumbnail || t.THUMBNAIL || t.img || "",
-      demoPath: t.demoPath || t.demopath || t.DEMOPATH || defaultDemoPath,
-      price: t.price || t.PRICE || "Free",
-      payhipUrl: t.payhipUrl || t.payhipurl || t.PAYHIPURL || "",
-      figmaUrl: t.figmaUrl || t.figmaurl || t.FIGMAURL,
-      rating: t.rating || t.RATING || 4.8,
-      reviews: t.reviews || t.REVIEWS || 120,
-      downloads: t.downloads || t.DOWNLOADS || 1200,
-      pages: t.pages || t.PAGES || 5,
-      tech: t.tech ? (typeof t.tech === "string" ? JSON.parse(t.tech) : t.tech) : ["React", "Tailwind"],
-      htmlCode: t.htmlCode || t.htmlcode || t.HTMLCODE || "",
-      cssCode: t.cssCode || t.csscode || t.CSSCODE || "",
-      jsCode: t.jsCode || t.jscode || t.JSCODE || "",
-    };
-  };
-
-  // 1. Fetch templates from D1 database
+  // 1. Fetch dynamic templates list
   const loadTemplates = async () => {
     try {
       const res = await fetch(CLOUDFLARE_WORKER_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "get_templates" })
-      });
-      const data = await res.json();
-      if (data.result === "success" && data.templates && data.templates.length > 0) {
-        setTemplatesList(data.templates.map(normalizeTemplate));
+      })
+      const d = await res.json()
+      if (d.result === "success" && d.templates && d.templates.length > 0) {
+        setTemplatesList(d.templates)
       } else {
-        // Fallback to static seed data if D1 returns empty results
-        setTemplatesList(templates.map(normalizeTemplate));
+        setTemplatesList(SEED_TEMPLATES)
       }
-    } catch (err) {
-      console.error("Failed to load templates", err);
-      // Fallback to static seed data if network or server error occurs
-      setTemplatesList(templates.map(normalizeTemplate));
+    } catch (e) {
+      console.error(e)
+      setTemplatesList(SEED_TEMPLATES)
     }
-  };  // 2. Fetch user whitelist purchases from D1 database
+  }
+
+  // 2. Fetch user whitelist purchases
   const loadUserPurchases = async (email: string) => {
     try {
       const res = await fetch(CLOUDFLARE_WORKER_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "get_purchases", email })
-      });
-      const data = await res.json();
-      if (data.result === "success") {
-        setPurchasedTemplates(data.purchases.map((p: any) => p.templateId));
+      })
+      const d = await res.json()
+      if (d.result === "success" && d.purchases) {
+        setPurchasedTemplates(d.purchases)
       }
-    } catch (err) {
-      console.error("Failed to load user purchases", err);
+    } catch (e) {
+      console.error(e)
     }
-  };
+  }
+
+  // 3. Verify whitelist status on login
+  const checkWhitelistStatus = async (email: string) => {
+    try {
+      const res = await fetch(CLOUDFLARE_WORKER_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "send_otp", email })
+      })
+      const d = await res.json()
+      if (d.result === "success") {
+        setIsWhitelisted(true)
+      } else {
+        setIsWhitelisted(false)
+        // Auto registered into whitelist access queue
+      }
+    } catch (e) {
+      console.error(e)
+    }
+  }
 
   useEffect(() => {
-    loadTemplates();
-  }, []);
+    loadTemplates()
+  }, [])
 
   useEffect(() => {
     if (userEmail) {
-      loadUserPurchases(userEmail);
+      loadUserPurchases(userEmail)
+      checkWhitelistStatus(userEmail)
     } else {
-      setPurchasedTemplates([]);
+      setPurchasedTemplates([])
+      setIsWhitelisted(false)
     }
-  }, [userEmail]);
+  }, [userEmail])
 
+  // Google OAuth button renderer inside templates tab
+  useEffect(() => {
+    const handleCredentialResponse = (response: any) => {
+      try {
+        const payload = JSON.parse(
+          decodeURIComponent(
+            window
+              .atob(response.credential.split(".")[1].replace(/-/g, "+").replace(/_/g, "/"))
+              .split("")
+              .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+              .join("")
+          )
+        );
+        const { email, name, picture } = payload;
+        handleGoogleSuccess(email, name, picture);
+      } catch (err) {
+        console.error("Failed to decode token", err);
+      }
+    };
+
+    if (page === 'templates' && !userEmail && (window as any).google) {
+      setTimeout(() => {
+        const container = document.getElementById("google-signin-btn-container");
+        if (container) {
+          (window as any).google.accounts.id.initialize({
+            client_id: GOOGLE_CLIENT_ID,
+            callback: handleCredentialResponse
+          });
+          (window as any).google.accounts.id.renderButton(container, {
+            theme: "filled_blue",
+            size: "large",
+            text: "continue_with",
+            shape: "pill",
+            width: 250
+          });
+        }
+      }, 300);
+    }
+  }, [page, userEmail])
+
+  // Payhip Success redirect hooks
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const payhipSuccess = params.get("payhip_success");
@@ -3659,7 +2153,8 @@ export default function App() {
           const data = await response.json();
           if (data.result === "success") {
             alert("Payment verified successfully! You can now download your template source code on this page.");
-            window.location.href = `/templates/product.html?template=${payhipTemplate}`;
+            loadUserPurchases(payhipEmail);
+            setPage('templates');
           }
         } catch (err) {
           console.error("Payhip redirect sync failed:", err);
@@ -3669,16 +2164,6 @@ export default function App() {
     }
   }, []);
 
-  const handleLogin = (user: AdminUser) => {
-    setAdminUser(user);
-    setView("admin-dashboard");
-  };
-
-  const handleLogout = () => {
-    setAdminUser(null);
-    setView("site");
-  };
-
   const handleGoogleSuccess = (email: string, name: string, picture: string) => {
     localStorage.setItem("tf_user_email", email);
     localStorage.setItem("tf_user_name", name);
@@ -3686,19 +2171,11 @@ export default function App() {
     setUserEmail(email);
     setUserName(name);
     setUserPicture(picture);
-    setShowAuthModal(false);
-
-    // If logging in is admin email, automatically load admin session
+    
     if (ADMIN_EMAILS.includes(email.toLowerCase().trim())) {
-      setAdminUser({
-        email,
-        password: "",
-        name,
-        role: "Super Admin"
-      });
-      setView("admin-dashboard");
+      setPage('dashboard');
     }
-  };
+  }
 
   const handleSignOut = () => {
     localStorage.removeItem("tf_user_email");
@@ -3707,79 +2184,168 @@ export default function App() {
     setUserEmail(null);
     setUserName(null);
     setUserPicture(null);
+    setIsWhitelisted(false);
     setPurchasedTemplates([]);
-    handleLogout();
-  };
-
-  if (view === "admin-login") {
-    return <AdminLogin onLogin={handleLogin} onBack={() => setView("site")} />;
+    setPage('home');
   }
 
-  if (view === "admin-dashboard" && adminUser) {
-    return (
-      <AdminDashboard
-        user={adminUser}
-        onLogout={handleLogout}
-        templatesList={templatesList}
-        onRefreshTemplates={loadTemplates}
-      />
-    );
+  const triggerDownload = (t: Template) => {
+    if (!t.htmlCode && !t.cssCode && !t.jsCode) {
+      alert("This is a mock layout. Source code has not been uploaded to the database.");
+      return;
+    }
+    const htmlStr = `<!DOCTYPE html>\n<html>\n<head>\n  <meta charset="UTF-8">\n  <title>${t.name}</title>\n  <style>\n${t.cssCode || ''}\n  </style>\n</head>\n<body>\n${t.htmlCode || ''}\n  <script>\n${t.jsCode || ''}\n  </script>\n</body>\n</html>`;
+    const blob = new Blob([htmlStr], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${t.id || 'template'}_source.html`;
+    link.click();
+    URL.revokeObjectURL(url);
   }
 
-  if (view === "profile" && userEmail) {
-    return (
-      <UserProfile
-        userEmail={userEmail}
-        userName={userName}
-        userPicture={userPicture}
-        purchasedTemplates={purchasedTemplates}
-        templatesList={templatesList}
-        onBack={() => setView("site")}
-        onSignOut={handleSignOut}
-      />
-    );
+  const handleDownload = (t: Template) => {
+    if (!userEmail) {
+      alert("Please sign in with Google below first!");
+      return;
+    }
+    if (!isWhitelisted && t.price === 'Free') {
+      alert("Your account is awaiting whitelist approval from the sheet administrator. Access request has already been recorded.");
+      return;
+    }
+    triggerDownload(t);
   }
+
+  const handlePurchase = (t: Template) => {
+    if (!userEmail) {
+      alert("Please sign in with Google below first to purchase!");
+      return;
+    }
+    setCheckoutTemplate(t);
+  }
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }, [page])
 
   return (
-    <div className="min-h-screen" style={{ background: "#0a0a0a" }}>
-      <Navbar
-        userEmail={userEmail}
-        userName={userName}
-        userPicture={userPicture}
-        onSignOut={handleSignOut}
-        onOpenAuth={() => setShowAuthModal(true)}
-        onAdminDashboard={() => setView("admin-dashboard")}
-        onProfileView={() => setView("profile")}
-      />
-      <Hero />
-      <Templates
-        templatesList={templatesList}
-        purchasedTemplates={purchasedTemplates}
-        userEmail={userEmail}
-        onOpenCheckout={(tmpl) => setCheckoutTemplate(tmpl)}
-        onOpenAuth={() => setShowAuthModal(true)}
-      />
-      <Services />
-      <Work />
-      <Process />
-      <Contact />
-      <Footer onAdminClick={() => setView("admin-login")} />
+    <div style={{ background: '#070b12', minHeight: '100vh', color: '#e2e8f0' }}>
+      <NavBar page={page} setPage={setPage} userEmail={userEmail} handleSignOut={handleSignOut} />
 
-      {/* Overlays */}
-      {showAuthModal && (
-        <AuthModal
-          onClose={() => setShowAuthModal(false)}
-          onSuccess={handleGoogleSuccess}
+      {page === 'home' && (
+        <>
+          <HeroSection setPage={setPage} />
+          <FeaturesSection />
+          {/* Marketplace preview on home */}
+          <section style={{ padding: '80px 24px', background: 'rgba(0,0,0,0.2)' }}>
+            <div style={{ maxWidth: 1200, margin: '0 auto', textAlign: 'center', marginBottom: 48 }}>
+              <div className="section-label" style={{ marginBottom: 12 }}>Featured Templates</div>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1.8rem, 3.5vw, 2.6rem)', fontWeight: 700, color: '#f1f5f9', letterSpacing: '-0.02em', marginBottom: 16 }}>
+                Start with something exceptional
+              </h2>
+            </div>
+            <div style={{ maxWidth: 1200, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 20, marginBottom: 40 }}>
+              {templatesList.slice(0, 3).map(t => {
+                const isUnlocked = t.price === 'Free' || purchasedTemplates.includes(t.id);
+                return (
+                  <TemplateCard
+                    key={t.id}
+                    t={t}
+                    onPreview={(tmpl) => {
+                      setActiveSandboxTemplate(tmpl);
+                      setPage('sandbox');
+                    }}
+                    isUnlocked={isUnlocked}
+                    onDownload={handleDownload}
+                    onPurchase={handlePurchase}
+                  />
+                );
+              })}
+            </div>
+            <div style={{ textAlign: 'center' }}>
+              <button onClick={() => setPage('templates')} className="btn-ghost" style={{ padding: '12px 28px', borderRadius: 8, cursor: 'pointer', fontSize: '0.9rem', background: 'transparent' }}>
+                View All Templates →
+              </button>
+            </div>
+          </section>
+
+          {/* CTA Banner */}
+          <section style={{ padding: '100px 24px' }}>
+            <div style={{ maxWidth: 800, margin: '0 auto', textAlign: 'center', padding: '60px 48px', borderRadius: 20, background: 'linear-gradient(135deg, rgba(0,229,255,0.05), rgba(139,92,246,0.08))', border: '1px solid rgba(0,229,255,0.1)', position: 'relative', overflow: 'hidden' }}>
+              <div style={{ position: 'absolute', top: -40, right: -40, width: 200, height: 200, borderRadius: '50%', background: 'radial-gradient(circle, rgba(0,229,255,0.08), transparent)' }} />
+              <div style={{ position: 'absolute', bottom: -40, left: -40, width: 150, height: 150, borderRadius: '50%', background: 'radial-gradient(circle, rgba(139,92,246,0.1), transparent)' }} />
+              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1.8rem, 4vw, 2.8rem)', fontWeight: 800, color: '#f1f5f9', letterSpacing: '-0.02em', marginBottom: 16, position: 'relative' }}>
+                Ready to build at the <span className="gradient-text">edge?</span>
+              </h2>
+              <p style={{ color: '#6b7280', marginBottom: 36, maxWidth: 400, margin: '0 auto 36px', lineHeight: 1.7, position: 'relative' }}>
+                Access serverless database templates, visual layout code sandbox, and fast responsive edge builders.
+              </p>
+              <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap', position: 'relative' }}>
+                <button onClick={() => setPage('templates')} className="btn-primary" style={{ padding: '13px 32px', borderRadius: 8, border: 'none', cursor: 'pointer', fontSize: '0.95rem', fontFamily: 'var(--font-display)', fontWeight: 600 }}>
+                  Explore Catalog
+                </button>
+                <button onClick={() => setPage('contact')} className="btn-ghost" style={{ padding: '13px 32px', borderRadius: 8, cursor: 'pointer', fontSize: '0.95rem', background: 'transparent' }}>
+                  Contact Us
+                </button>
+              </div>
+            </div>
+          </section>
+          <Footer setPage={setPage} />
+        </>
+      )}
+
+      {page === 'templates' && (
+        <TemplatesPage
+          templatesList={templatesList}
+          purchasedTemplates={purchasedTemplates}
+          userEmail={userEmail}
+          isWhitelisted={isWhitelisted}
+          onPreview={(tmpl) => {
+            setActiveSandboxTemplate(tmpl);
+            setPage('sandbox');
+          }}
+          onDownload={handleDownload}
+          onPurchase={handlePurchase}
+          openUPIModal={() => setShowUPIModal(true)}
         />
       )}
 
+      {page === 'sandbox' && (
+        <SandboxPage activeTemplate={activeSandboxTemplate} />
+      )}
+
+      {page === 'dashboard' && (
+        <AdminDashboard
+          templatesList={templatesList}
+          onRefreshTemplates={loadTemplates}
+        />
+      )}
+
+      {page === 'contact' && (
+        <>
+          <ContactPage />
+          <Footer setPage={setPage} />
+        </>
+      )}
+
+      {/* UPI payment trigger modal */}
+      {showUPIModal && userEmail && (
+        <UPIVerificationModal
+          templatesList={templatesList}
+          userEmail={userEmail}
+          onClose={() => setShowUPIModal(false)}
+        />
+      )}
+
+      {/* Premium Checkout modal */}
       {checkoutTemplate && userEmail && (
-        <PaymentCheckoutModal
+        <PurchaseCheckoutModal
           template={checkoutTemplate}
           userEmail={userEmail}
           onClose={() => setCheckoutTemplate(null)}
+          onOpenUPI={() => setShowUPIModal(true)}
         />
       )}
     </div>
-  );
+  )
 }
