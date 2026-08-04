@@ -335,7 +335,7 @@ function HeroSection({ setPage }: { setPage: (p: NavPage) => void }) {
         </h1>
 
         <p style={{ fontSize: '1.1rem', color: '#94a3b8', lineHeight: 1.7, maxWidth: 580, margin: '0 auto 40px', fontWeight: 400 }}>
-          Premium responsive templates with live browser preview viewports, interactive sandbox variables,
+          Premium responsive templates with live browser preview viewports, dynamic source code unlocks,
           and serverless backends powered by Cloudflare Workers and D1 Database.
         </p>
 
@@ -381,8 +381,8 @@ function FeaturesSection() {
   const features = [
     {
       icon: '⬡',
-      title: 'Sandboxed Live Preview',
-      desc: 'Every template runs in an isolated <iframe> sandbox via /api/preview — toggle between Desktop, Tablet, and Mobile viewports in real time.',
+      title: 'Dynamic Live Preview',
+      desc: 'Every template is served dynamically via the /api/preview endpoint — rendering full-screen live layouts instantly in the browser.',
       accent: '#00e5ff',
     },
     {
@@ -405,8 +405,8 @@ function FeaturesSection() {
     },
     {
       icon: '◫',
-      title: 'Real-Time Customizer',
-      desc: 'Modify colors, layouts, and typography through an interactive visual editor. Changes re-render the live preview instantly without page reloads.',
+      title: 'Figma Assets Included',
+      desc: 'Get full access to the source Figma design files alongside raw code templates to customize assets offline with your design system.',
       accent: '#06b6d4',
     },
     {
@@ -668,6 +668,7 @@ function AdminDashboard({
   const [editTplCssFile, setEditTplCssFile] = useState<File | null>(null);
   const [editTplJsFile, setEditTplJsFile] = useState<File | null>(null);
   const [editTplThumbnailFile, setEditTplThumbnailFile] = useState<File | null>(null);
+  const [viewCode, setViewCode] = useState<{ title: string; code: string } | null>(null);
 
   // New Template form fields
   const [newTemplate, setNewTemplate] = useState({
@@ -1177,21 +1178,45 @@ function AdminDashboard({
             <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', fontWeight: 700, color: '#f1f5f9', marginBottom: 16 }}>Existing Templates</h3>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 12 }}>
               {templatesList.map(t => (
-                <div key={t.id} style={{ padding: '16px', borderRadius: 10, background: '#0d1422', border: '1px solid rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', gap: 12 }}>
-                  <div style={{ width: 40, height: 40, borderRadius: 8, background: '#0a0a0a', border: '1px solid rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, overflow: 'hidden' }}>
-                    {t.thumbnail ? (
-                      <img src={t.thumbnail} alt={t.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                    ) : (
-                      <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.65rem', fontWeight: 800, color: '#00e5ff' }}>{t.name[0]}</span>
-                    )}
+                <div key={t.id} style={{ padding: '16px', borderRadius: 10, background: '#0d1422', border: '1px solid rgba(255,255,255,0.06)', display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12, width: '100%' }}>
+                    <div style={{ width: 40, height: 40, borderRadius: 8, background: '#0a0a0a', border: '1px solid rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, overflow: 'hidden' }}>
+                      {t.thumbnail ? (
+                        <img src={t.thumbnail} alt={t.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      ) : (
+                        <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.65rem', fontWeight: 800, color: '#00e5ff' }}>{t.name[0]}</span>
+                      )}
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontFamily: 'var(--font-body)', fontSize: '0.82rem', fontWeight: 600, color: '#e2e8f0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.name}</div>
+                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.62rem', color: '#374151', marginTop: 2 }}>{t.id} · {t.price}</div>
+                    </div>
+                    <div style={{ display: 'flex', gap: 4 }}>
+                      <button onClick={() => setEditingTemplate(t)} style={{ background: 'none', border: 'none', color: '#6b7280', cursor: 'pointer', fontSize: '0.75rem', padding: 4 }} title="Edit Template">✎</button>
+                      <button onClick={() => handleDeleteTemplate(t.id)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '0.75rem', padding: 4 }} title="Delete Template">✕</button>
+                    </div>
                   </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontFamily: 'var(--font-body)', fontSize: '0.82rem', fontWeight: 600, color: '#e2e8f0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.name}</div>
-                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.62rem', color: '#374151', marginTop: 2 }}>{t.id} · {t.price}</div>
-                  </div>
-                  <div style={{ display: 'flex', gap: 4 }}>
-                    <button onClick={() => setEditingTemplate(t)} style={{ background: 'none', border: 'none', color: '#6b7280', cursor: 'pointer', fontSize: '0.75rem', padding: 4 }}>✎</button>
-                    <button onClick={() => handleDeleteTemplate(t.id)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '0.75rem', padding: 4 }}>✕</button>
+
+                  {/* Code Previews */}
+                  <div style={{ display: 'flex', gap: 6, borderTop: '1px solid rgba(255,255,255,0.04)', paddingTop: 10 }}>
+                    <button
+                      onClick={() => setViewCode({ title: `${t.name} - HTML Source`, code: t.htmlCode || '<!-- No HTML uploaded -->' })}
+                      style={{ flex: 1, padding: '5px 0', borderRadius: 4, background: 'rgba(249,115,22,0.1)', border: '1px solid rgba(249,115,22,0.2)', color: '#f97316', fontSize: '0.68rem', fontFamily: 'var(--font-mono)', cursor: 'pointer', fontWeight: 600 }}
+                    >
+                      HTML
+                    </button>
+                    <button
+                      onClick={() => setViewCode({ title: `${t.name} - CSS Styles`, code: t.cssCode || '/* No CSS uploaded */' })}
+                      style={{ flex: 1, padding: '5px 0', borderRadius: 4, background: 'rgba(56,189,248,0.1)', border: '1px solid rgba(56,189,248,0.2)', color: '#38bdf8', fontSize: '0.68rem', fontFamily: 'var(--font-mono)', cursor: 'pointer', fontWeight: 600 }}
+                    >
+                      CSS
+                    </button>
+                    <button
+                      onClick={() => setViewCode({ title: `${t.name} - JS Logic`, code: t.jsCode || '// No JS uploaded' })}
+                      style={{ flex: 1, padding: '5px 0', borderRadius: 4, background: 'rgba(251,191,36,0.1)', border: '1px solid rgba(251,191,36,0.2)', color: '#fbbf24', fontSize: '0.68rem', fontFamily: 'var(--font-mono)', cursor: 'pointer', fontWeight: 600 }}
+                    >
+                      JS
+                    </button>
                   </div>
                 </div>
               ))}
@@ -1484,6 +1509,39 @@ function AdminDashboard({
               </div>
             </form>
           </div>
+        {/* Code Inspector Overlay */}
+        {viewCode && (
+          <div style={{ position: 'fixed', inset: 0, zIndex: 220, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }} onClick={() => setViewCode(null)}>
+            <div onClick={e => e.stopPropagation()} style={{ background: '#0d1422', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 16, width: '100%', maxWidth: 720, padding: 28, display: 'flex', flexDirection: 'column', gap: 16, maxHeight: '90vh' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem', fontWeight: 700, color: '#f1f5f9' }}>{viewCode.title}</h3>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(viewCode.code);
+                      alert('Source code copied to clipboard! 📋');
+                    }}
+                    className="btn-primary"
+                    style={{ padding: '6px 12px', borderRadius: 6, border: 'none', cursor: 'pointer', fontSize: '0.75rem', fontFamily: 'var(--font-body)', fontWeight: 600 }}
+                  >
+                    Copy Code
+                  </button>
+                  <button
+                    onClick={() => setViewCode(null)}
+                    className="btn-ghost"
+                    style={{ padding: '6px 12px', borderRadius: 6, cursor: 'pointer', fontSize: '0.75rem', fontFamily: 'var(--font-body)' }}
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+              <textarea
+                readOnly
+                value={viewCode.code}
+                style={{ flex: 1, minHeight: 350, background: '#070b12', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 8, padding: 16, color: '#00e5ff', fontFamily: 'var(--font-mono)', fontSize: '0.78rem', lineHeight: 1.7, outline: 'none', resize: 'none' }}
+              />
+            </div>
+          </div>
         )}
       </div>
     </div>
@@ -1636,7 +1694,7 @@ function Footer({ setPage }: { setPage: (p: NavPage) => void }) {
             </p>
           </div>
           {[
-            { title: 'Platform', links: [{ label: 'Templates', page: 'templates' }, { label: 'Sandbox', page: 'sandbox' }, { label: 'Contact Us', page: 'contact' }] },
+            { title: 'Platform', links: [{ label: 'Templates', page: 'templates' }, { label: 'Contact Us', page: 'contact' }] },
             { title: 'Information', links: [{ label: 'Privacy Policy', page: 'home' }, { label: 'Terms of Use', page: 'home' }, { label: 'Whitelists', page: 'templates' }] },
             { title: 'Company', links: [{ label: 'Get Support', page: 'contact' }, { label: 'Admin Access', page: 'dashboard' }] },
           ].map(col => (
