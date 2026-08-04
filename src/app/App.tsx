@@ -7,7 +7,7 @@ const ADMIN_EMAILS = ["oxoredz@gmail.com"];
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 type NavPage = 'home' | 'templates' | 'dashboard' | 'contact'
-type AdminTab = 'overview' | 'templates' | 'inquiries' | 'access'
+type AdminTab = 'overview' | 'upload' | 'templates' | 'inquiries' | 'access'
 type Viewport = 'desktop' | 'tablet' | 'mobile'
 
 interface Template {
@@ -967,6 +967,7 @@ function AdminDashboard({
 
   const tabs: { id: AdminTab; label: string }[] = [
     { id: 'overview', label: 'Overview' },
+    { id: 'upload', label: 'Upload Template' },
     { id: 'templates', label: 'Template Manager' },
     { id: 'inquiries', label: 'Inquiries Inbox' },
     { id: 'access', label: 'Access Requests' },
@@ -1054,14 +1055,14 @@ function AdminDashboard({
           </div>
         )}
 
-        {/* Template Manager */}
-        {tab === 'templates' && (
+        {/* Upload Template Section */}
+        {tab === 'upload' && (
           <div>
-            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.6rem', fontWeight: 700, color: '#f1f5f9', marginBottom: 8 }}>Template Manager</h2>
-            <p style={{ color: '#4b5563', marginBottom: 36, fontSize: '0.85rem' }}>Create and upload new templates. Thumbnails are stored in D1 or rendered via sandbox iframe preview.</p>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.6rem', fontWeight: 700, color: '#f1f5f9', marginBottom: 8 }}>Upload New Template</h2>
+            <p style={{ color: '#4b5563', marginBottom: 36, fontSize: '0.85rem' }}>Create and register a new template directly to the Cloudflare D1 SQLite database.</p>
 
             <form onSubmit={handleAddTemplateSubmit} style={{ padding: 32, borderRadius: 12, background: '#0d1422', border: '1px solid rgba(255,255,255,0.07)', marginBottom: 28 }}>
-              <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', fontWeight: 700, color: '#f1f5f9', marginBottom: 24 }}>Upload New Template</h3>
+              <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', fontWeight: 700, color: '#f1f5f9', marginBottom: 24 }}>Template Metadata</h3>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 20 }}>
                 <div>
@@ -1175,6 +1176,14 @@ function AdminDashboard({
                 Save Template to D1
               </button>
             </form>
+          </div>
+        )}
+
+        {/* Template Manager */}
+        {tab === 'templates' && (
+          <div>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.6rem', fontWeight: 700, color: '#f1f5f9', marginBottom: 8 }}>Template Manager</h2>
+            <p style={{ color: '#4b5563', marginBottom: 36, fontSize: '0.85rem' }}>View, edit, or delete existing templates registered on the Cloudflare database.</p>
 
             {/* Template list */}
             <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', fontWeight: 700, color: '#f1f5f9', marginBottom: 16 }}>Existing Templates</h3>
