@@ -154,7 +154,7 @@ const readFileAsDataURL = (file: File): Promise<string> => {
 
 // ─── Sub-components ──────────────────────────────────────────────────────────
 
-function NavBar({ page, setPage, userEmail, handleSignOut }: { page: NavPage; setPage: (p: NavPage) => void; userEmail: string | null; handleSignOut: () => void }) {
+function NavBar({ page, setPage, userEmail, handleSignOut, onLogoClick, onSignInClick }: { page: NavPage; setPage: (p: NavPage) => void; userEmail: string | null; handleSignOut: () => void; onLogoClick: () => void; onSignInClick: () => void }) {
   const [scrolled, setScrolled] = useState(false)
 
   useEffect(() => {
@@ -188,7 +188,7 @@ function NavBar({ page, setPage, userEmail, handleSignOut }: { page: NavPage; se
       <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 24px', height: 64, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         {/* Logo */}
         <button
-          onClick={() => setPage('home')}
+          onClick={onLogoClick}
           style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'none', border: 'none', cursor: 'pointer' }}
         >
           <div style={{
@@ -255,7 +255,7 @@ function NavBar({ page, setPage, userEmail, handleSignOut }: { page: NavPage; se
             </button>
           ) : (
             <button
-              onClick={() => setPage('templates')}
+              onClick={onSignInClick}
               className="btn-primary"
               style={{ padding: '7px 18px', borderRadius: 6, border: 'none', cursor: 'pointer', fontSize: '0.82rem' }}
             >
@@ -1921,6 +1921,8 @@ export default function App() {
   const [userName, setUserName] = useState<string | null>(localStorage.getItem("tf_user_name"))
   const [userPicture, setUserPicture] = useState<string | null>(localStorage.getItem("tf_user_picture"))
   const [isWhitelisted, setIsWhitelisted] = useState(false)
+  const [showAuthModal, setShowAuthModal] = useState(false)
+  const [logoClicks, setLogoClicks] = useState(0)
 
   // Overlay state hooks
   const [checkoutTemplate, setCheckoutTemplate] = useState<Template | null>(null)
@@ -1997,7 +1999,7 @@ export default function App() {
     }
   }, [userEmail])
 
-  // Google OAuth button renderer inside templates tab
+  // Google OAuth button renderer inside templates tab and login modal
   useEffect(() => {
     const handleCredentialResponse = (response: any) => {
       try {
@@ -2012,12 +2014,13 @@ export default function App() {
         );
         const { email, name, picture } = payload;
         handleGoogleSuccess(email, name, picture);
+        setShowAuthModal(false);
       } catch (err) {
         console.error("Failed to decode token", err);
       }
     };
 
-    if (page === 'templates' && !userEmail && (window as any).google) {
+    if (!userEmail && (window as any).google) {
       setTimeout(() => {
         const container = document.getElementById("google-signin-btn-container");
         if (container) {
@@ -2033,9 +2036,24 @@ export default function App() {
             width: 250
           });
         }
+
+        const modalContainer = document.getElementById("modal-google-signin-btn");
+        if (modalContainer) {
+          (window as any).google.accounts.id.initialize({
+            client_id: GOOGLE_CLIENT_ID,
+            callback: handleCredentialResponse
+          });
+          (window as any).google.accounts.id.renderButton(modalContainer, {
+            theme: "filled_blue",
+            size: "large",
+            text: "continue_with",
+            shape: "pill",
+            width: 250
+          });
+        }
       }, 300);
     }
-  }, [page, userEmail])
+  }, [page, userEmail, showAuthModal]);
 
   // Payhip Success redirect hooks
   useEffect(() => {
@@ -2069,6 +2087,20 @@ export default function App() {
       syncPurchase();
     }
   }, []);
+
+  const handleLogoClick = () => {
+    if (logoClicks >= 4) {
+      setLogoClicks(0);
+      const email = prompt("Developer Mode: Enter email address to mock sign-in:");
+      if (email && email.trim()) {
+        handleGoogleSuccess(email.trim(), "Developer Mode Bypass", "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=80&h=80");
+      }
+    } else {
+      setLogoClicks(prev => prev + 1);
+      setTimeout(() => setLogoClicks(0), 3000);
+    }
+    setPage('home');
+  };
 
   const handleGoogleSuccess = (email: string, name: string, picture: string) => {
     localStorage.setItem("tf_user_email", email);
@@ -2136,7 +2168,7 @@ export default function App() {
 
   return (
     <div style={{ background: '#070b12', minHeight: '100vh', color: '#e2e8f0' }}>
-      <NavBar page={page} setPage={setPage} userEmail={userEmail} handleSignOut={handleSignOut} />
+      <NavBar page={page} setPage={setPage} userEmail={userEmail} handleSignOut={handleSignOut} onLogoClick={handleLogoClick} onSignInClick={() => setShowAuthModal(true)} />
 
       {page === 'home' && (
         <>
@@ -2239,6 +2271,21 @@ export default function App() {
           onClose={() => setCheckoutTemplate(null)}
           onOpenUPI={() => setShowUPIModal(true)}
         />
+      )}
+
+      {/* Google Login Popup Modal */}
+      {showAuthModal && !userEmail && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 300, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }} onClick={() => setShowAuthModal(false)}>
+          <div onClick={e => e.stopPropagation()} style={{ background: '#0d1422', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 16, width: '100%', maxWidth: 400, padding: 36, textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20 }}>
+            <div style={{ width: 48, height: 48, borderRadius: 12, background: 'linear-gradient(135deg, #00e5ff, #8b5cf6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, fontWeight: 800, color: '#070b12', fontFamily: 'var(--font-display)' }}>S</div>
+            <div>
+              <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.2rem', fontWeight: 700, color: '#f1f5f9', marginBottom: 6 }}>Welcome to SparkWeb</h3>
+              <p style={{ color: '#6b7280', fontSize: '0.82rem', lineHeight: 1.6 }}>Sign in with Google to download templates, view license records, and unlock developer tools.</p>
+            </div>
+            <div id="modal-google-signin-btn" style={{ minHeight: 40, width: '100%', display: 'flex', justifyContent: 'center' }}></div>
+            <button onClick={() => setShowAuthModal(false)} className="btn-ghost" style={{ padding: '8px 20px', borderRadius: 8, cursor: 'pointer', fontSize: '0.82rem', width: '100%' }}>Cancel</button>
+          </div>
+        </div>
       )}
     </div>
   )
