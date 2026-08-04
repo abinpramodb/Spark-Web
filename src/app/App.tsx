@@ -487,9 +487,6 @@ function TemplateCard({ t, isUnlocked, onDownload, onPurchase }: { t: Template; 
         ) : (
           <img src={t.thumbnail} alt={t.name} style={{ width: '100%', height: '100%', objectCover: 'cover' }} />
         )}
-        <div style={{ position: 'absolute', top: 12, right: 12, padding: '3px 10px', borderRadius: 100, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', color: isFree ? '#22c55e' : '#00e5ff', fontSize: '0.68rem', fontWeight: 700, fontFamily: 'var(--font-mono)' }}>
-          {t.price}
-        </div>
       </div>
 
       {/* Info */}
@@ -499,7 +496,12 @@ function TemplateCard({ t, isUnlocked, onDownload, onPurchase }: { t: Template; 
             <span key={tag} style={{ padding: '2px 8px', borderRadius: 4, background: 'rgba(255,255,255,0.05)', color: '#6b7280', fontSize: '0.7rem', fontFamily: 'var(--font-mono)' }}>{tag}</span>
           ))}
         </div>
-        <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem', fontWeight: 700, color: '#f1f5f9', marginBottom: 8 }}>{t.name}</h3>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8, gap: 12 }}>
+          <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem', fontWeight: 700, color: '#f1f5f9', margin: 0 }}>{t.name}</h3>
+          <span style={{ color: isFree ? '#22c55e' : '#00e5ff', fontSize: '1.05rem', fontWeight: 800, fontFamily: 'var(--font-mono)', flexShrink: 0 }}>
+            {t.price}
+          </span>
+        </div>
         <p style={{ color: '#6b7280', fontSize: '0.82rem', lineHeight: 1.6, flex: 1, marginBottom: 16 }}>{t.description}</p>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
           <button
