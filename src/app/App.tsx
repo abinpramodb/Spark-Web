@@ -7,7 +7,7 @@ const ADMIN_EMAILS = ["oxoredz@gmail.com"];
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 type NavPage = 'home' | 'templates' | 'dashboard' | 'contact'
-type AdminTab = 'overview' | 'upload' | 'templates' | 'inquiries' | 'access'
+type AdminTab = 'overview' | 'templates' | 'upload' | 'inquiries' | 'access'
 type Viewport = 'desktop' | 'tablet' | 'mobile'
 
 interface Template {
@@ -967,8 +967,8 @@ function AdminDashboard({
 
   const tabs: { id: AdminTab; label: string }[] = [
     { id: 'overview', label: 'Overview' },
+    { id: 'templates', label: 'Templates List' },
     { id: 'upload', label: 'Upload Template' },
-    { id: 'templates', label: 'Template Manager' },
     { id: 'inquiries', label: 'Inquiries Inbox' },
     { id: 'access', label: 'Access Requests' },
   ]
@@ -1055,135 +1055,11 @@ function AdminDashboard({
           </div>
         )}
 
-        {/* Upload Template Section */}
-        {tab === 'upload' && (
-          <div>
-            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.6rem', fontWeight: 700, color: '#f1f5f9', marginBottom: 8 }}>Upload New Template</h2>
-            <p style={{ color: '#4b5563', marginBottom: 36, fontSize: '0.85rem' }}>Create and register a new template directly to the Cloudflare D1 SQLite database.</p>
-
-            <form onSubmit={handleAddTemplateSubmit} style={{ padding: 32, borderRadius: 12, background: '#0d1422', border: '1px solid rgba(255,255,255,0.07)', marginBottom: 28 }}>
-              <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', fontWeight: 700, color: '#f1f5f9', marginBottom: 24 }}>Template Metadata</h3>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 20 }}>
-                <div>
-                  <label style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.1em', color: '#4b5563', marginBottom: 6 }}>TEMPLATE ID</label>
-                  <input
-                    required
-                    placeholder="e.g. template-5"
-                    value={newTemplate.id}
-                    onChange={e => setNewTemplate({ ...newTemplate, id: e.target.value })}
-                    style={{ width: '100%', padding: '9px 12px', background: '#111827', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 7, color: '#e2e8f0', fontSize: '0.82rem', outline: 'none' }}
-                  />
-                </div>
-                <div>
-                  <label style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.1em', color: '#4b5563', marginBottom: 6 }}>TEMPLATE NAME</label>
-                  <input
-                    required
-                    placeholder="e.g. Apex Dashboard Pro"
-                    value={newTemplate.name}
-                    onChange={e => setNewTemplate({ ...newTemplate, name: e.target.value })}
-                    style={{ width: '100%', padding: '9px 12px', background: '#111827', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 7, color: '#e2e8f0', fontSize: '0.82rem', outline: 'none' }}
-                  />
-                </div>
-                <div>
-                  <label style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.1em', color: '#4b5563', marginBottom: 6 }}>CATEGORY</label>
-                  <input
-                    required
-                    placeholder="SaaS / Portfolio / Blog / eCommerce"
-                    value={newTemplate.category}
-                    onChange={e => setNewTemplate({ ...newTemplate, category: e.target.value })}
-                    style={{ width: '100%', padding: '9px 12px', background: '#111827', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 7, color: '#e2e8f0', fontSize: '0.82rem', outline: 'none' }}
-                  />
-                </div>
-                <div>
-                  <label style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.1em', color: '#4b5563', marginBottom: 6 }}>PRICE</label>
-                  <input
-                    required
-                    placeholder="Free or $14.99"
-                    value={newTemplate.price}
-                    onChange={e => setNewTemplate({ ...newTemplate, price: e.target.value })}
-                    style={{ width: '100%', padding: '9px 12px', background: '#111827', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 7, color: '#e2e8f0', fontSize: '0.82rem', outline: 'none' }}
-                  />
-                </div>
-                <div>
-                  <label style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.1em', color: '#4b5563', marginBottom: 6 }}>PAYHIP CHECKOUT URL (OPTIONAL)</label>
-                  <input
-                    placeholder="https://payhip.com/b/..."
-                    value={newTemplate.payhipUrl}
-                    onChange={e => setNewTemplate({ ...newTemplate, payhipUrl: e.target.value })}
-                    style={{ width: '100%', padding: '9px 12px', background: '#111827', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 7, color: '#e2e8f0', fontSize: '0.82rem', outline: 'none' }}
-                  />
-                </div>
-                <div>
-                  <label style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.1em', color: '#4b5563', marginBottom: 6 }}>FIGMA FILE URL (OPTIONAL)</label>
-                  <input
-                    placeholder="https://figma.com/file/..."
-                    value={newTemplate.figmaUrl}
-                    onChange={e => setNewTemplate({ ...newTemplate, figmaUrl: e.target.value })}
-                    style={{ width: '100%', padding: '9px 12px', background: '#111827', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 7, color: '#e2e8f0', fontSize: '0.82rem', outline: 'none' }}
-                  />
-                </div>
-              </div>
-
-              <div style={{ marginBottom: 20 }}>
-                <label style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.1em', color: '#4b5563', marginBottom: 6 }}>DESCRIPTION</label>
-                <textarea
-                  required
-                  placeholder="Brief description of the template features..."
-                  value={newTemplate.description}
-                  onChange={e => setNewTemplate({ ...newTemplate, description: e.target.value })}
-                  rows={2}
-                  style={{ width: '100%', padding: '9px 12px', background: '#111827', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 7, color: '#e2e8f0', fontSize: '0.82rem', outline: 'none', resize: 'vertical' }}
-                />
-              </div>
-
-              <div style={{ marginBottom: 20 }}>
-                <label style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.1em', color: '#4b5563', marginBottom: 6 }}>THUMBNAIL IMAGE URL / UPLOAD IMAGE</label>
-                <input
-                  placeholder="https://unsplash.com/..."
-                  value={newTemplate.thumbnail}
-                  onChange={e => setNewTemplate({ ...newTemplate, thumbnail: e.target.value })}
-                  style={{ width: '100%', padding: '9px 12px', background: '#111827', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 7, color: '#e2e8f0', fontSize: '0.82rem', outline: 'none', marginBottom: 8 }}
-                />
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={e => setNewTplThumbnailFile(e.target.files?.[0] || null)}
-                  className="text-xs text-muted"
-                />
-              </div>
-
-              {/* File uploads */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 24 }}>
-                {[
-                  { label: 'HTML File', ext: '.html', file: newTplHtmlFile, setFile: setNewTplHtmlFile },
-                  { label: 'CSS File', ext: '.css', file: newTplCssFile, setFile: setNewTplCssFile },
-                  { label: 'JS File', ext: '.js', file: newTplJsFile, setFile: setNewTplJsFile },
-                ].map(f => (
-                  <div key={f.label} style={{ padding: '16px', borderRadius: 8, border: '1px dashed rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.02)', textAlign: 'center' }}>
-                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: '#4b5563', marginBottom: 8 }}>{f.label.toUpperCase()}</div>
-                    <label style={{ cursor: 'pointer' }}>
-                      <input type="file" accept={f.ext} style={{ display: 'none' }} onChange={e => f.setFile(e.target.files?.[0] || null)} />
-                      <div style={{ padding: '6px 12px', borderRadius: 5, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.07)', color: '#6b7280', fontSize: '0.75rem', fontFamily: 'var(--font-body)', cursor: 'pointer', display: 'inline-block' }}>
-                        {f.file ? f.file.name : `Choose ${f.ext}`}
-                      </div>
-                    </label>
-                  </div>
-                ))}
-              </div>
-
-              <button type="submit" className="btn-primary" style={{ padding: '10px 24px', borderRadius: 8, border: 'none', cursor: 'pointer', fontSize: '0.85rem' }}>
-                Save Template to D1
-              </button>
-            </form>
-          </div>
-        )}
-
-        {/* Template Manager */}
+        {/* Templates List Tab */}
         {tab === 'templates' && (
           <div>
-            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.6rem', fontWeight: 700, color: '#f1f5f9', marginBottom: 8 }}>Template Manager</h2>
-            <p style={{ color: '#4b5563', marginBottom: 36, fontSize: '0.85rem' }}>View, edit, or delete existing templates registered on the Cloudflare database.</p>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.6rem', fontWeight: 700, color: '#f1f5f9', marginBottom: 8 }}>Templates List</h2>
+            <p style={{ color: '#4b5563', marginBottom: 36, fontSize: '0.85rem' }}>Manage existing templates, inspect HTML/CSS/JS edge database source code payloads, and edit layout metadata properties.</p>
 
             {/* Template list */}
             <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', fontWeight: 700, color: '#f1f5f9', marginBottom: 16 }}>Existing Templates</h3>
@@ -1317,6 +1193,130 @@ function AdminDashboard({
                 </form>
               </div>
             )}
+          </div>
+        )}
+
+        {/* Upload Template Tab */}
+        {tab === 'upload' && (
+          <div>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.6rem', fontWeight: 700, color: '#f1f5f9', marginBottom: 8 }}>Upload Template</h2>
+            <p style={{ color: '#4b5563', marginBottom: 36, fontSize: '0.85rem' }}>Publish new templates directly to the Cloudflare D1 edge database, complete with details, payhip hooks, and asset file uploads.</p>
+
+            <form onSubmit={handleAddTemplateSubmit} style={{ padding: 32, borderRadius: 12, background: '#0d1422', border: '1px solid rgba(255,255,255,0.07)', marginBottom: 28 }}>
+              <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', fontWeight: 700, color: '#f1f5f9', marginBottom: 24 }}>Template Details</h3>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 20 }}>
+                <div>
+                  <label style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.1em', color: '#4b5563', marginBottom: 6 }}>TEMPLATE ID</label>
+                  <input
+                    required
+                    placeholder="e.g. template-5"
+                    value={newTemplate.id}
+                    onChange={e => setNewTemplate({ ...newTemplate, id: e.target.value })}
+                    style={{ width: '100%', padding: '9px 12px', background: '#111827', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 7, color: '#e2e8f0', fontSize: '0.82rem', outline: 'none' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.1em', color: '#4b5563', marginBottom: 6 }}>TEMPLATE NAME</label>
+                  <input
+                    required
+                    placeholder="e.g. Apex Dashboard Pro"
+                    value={newTemplate.name}
+                    onChange={e => setNewTemplate({ ...newTemplate, name: e.target.value })}
+                    style={{ width: '100%', padding: '9px 12px', background: '#111827', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 7, color: '#e2e8f0', fontSize: '0.82rem', outline: 'none' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.1em', color: '#4b5563', marginBottom: 6 }}>CATEGORY</label>
+                  <input
+                    required
+                    placeholder="SaaS / Portfolio / Blog / eCommerce"
+                    value={newTemplate.category}
+                    onChange={e => setNewTemplate({ ...newTemplate, category: e.target.value })}
+                    style={{ width: '100%', padding: '9px 12px', background: '#111827', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 7, color: '#e2e8f0', fontSize: '0.82rem', outline: 'none' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.1em', color: '#4b5563', marginBottom: 6 }}>PRICE</label>
+                  <input
+                    required
+                    placeholder="Free or $14.99"
+                    value={newTemplate.price}
+                    onChange={e => setNewTemplate({ ...newTemplate, price: e.target.value })}
+                    style={{ width: '100%', padding: '9px 12px', background: '#111827', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 7, color: '#e2e8f0', fontSize: '0.82rem', outline: 'none' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.1em', color: '#4b5563', marginBottom: 6 }}>PAYHIP CHECKOUT URL (OPTIONAL)</label>
+                  <input
+                    placeholder="https://payhip.com/b/..."
+                    value={newTemplate.payhipUrl}
+                    onChange={e => setNewTemplate({ ...newTemplate, payhipUrl: e.target.value })}
+                    style={{ width: '100%', padding: '9px 12px', background: '#111827', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 7, color: '#e2e8f0', fontSize: '0.82rem', outline: 'none' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.1em', color: '#4b5563', marginBottom: 6 }}>FIGMA FILE URL (OPTIONAL)</label>
+                  <input
+                    placeholder="https://figma.com/file/..."
+                    value={newTemplate.figmaUrl}
+                    onChange={e => setNewTemplate({ ...newTemplate, figmaUrl: e.target.value })}
+                    style={{ width: '100%', padding: '9px 12px', background: '#111827', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 7, color: '#e2e8f0', fontSize: '0.82rem', outline: 'none' }}
+                  />
+                </div>
+              </div>
+
+              <div style={{ marginBottom: 20 }}>
+                <label style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.1em', color: '#4b5563', marginBottom: 6 }}>DESCRIPTION</label>
+                <textarea
+                  required
+                  placeholder="Brief description of the template features..."
+                  value={newTemplate.description}
+                  onChange={e => setNewTemplate({ ...newTemplate, description: e.target.value })}
+                  rows={2}
+                  style={{ width: '100%', padding: '9px 12px', background: '#111827', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 7, color: '#e2e8f0', fontSize: '0.82rem', outline: 'none', resize: 'vertical' }}
+                />
+              </div>
+
+              <div style={{ marginBottom: 20 }}>
+                <label style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.1em', color: '#4b5563', marginBottom: 6 }}>THUMBNAIL IMAGE URL / UPLOAD IMAGE</label>
+                <input
+                  placeholder="https://unsplash.com/..."
+                  value={newTemplate.thumbnail}
+                  onChange={e => setNewTemplate({ ...newTemplate, thumbnail: e.target.value })}
+                  style={{ width: '100%', padding: '9px 12px', background: '#111827', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 7, color: '#e2e8f0', fontSize: '0.82rem', outline: 'none', marginBottom: 8 }}
+                />
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={e => setNewTplThumbnailFile(e.target.files?.[0] || null)}
+                  className="text-xs text-muted"
+                />
+              </div>
+
+              {/* File uploads */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 24 }}>
+                {[
+                  { label: 'HTML File', ext: '.html', file: newTplHtmlFile, setFile: setNewTplHtmlFile },
+                  { label: 'CSS File', ext: '.css', file: newTplCssFile, setFile: setNewTplCssFile },
+                  { label: 'JS File', ext: '.js', file: newTplJsFile, setFile: setNewTplJsFile },
+                ].map(f => (
+                  <div key={f.label} style={{ padding: '16px', borderRadius: 8, border: '1px dashed rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.02)', textAlign: 'center' }}>
+                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: '#4b5563', marginBottom: 8 }}>{f.label.toUpperCase()}</div>
+                    <label style={{ cursor: 'pointer' }}>
+                      <input type="file" accept={f.ext} style={{ display: 'none' }} onChange={e => f.setFile(e.target.files?.[0] || null)} />
+                      <div style={{ padding: '6px 12px', borderRadius: 5, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.07)', color: '#6b7280', fontSize: '0.75rem', fontFamily: 'var(--font-body)', cursor: 'pointer', display: 'inline-block' }}>
+                        {f.file ? f.file.name : `Choose ${f.ext}`}
+                      </div>
+                    </label>
+                  </div>
+                ))}
+              </div>
+
+              <button type="submit" className="btn-primary" style={{ padding: '10px 24px', borderRadius: 8, border: 'none', cursor: 'pointer', fontSize: '0.85rem' }}>
+                Save Template to D1
+              </button>
+            </form>
           </div>
         )}
 
