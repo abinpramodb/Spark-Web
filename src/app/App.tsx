@@ -6,7 +6,7 @@ const GOOGLE_CLIENT_ID = "915707234297-n0c94s32q1gtje708bhckeapdg676adu.apps.goo
 const ADMIN_EMAILS = ["oxoredz@gmail.com"];
 
 // ─── Types ──────────────────────────────────────────────────────────────────
-type NavPage = 'home' | 'templates' | 'sandbox' | 'dashboard' | 'contact'
+type NavPage = 'home' | 'templates' | 'dashboard' | 'contact'
 type AdminTab = 'overview' | 'templates' | 'inquiries' | 'access'
 type Viewport = 'desktop' | 'tablet' | 'mobile'
 
@@ -166,7 +166,6 @@ function NavBar({ page, setPage, userEmail, handleSignOut }: { page: NavPage; se
   const navLinks: { label: string; id: NavPage }[] = [
     { label: 'Home', id: 'home' },
     { label: 'Templates', id: 'templates' },
-    { label: 'Sandbox', id: 'sandbox' },
     { label: 'Contact', id: 'contact' },
   ]
 
@@ -351,16 +350,6 @@ function HeroSection({ setPage }: { setPage: (p: NavPage) => void }) {
             </svg>
             Browse Templates
           </button>
-          <button
-            onClick={() => setPage('sandbox')}
-            className="btn-ghost"
-            style={{ padding: '14px 32px', borderRadius: 8, cursor: 'pointer', fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: 8, background: 'transparent' }}
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <polygon points="5 3 19 12 5 21 5 3" />
-            </svg>
-            Interactive Sandbox
-          </button>
         </div>
 
         {/* Stats */}
@@ -467,7 +456,7 @@ function FeaturesSection() {
   )
 }
 
-function TemplateCard({ t, onPreview, isUnlocked, onDownload, onPurchase }: { t: Template; onPreview: (t: Template) => void; isUnlocked: boolean; onDownload: (t: Template) => void; onPurchase: (t: Template) => void }) {
+function TemplateCard({ t, isUnlocked, onDownload, onPurchase }: { t: Template; isUnlocked: boolean; onDownload: (t: Template) => void; onPurchase: (t: Template) => void }) {
   const isFree = t.price === 'Free'
   
   // Clean fallback checks for thumbnails
@@ -514,7 +503,12 @@ function TemplateCard({ t, onPreview, isUnlocked, onDownload, onPurchase }: { t:
         <p style={{ color: '#6b7280', fontSize: '0.82rem', lineHeight: 1.6, flex: 1, marginBottom: 16 }}>{t.description}</p>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
           <button
-            onClick={() => onPreview(t)}
+            onClick={() => {
+              const previewUrl = t.htmlCode && t.htmlCode.trim()
+                ? `${CLOUDFLARE_WORKER_URL}/api/preview?templateId=${t.id}`
+                : `/previews/${t.demoPath}/index.html`;
+              window.open(previewUrl, '_blank');
+            }}
             style={{ padding: '7px 14px', borderRadius: 6, border: '1px solid rgba(255,255,255,0.1)', background: 'transparent', color: '#9ca3af', cursor: 'pointer', fontSize: '0.78rem', fontFamily: 'var(--font-body)', transition: 'all 0.2s' }}
           >
             Live Demo
@@ -547,7 +541,6 @@ function TemplatesPage({
   purchasedTemplates,
   userEmail,
   isWhitelisted,
-  onPreview,
   onDownload,
   onPurchase,
   openUPIModal
@@ -556,7 +549,6 @@ function TemplatesPage({
   purchasedTemplates: string[];
   userEmail: string | null;
   isWhitelisted: boolean;
-  onPreview: (t: Template) => void;
   onDownload: (t: Template) => void;
   onPurchase: (t: Template) => void;
   openUPIModal: () => void;
@@ -605,7 +597,6 @@ function TemplatesPage({
               <TemplateCard
                 key={t.id}
                 t={t}
-                onPreview={onPreview}
                 isUnlocked={isUnlocked}
                 onDownload={onDownload}
                 onPurchase={onPurchase}
@@ -635,149 +626,6 @@ function TemplatesPage({
                 </div>
               </div>
             )}
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-function SandboxPage({ activeTemplate }: { activeTemplate?: Template }) {
-  const [viewport, setViewport] = useState<Viewport>('desktop')
-  const [html, setHtml] = useState(SANDBOX_DEFAULT.html)
-  const [css, setCss] = useState(SANDBOX_DEFAULT.css)
-  const [js, setJs] = useState(SANDBOX_DEFAULT.js)
-  const [activeTab, setActiveTab] = useState<'html' | 'css' | 'js'>('html')
-  const [srcDoc, setSrcDoc] = useState('')
-  const iframeRef = useRef<HTMLIFrameElement>(null)
-
-  useEffect(() => {
-    if (activeTemplate) {
-      setHtml(activeTemplate.htmlCode || SANDBOX_DEFAULT.html);
-      setCss(activeTemplate.cssCode || SANDBOX_DEFAULT.css);
-      setJs(activeTemplate.jsCode || SANDBOX_DEFAULT.js);
-    }
-  }, [activeTemplate])
-
-  const buildSrcDoc = () => {
-    return `<!DOCTYPE html><html><head><style>${css}</style></head><body>${html}<script>${js}<\/script></body></html>`
-  }
-
-  useEffect(() => {
-    setSrcDoc(buildSrcDoc())
-  }, [html, css, js])
-
-  const runPreview = () => setSrcDoc(buildSrcDoc())
-
-  const viewportDims: Record<Viewport, { width: string; label: string }> = {
-    desktop: { width: '100%', label: '1280px' },
-    tablet: { width: '768px', label: '768px' },
-    mobile: { width: '375px', label: '375px' },
-  }
-
-  const editors: { id: 'html' | 'css' | 'js'; label: string; color: string }[] = [
-    { id: 'html', label: 'HTML', color: '#f97316' },
-    { id: 'css', label: 'CSS', color: '#38bdf8' },
-    { id: 'js', label: 'JS', color: '#fbbf24' },
-  ]
-
-  const currentValue = activeTab === 'html' ? html : activeTab === 'css' ? css : js
-  const setValue = activeTab === 'html' ? setHtml : activeTab === 'css' ? setCss : setJs
-
-  return (
-    <div style={{ minHeight: '100vh', paddingTop: 64, display: 'flex', flexDirection: 'column' }}>
-      {/* Toolbar */}
-      <div style={{ background: '#0d1422', borderBottom: '1px solid rgba(255,255,255,0.06)', padding: '12px 24px', display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
-        <div className="section-label" style={{ color: '#6b7280' }}>Live Sandbox</div>
-
-        {/* Viewport toggles */}
-        <div style={{ display: 'flex', gap: 2, background: 'rgba(255,255,255,0.04)', borderRadius: 8, padding: 3 }}>
-          {(['desktop', 'tablet', 'mobile'] as Viewport[]).map(v => (
-            <button
-              key={v}
-              onClick={() => setViewport(v)}
-              style={{
-                padding: '5px 14px', borderRadius: 6, border: 'none', cursor: 'pointer', fontSize: '0.75rem', fontFamily: 'var(--font-mono)',
-                background: viewport === v ? 'rgba(0,229,255,0.12)' : 'transparent',
-                color: viewport === v ? '#00e5ff' : '#6b7280',
-                textTransform: 'capitalize', transition: 'all 0.15s',
-              }}
-            >
-              {v}
-            </button>
-          ))}
-        </div>
-        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: '#374151' }}>{viewportDims[viewport].label}</span>
-
-        <div style={{ marginLeft: 'auto', display: 'flex', gap: 10 }}>
-          <button
-            onClick={runPreview}
-            className="btn-primary"
-            style={{ padding: '7px 18px', borderRadius: 7, border: 'none', cursor: 'pointer', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: 6 }}
-          >
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3" /></svg>
-            Run Code
-          </button>
-        </div>
-      </div>
-
-      <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '420px 1fr', minHeight: 0 }}>
-        {/* Editor Panel */}
-        <div style={{ borderRight: '1px solid rgba(255,255,255,0.06)', display: 'flex', flexDirection: 'column', background: '#080e19' }}>
-          {/* Editor tabs */}
-          <div style={{ display: 'flex', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-            {editors.map(e => (
-              <button
-                key={e.id}
-                onClick={() => setActiveTab(e.id)}
-                style={{
-                  flex: 1, padding: '10px 0', border: 'none', background: 'none', cursor: 'pointer',
-                  fontFamily: 'var(--font-mono)', fontSize: '0.72rem', fontWeight: 600,
-                  color: activeTab === e.id ? e.color : '#374151',
-                  borderBottom: `2px solid ${activeTab === e.id ? e.color : 'transparent'}`,
-                  transition: 'all 0.15s',
-                }}
-              >
-                {e.label}
-              </button>
-            ))}
-          </div>
-          <textarea
-            value={currentValue}
-            onChange={e => setValue(e.target.value)}
-            spellCheck={false}
-            style={{
-              flex: 1, background: 'transparent', border: 'none', outline: 'none', resize: 'none',
-              color: '#d4d4d4', fontFamily: 'var(--font-mono)', fontSize: '0.78rem', lineHeight: 1.7,
-              padding: '20px 20px', tabSize: 2,
-            }}
-          />
-          <div style={{ padding: '8px 16px', borderTop: '1px solid rgba(255,255,255,0.04)', display: 'flex', gap: 12 }}>
-            {editors.map(e => (
-              <span key={e.id} style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: '#374151' }}>
-                {e.label}: {(e.id === 'html' ? html : e.id === 'css' ? css : js).length / 1000 < 0.1 ? `${(e.id === 'html' ? html : e.id === 'css' ? css : js).length} B` : `${((e.id === 'html' ? html : e.id === 'css' ? css : js).length / 1024).toFixed(1)} KB`}
-                <span style={{ color: '#22c55e', marginLeft: 4 }}>✓</span>
-              </span>
-            ))}
-          </div>
-        </div>
-
-        {/* Preview Panel */}
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', background: '#050810', padding: '24px' }}>
-          <div style={{
-            width: viewportDims[viewport].width, maxWidth: '100%',
-            flex: 1, borderRadius: 8, overflow: 'hidden',
-            border: '1px solid rgba(255,255,255,0.08)',
-            boxShadow: '0 20px 60px rgba(0,0,0,0.5)',
-            transition: 'width 0.3s ease',
-          }}>
-            <iframe
-              ref={iframeRef}
-              srcDoc={srcDoc}
-              sandbox="allow-scripts allow-same-origin"
-              style={{ width: '100%', height: '100%', border: 'none', minHeight: 500 }}
-              title="Sandbox Visual Render"
-            />
           </div>
         </div>
       </div>
@@ -2014,7 +1862,6 @@ export default function App() {
   const [userName, setUserName] = useState<string | null>(localStorage.getItem("tf_user_name"))
   const [userPicture, setUserPicture] = useState<string | null>(localStorage.getItem("tf_user_picture"))
   const [isWhitelisted, setIsWhitelisted] = useState(false)
-  const [activeSandboxTemplate, setActiveSandboxTemplate] = useState<Template | undefined>(undefined)
 
   // Overlay state hooks
   const [checkoutTemplate, setCheckoutTemplate] = useState<Template | null>(null)
@@ -2251,10 +2098,6 @@ export default function App() {
                   <TemplateCard
                     key={t.id}
                     t={t}
-                    onPreview={(tmpl) => {
-                      setActiveSandboxTemplate(tmpl);
-                      setPage('sandbox');
-                    }}
                     isUnlocked={isUnlocked}
                     onDownload={handleDownload}
                     onPurchase={handlePurchase}
@@ -2278,7 +2121,7 @@ export default function App() {
                 Ready to build at the <span className="gradient-text">edge?</span>
               </h2>
               <p style={{ color: '#6b7280', marginBottom: 36, maxWidth: 400, margin: '0 auto 36px', lineHeight: 1.7, position: 'relative' }}>
-                Access serverless database templates, visual layout code sandbox, and fast responsive edge builders.
+                Access serverless database templates, premium design layouts, and fast responsive edge builders.
               </p>
               <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap', position: 'relative' }}>
                 <button onClick={() => setPage('templates')} className="btn-primary" style={{ padding: '13px 32px', borderRadius: 8, border: 'none', cursor: 'pointer', fontSize: '0.95rem', fontFamily: 'var(--font-display)', fontWeight: 600 }}>
@@ -2300,18 +2143,10 @@ export default function App() {
           purchasedTemplates={purchasedTemplates}
           userEmail={userEmail}
           isWhitelisted={isWhitelisted}
-          onPreview={(tmpl) => {
-            setActiveSandboxTemplate(tmpl);
-            setPage('sandbox');
-          }}
           onDownload={handleDownload}
           onPurchase={handlePurchase}
           openUPIModal={() => setShowUPIModal(true)}
         />
-      )}
-
-      {page === 'sandbox' && (
-        <SandboxPage activeTemplate={activeSandboxTemplate} />
       )}
 
       {page === 'dashboard' && (
